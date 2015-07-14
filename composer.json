@@ -1,0 +1,24 @@
+{
+	"name":"netherphp/console",
+	"description":"A CLI Parser",
+	"keywords":["php","cli","console"],
+	"license":"BSD-3-Clause",
+	"authors":[
+		{ "name":"Bob Majdak Jr",
+		  "email":"bob@nether.io",
+		  "homepage":"http://nether.io",
+		  "role":"developer" }
+	],
+	"require": {
+		"netherphp/object": "~1.0.0"
+	},
+	"require-dev": {
+		"codeception/codeception": "~2.0.13",
+		"codeception/verify": "~0.2.0"
+	},
+	"autoload": {
+		"psr-0": {
+			"Nether\\":"src/"
+		}
+	}
+}
