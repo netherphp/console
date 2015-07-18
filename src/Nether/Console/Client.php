@@ -6,13 +6,32 @@ use \Exception;
 
 class Client {
 
-	protected $CommandString;
-
 	protected $Inputs = [];
-	protected $Options = [];
+	/*//
+	@type array
+	a list of non-switched arguments that were found.
+	//*/
 
-	///////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////
+	protected $Options = [];
+	/*//
+	@type array
+	a list of switched arguments that were found.
+	//*/
+
+	protected $DefaultHandlerName = 'help';
+	/*//
+	@type string
+	the name of the default handler if no input is given.
+	//*/
+
+	protected $Handlers = [];
+	/*//
+	@type array
+	a list of callables for handling input.
+	//*/
+
+	////////////////////////////////
+	////////////////////////////////
 
 	public function
 	__construct($opt=null) {
@@ -20,8 +39,8 @@ class Client {
 		return;
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////////
+	////////////////////////////////
 
 	protected function
 	ParseCommandLine() {
@@ -74,10 +93,79 @@ class Client {
 		return $output;
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////////
+	////////////////////////////////
 
-	public function GetInput($offset) {
+	public function
+	PrintMessage($msg='',$opt=null) {
+	/*//
+	@argv string Message, object Options
+	@return self
+
+	print a string to the terminal, automatically doing line wrapping. if the
+	string has a prefix of white space, then that prefix will be appended
+	to all the lines after line wrapping, all without breaking the specified
+	width of the wrap.
+
+	if prefix is Boolean True, then we will scoop off the prefix of whitespace
+	from the beginning of the string and use it on each line that was wrapped.
+	if was a string to start with, then we will just use that prefix.
+	//*/
+
+		$opt = new Nether\Object($opt,[
+			'EOL'    => PHP_EOL,
+			'Prefix' => true,
+			'Width'  => 75
+		]);
+
+		////////
+		////////
+
+		// scoop a prefix off the start of the string.
+		if($opt->Prefix === true)
+		$opt->Prefix = preg_replace('/^([\s]*).*?$/','\1',$msg);
+
+		////////
+		////////
+
+		// consider the prefix length.
+		$opt->Width -= strlen($opt->Prefix);
+
+		// wrap the text.
+		$msg = wordwrap($msg,$opt->Width,$opt->EOL);
+
+		// apply the prefix.
+		$lines = explode($opt->EOL,$msg);
+		foreach($lines as $k => $v) $lines[$k] = sprintf(
+			'%s%s',
+			$opt->Prefix,
+			ltrim($v)
+		);
+
+		echo implode($opt->EOL,$lines), $opt->EOL;
+		return $this;
+	}
+
+	public function PrintStrings() {
+	/*//
+	@argv string Input, ...
+	takes an infinite number of string arguments and runs them with the
+	PrintMessage method. imho just a bit cleaner to write when trying
+	to produce things like help info in the terminal. see the nether-onescript
+	bin file to see what i mean.
+	//*/
+
+		foreach(func_get_args() as $string)
+		$this->PrintMessage($string);
+
+		return $this;
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	public function
+	GetInput($offset) {
 	/*//
 	fetch the specified input value by offset. if you want the 1st input then
 	you will ask for 1. we will zero-pwn it internally.
@@ -89,7 +177,8 @@ class Client {
 		else return $this->Inputs[$offset];
 	}
 
-	public function GetInputs() {
+	public function
+	GetInputs() {
 	/*//
 	hand off the entire input array.
 	//*/
@@ -97,16 +186,18 @@ class Client {
 		return $this->Inputs;
 	}
 
-	public function GetOption($name) {
+	public function
+	GetOption($name) {
 	/*//
 	fetch the specified option input value by name.
 	//*/
 
 		if(!array_key_exists($name,$this->Options)) return false;
-		else return $this->Options[$offset];
+		else return $this->Options[$name];
 	}
 
-	public function GetOptions() {
+	public function
+	GetOptions() {
 	/*//
 	hand off the entire option array.
 	//*/
@@ -114,16 +205,77 @@ class Client {
 		return $this->Options;
 	}
 
-	///////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////
+	////////////////////////////////
+	////////////////////////////////
 
-	public function Quit($msg,$code=0) {
+	public function
+	Quit($msg,$code=0) {
 	/*//
 	print a message and kill off the application.
 	//*/
 
 		echo $msg, PHP_EOL, PHP_EOL;
 		exit($code); return;
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	public function
+	SetHandler($cmd, callable $func) {
+	/*//
+	//*/
+
+		$this->Handlers[$cmd] = $func;
+		return $this;
+	}
+
+	public function
+	SetDefaultHandlerName($cmd) {
+	/*//
+	//*/
+
+		$this->DefaultHandlerName = $cmd;
+		return $this;
+	}
+
+	public function
+	Run($cmd=null) {
+	/*//
+	//*/
+
+		if(!$cmd && !($cmd = $this->GetInput(1))) {
+			if($this->DefaultHandlerName) {
+				$cmd = $this->DefaultHandlerName;
+			} else {
+				echo "No input provided.", PHP_EOL;
+				return -2;
+			}
+		}
+
+		if(!array_key_exists($cmd,$this->Handlers)) {
+			echo "No handler defined for `{$cmd}`.", PHP_EOL;
+			return -1;
+		}
+
+		return call_user_func(function($cli,$func){
+			return $func($cli);
+		},$this,$this->Handlers[$cmd]);
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	public function
+	MakeDirectory($dir) {
+	/*//
+	//*/
+
+		$umask = umask(0);
+		@mkdir($dir,0777,true);
+		umask($umask);
+
+		return is_dir($dir);
 	}
 
 }
