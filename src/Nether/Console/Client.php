@@ -6,13 +6,13 @@ use \Exception;
 
 class Client {
 
-	protected $Inputs = [];
+	protected $Inputs;
 	/*//
 	@type array
 	a list of non-switched arguments that were found.
 	//*/
 
-	protected $Options = [];
+	protected $Options;
 	/*//
 	@type array
 	a list of switched arguments that were found.
@@ -35,7 +35,10 @@ class Client {
 
 	public function
 	__construct($opt=null) {
-		$this->ParseCommandLine();
+		if(!array_key_exists('argv',$_SERVER))
+		throw new Exception('register_argc_argv must be enabled');
+
+		$this->ParseCommandArgs($_SERVER['argv'],true);
 		return;
 	}
 
@@ -43,17 +46,26 @@ class Client {
 	////////////////////////////////
 
 	protected function
-	ParseCommandLine() {
+	ParseCommandArgs($data,$skipfirst=false) {
 	/*//
-	parse the command line into digestable components.
+	parse the command line into digestable components. we got lucky in that
+	php already handled breaking up the command line statement into nice
+	chunks, handling quotes and tokens and all that stuff. this means we
+	can process each item as a potential option or input straight out. this
+	also means we can reuse this fact later when we want to override what the
+	command line was with our own commands.
+
+	$data[ 'filename', 'input1', 'input2', 'input3', '--someopt=with a value' ]
 	//*/
 
-		if(!array_key_exists('argv',$_SERVER))
-		throw new Exception('register_argc_argv must be enabled');
+		// blank out the data in the event we reuse this in a
+		// subcommand type deal.
+		$this->Inputs = [];
+		$this->Options = [];
 
 		$option = null;
-		foreach($_SERVER['argv'] as $key => $segment) {
-			if($key === 0) continue;
+		foreach($data as $key => $segment) {
+			if($key === 0 && $skipfirst) continue;
 
 			if($option = $this->ParseCommandOption($segment)) {
 				$this->Options[key($option)] = current($option);
@@ -242,7 +254,23 @@ class Client {
 	public function
 	Run($cmd=null) {
 	/*//
+	@argv string HandlerName
+	@argv array CommandArgumentList
+
+	if given a string it will execute the handler defined under as that name.
+	if given an array then it will process that array as though it was the
+	_SERVER['argv'] data and execute as if that was the original command line
+	given to the object creation.
 	//*/
+
+		if(is_array($cmd)) {
+			// rewrite our input and option data with this subcommand
+			// that was given to us. execute as though this array defined
+			// the original command input.
+
+			$this->ParseCommandArgs($cmd,false);
+			$cmd = $this->GetInput(1);
+		}
 
 		if(!$cmd && !($cmd = $this->GetInput(1))) {
 			if($this->DefaultHandlerName) {
