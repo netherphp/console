@@ -2,6 +2,8 @@
 
 A CLI Parser.
 
+
+
 # Quickstart
 
 It will take the command line as given and chop it up into `Inputs` and
@@ -24,6 +26,8 @@ define. These are functions that are called when the input matches. By
 default it will attempt to find a handler that matches the value of
 `GetInput(1)` - and if none are specified it will try to run the handler
 named `help`.
+
+
 
 # Example: Hello Handler
 
@@ -54,6 +58,8 @@ When we run that code...
 	$ php greet.php hello Bob
 	Hello Bob
 
+
+
 # Example: Handler Handlers
 
 We can also execute other handlers from our handlers. Here is an obviously
@@ -82,6 +88,21 @@ like this when your stuff gets crazy.
 	})
 	->Run();
 
+And then running this...
+
+	$ php handlers.php run
+	no input value specified.
+
+	$ php handlers.php run whatever
+	done.
+
+Basically, passing an array to the `Run()` method is the same as having run
+the script like this...
+
+	$ php handlers.php run-one-thing --value=whatever
+	$ php handlers.php run-another-thing --value=whatever
+
+
 
 # About Options
 
@@ -96,17 +117,42 @@ All options may have optional values added by equals.
 Switch blocks are not currently supported. Example, `-omg` is an option named
 'omg' not -o -m and -g.
 
+
+
 # Console API
 
-* `Console->GetInput(int Offset)`
+* **`public string Console->GetInput(int Offset)`**
+
   fetches the nth non-option argument that existed.
-* `Console->GetInputs(void)`
+
+* **`public array Console->GetInputs(void)`**
+
   fetch all the non-option arguments.
-* `Console->GetOption(string Name)`
+
+* **`public mixed Console->GetOption(string Name)`**
+
   fetch the specified option.
-* `Console->GetOptions(void)`
+
+* **`public array Console->GetOptions(void)`**
+
   fetch all the option arguments.
-* `Console::Message(string Msg)`
+
+* **`public self Console->SetHandler(string HandlerName, callable HandlerFunc)`**
+
+  add a handler for the specified input.
+
+* **`public mixed Console->Run(string HandlerName)`**
+
+  run the specified handler.
+
+* **`public mixed Console->Run(array Argv)`**
+
+  run the specified argv data as though it had been from _SERVER['argv']
+
+* **`static void Console::Message(string Msg)`**
+
   print a message out.
-* `Console::Messages(string Msg, ...)`
+
+* **`static void Console::Messages(string Msg, ...)`**
+
   print a theoretically infinite number of messages out, one after another.
