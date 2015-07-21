@@ -156,3 +156,7 @@ Switch blocks are not currently supported. Example, `-omg` is an option named
 * **`static void Console::Messages(string Msg, ...)`**
 
   print a theoretically infinite number of messages out, one after another.
+
+* **`static void Console::Quit(string Msg default null, int Error default 0)`**
+
+  exit the script, printing this message with this exit status code.
