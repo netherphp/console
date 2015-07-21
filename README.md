@@ -2,35 +2,88 @@
 
 A CLI Parser.
 
-# Using Console
+# Quickstart
 
-Given a command line like...
+It will take the command line as given and chop it up into `Inputs` and
+`Options`. Options are things prefixed with - or --, so they look like
+`--option`, `--option=value`, or `--option="long value"`. Inputs are
+anythings which are not options.
 
-* `php whatever.php build path/to/file --output=newfile.txt --verbose`
-* `php whatever.php --output=newfile.txt build --verbose path/to/file`
-* `php whatever.php --output=newfile.txt --verbose build path/to/file`
+Options are accessible via their name with the `GetOption(string Name)`
+method. If the option was not defined you will get boolean false. If it
+was defined all alone, you will get boolean true. Else you will get the
+string that it was given without quotes around it.
 
-We could do this.
+Inputs are accessible via their offset. To get the first non-option
+value that was give you would use `GetInput(1)`, and to get the next
+`GetInput(2)` etc. This will work even if your options are peppered in the
+middle of the command line.
 
-	$cli = new Nether\Console\Client;
+As for executing things Nether Console works on a series of handlers you
+define. These are functions that are called when the input matches. By
+default it will attempt to find a handler that matches the value of
+`GetInput(1)` - and if none are specified it will try to run the handler
+named `help`.
 
-	switch($cli->GetInput(1)) {
-		case 'build': {
-			$infile = $cli->GetInput(2);
-			if(!$infile) die('no input file specified');
+# Example: Hello Handler
 
-			$outfile = $cli->GetOption('output');
-			if(!$outfile) die('no output file specified');
+Here is some code for a command script, called `greet.php`
 
-			if($cli->GetOption('verbose')) {
-				echo 'debugging output enabled',PHP_EOL;
-			}
+	$cli = (new Nether\Console\Client)
+	->SetHandler('help',function($console){
+		$console::Messages(
+			'Usage: hello <name>',
+			'if name is specified, it will greet it. else it will greet the world.'
+		);
+	})
+	->SetHandler('hello',function($console){
+		$who = ($console->GetInput(2))?:('World');
+		$console::Message("Hello {$who}");
+	})
+	->Run();
 
-			// ...
+When we run that code...
 
-			break;
+	$ php greet.php
+	Usage: hello <name>
+	if name is specified, it will greet it. else it will greet the world.
+
+	$ php greet.php hello
+	Hello World
+
+	$ php greet.php hello Bob
+	Hello Bob
+
+# Example: Handler Handlers
+
+We can also execute other handlers from our handlers. Here is an obviously
+too simple use case to demonstrate. It would make more sense to do something
+like this when your stuff gets crazy.
+
+	$cli = (new Nether\Console\Client)
+	->SetHandler('run',function($console){
+		$value = $console->GetInput(2);
+		if(!$value) {
+			$console::Message('no input value specified');
+			$console::Quit();
 		}
-	}
+
+		$console->Run([ 'run-one-thing', "--value={$value}" ]);
+		$console->Run([ 'run-another-thing', "--value={$value}" ]);
+		$console::Message('done.');
+	})
+	->SetHandler('run-one-thing',function($console){
+		$value = $console->GetOption('value');
+		// ...
+	})
+	->SetHandler('run-another-thing,function($console){
+		$value = $console->GetOption('value');
+		// ...
+	})
+	->Run();
+
+
+# About Options
 
 All options may be specified with - or -- prefixes.
 
@@ -53,3 +106,7 @@ Switch blocks are not currently supported. Example, `-omg` is an option named
   fetch the specified option.
 * `Console->GetOptions(void)`
   fetch all the option arguments.
+* `Console::Message(string Msg)`
+  print a message out.
+* `Console::Messages(string Msg, ...)`
+  print a theoretically infinite number of messages out, one after another.

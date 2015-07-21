@@ -38,71 +38,11 @@ class Client {
 		if(!array_key_exists('argv',$_SERVER))
 		throw new Exception('register_argc_argv must be enabled');
 
-		$this->ParseCommandArgs($_SERVER['argv'],true);
-		return;
-	}
-
-	////////////////////////////////
-	////////////////////////////////
-
-	protected function
-	ParseCommandArgs($data,$skipfirst=false) {
-	/*//
-	parse the command line into digestable components. we got lucky in that
-	php already handled breaking up the command line statement into nice
-	chunks, handling quotes and tokens and all that stuff. this means we
-	can process each item as a potential option or input straight out. this
-	also means we can reuse this fact later when we want to override what the
-	command line was with our own commands.
-
-	$data[ 'filename', 'input1', 'input2', 'input3', '--someopt=with a value' ]
-	//*/
-
-		// blank out the data in the event we reuse this in a
-		// subcommand type deal.
-		$this->Inputs = [];
-		$this->Options = [];
-
-		$option = null;
-		foreach($data as $key => $segment) {
-			if($key === 0 && $skipfirst) continue;
-
-			if($option = $this->ParseCommandOption($segment)) {
-				$this->Options[key($option)] = current($option);
-			} else {
-				$this->Inputs[] = $segment;
-			}
-		}
+		$data = static::ParseCommandArgs($_SERVER['argv'],true);
+		$this->Inputs = $data['Inputs'];
+		$this->Options = $data['Options'];
 
 		return;
-	}
-
-	protected function
-	ParseCommandOption($input) {
-	/*//
-	parse an option into digestable components. our command arguments are
-	going to behave a little differently than most people are used to. for
-	example, i am not going to allow "--option value" it must be
-	"--option=value" - nor am i going to allow "-xzf" they must be separate
-	so "-x -z -f" - for both ease of implementation and that i always thought
-	blocks of them were dumb anyway.
-	//*/
-
-		if(!preg_match('/^-{1,2}/',$input)) return false;
-
-		$opt = explode('=',$input,2);
-		switch(count($opt)) {
-			case 1: {
-				$output[ltrim($opt[0],'-')] = true;
-				break;
-			}
-			case 2: {
-				$output[ltrim($opt[0],'-')] = trim($opt[1]);
-				break;
-			}
-		}
-
-		return $output;
 	}
 
 	////////////////////////////////
@@ -111,65 +51,26 @@ class Client {
 	public function
 	PrintMessage($msg='',$opt=null) {
 	/*//
-	@argv string Message, object Options
-	@return self
-
-	print a string to the terminal, automatically doing line wrapping. if the
-	string has a prefix of white space, then that prefix will be appended
-	to all the lines after line wrapping, all without breaking the specified
-	width of the wrap.
-
-	if prefix is Boolean True, then we will scoop off the prefix of whitespace
-	from the beginning of the string and use it on each line that was wrapped.
-	if was a string to start with, then we will just use that prefix.
+	@deprecated
+	this method had no reason to access instance data.
 	//*/
 
-		$opt = new Nether\Object($opt,[
-			'EOL'    => PHP_EOL,
-			'Prefix' => true,
-			'Width'  => 75
-		]);
-
-		////////
-		////////
-
-		// scoop a prefix off the start of the string.
-		if($opt->Prefix === true)
-		$opt->Prefix = preg_replace('/^([\s]*).*?$/','\1',$msg);
-
-		////////
-		////////
-
-		// consider the prefix length.
-		$opt->Width -= strlen($opt->Prefix);
-
-		// wrap the text.
-		$msg = wordwrap($msg,$opt->Width,$opt->EOL);
-
-		// apply the prefix.
-		$lines = explode($opt->EOL,$msg);
-		foreach($lines as $k => $v) $lines[$k] = sprintf(
-			'%s%s',
-			$opt->Prefix,
-			ltrim($v)
-		);
-
-		echo implode($opt->EOL,$lines), $opt->EOL;
+		static::Message('NOTICE: Client->PrintMessage() is deprecated. Use Client::Message().');
+		static::Message($msg,$opt);
 		return $this;
 	}
 
 	public function PrintStrings() {
 	/*//
-	@argv string Input, ...
-	takes an infinite number of string arguments and runs them with the
-	PrintMessage method. imho just a bit cleaner to write when trying
-	to produce things like help info in the terminal. see the nether-onescript
-	bin file to see what i mean.
+	@depreciated
+	this method had no reason to access instance data.
 	//*/
 
-		foreach(func_get_args() as $string)
-		$this->PrintMessage($string);
-
+		static::Message('NOTICE: Client->PrintStrings() is deprecated. Use Client::Messages().');
+		call_user_func_array(
+			[static::class,'Messages'],
+			func_get_args()
+		);
 		return $this;
 	}
 
@@ -221,21 +122,9 @@ class Client {
 	////////////////////////////////
 
 	public function
-	Quit($msg,$code=0) {
-	/*//
-	print a message and kill off the application.
-	//*/
-
-		echo $msg, PHP_EOL, PHP_EOL;
-		exit($code); return;
-	}
-
-	////////////////////////////////
-	////////////////////////////////
-
-	public function
 	SetHandler($cmd, callable $func) {
 	/*//
+	@argv string HandlerName, callable HandlerFunc
 	//*/
 
 		$this->Handlers[$cmd] = $func;
@@ -245,6 +134,7 @@ class Client {
 	public function
 	SetDefaultHandlerName($cmd) {
 	/*//
+	@argv string HandlerName
 	//*/
 
 		$this->DefaultHandlerName = $cmd;
@@ -263,14 +153,27 @@ class Client {
 	given to the object creation.
 	//*/
 
+		$restore = false;
+
+		////////
+		////////
+
 		if(is_array($cmd)) {
 			// rewrite our input and option data with this subcommand
 			// that was given to us. execute as though this array defined
 			// the original command input.
 
-			$this->ParseCommandArgs($cmd,false);
+			$data = static::ParseCommandArgs($cmd,false);
+
+			$restore = [ 'Inputs'=>$this->Inputs, 'Options'=>$this->Options ];
+			$this->Inputs = $data['Inputs'];
+			$this->Options = $data['Options'];
+
 			$cmd = $this->GetInput(1);
 		}
+
+		////////
+		////////
 
 		if(!$cmd && !($cmd = $this->GetInput(1))) {
 			if($this->DefaultHandlerName) {
@@ -286,23 +189,194 @@ class Client {
 			return -1;
 		}
 
-		return call_user_func(function($cli,$func){
+		////////
+		////////
+
+		$return = call_user_func(function($cli,$func){
 			return $func($cli);
 		},$this,$this->Handlers[$cmd]);
+
+		////////
+		////////
+
+		if($restore) {
+			// restore the original input data before continuing on so that
+			// we could continue processing the cli input data if needed.
+			$this->Inputs = $restore['Inputs'];
+			$this->Options = $restore['Options'];
+		}
+
+		return $return;
 	}
 
 	////////////////////////////////
 	////////////////////////////////
 
-	public function
-	MakeDirectory($dir) {
+	static public function
+	Quit($msg='',$code=0) {
 	/*//
+	@argv string Message, int ErrorCode default 0
+	print a message and kill off the application.
 	//*/
 
+		if($msg) echo $msg, PHP_EOL, PHP_EOL;
+
+		exit($code);
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	static public function
+	Message($msg='',$opt=null) {
+	/*//
+	@argv string Message, object Options
+
+	print a string to the terminal, automatically doing line wrapping. if the
+	string has a prefix of white space, then that prefix will be appended
+	to all the lines after line wrapping, all without breaking the specified
+	width of the wrap.
+
+	if prefix is Boolean True, then we will scoop off the prefix of whitespace
+	from the beginning of the string and use it on each line that was wrapped.
+	if was a string to start with, then we will just use that prefix.
+	//*/
+
+		$opt = new Nether\Object($opt,[
+			'EOL'    => PHP_EOL,
+			'Prefix' => true,
+			'Width'  => 75
+		]);
+
+		////////
+		////////
+
+		// scoop a prefix off the start of the string.
+		if($opt->Prefix === true)
+		$opt->Prefix = preg_replace('/^([\s]*).*?$/','\1',$msg);
+
+		////////
+		////////
+
+		// consider the prefix length.
+		$opt->Width -= strlen($opt->Prefix);
+
+		// wrap the text.
+		$msg = wordwrap($msg,$opt->Width,$opt->EOL);
+
+		// apply the prefix.
+		$lines = explode($opt->EOL,$msg);
+		foreach($lines as $k => $v) $lines[$k] = sprintf(
+			'%s%s',
+			$opt->Prefix,
+			ltrim($v)
+		);
+
+		echo implode($opt->EOL,$lines), $opt->EOL;
+		return;
+	}
+
+	static public function
+	Messages() {
+	/*//
+	@argv string Input, ...
+	takes an infinite number of string arguments and runs them with the
+	PrintMessage method. imho just a bit cleaner to write when trying
+	to produce things like help info in the terminal. see the nether-onescript
+	bin file to see what i mean.
+	//*/
+
+		foreach(func_get_args() as $string)
+		static::Message($string);
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	static public function
+	ParseCommandArgs($data,$skipfirst=false) {
+	/*//
+	parse the command line into digestable components. we got lucky in that
+	php already handled breaking up the command line statement into nice
+	chunks, handling quotes and tokens and all that stuff. this means we
+	can process each item as a potential option or input straight out. this
+	also means we can reuse this fact later when we want to override what the
+	command line was with our own commands.
+
+	$data[ 'filename', 'input1', 'input2', 'input3', '--someopt=with a value' ]
+	//*/
+
+		$output = [ 'Inputs'=>[], 'Options'=>[] ];
+		$option = null;
+
+		foreach($data as $key => $segment) {
+			if($key === 0 && $skipfirst) continue;
+
+			if($option = static::ParseCommandOption($segment)) {
+				$output['Options'][key($option)] = current($option);
+			} else {
+				$output['Inputs'][] = $segment;
+			}
+		}
+
+		return $output;
+	}
+
+	static public function
+	ParseCommandOption($input) {
+	/*//
+	@argv string Input
+	@return array or false
+
+	parse an option into digestable components. our command arguments are
+	going to behave a little differently than most people are used to. for
+	example, i am not going to allow "--option value" it must be
+	"--option=value" - nor am i going to allow "-xzf" they must be separate
+	so "-x -z -f" - for both ease of implementation and that i always thought
+	blocks of them were dumb anyway.
+
+	returns an assoc array if we identified an option, else returns false.
+	//*/
+
+		if(!preg_match('/^-{1,2}/',$input)) return false;
+
+		$opt = explode('=',$input,2);
+		switch(count($opt)) {
+			case 1: {
+				$output[ltrim($opt[0],'-')] = true;
+				break;
+			}
+			case 2: {
+				$output[ltrim($opt[0],'-')] = trim($opt[1]);
+				break;
+			}
+		}
+
+		return $output;
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	static public function
+	MakeDirectory($dir) {
+	/*//
+	@argv string Directory
+	@return bool
+
+	make a directory. returns if successful or not. allows you to
+	blindly call it if it already exists to ensure it exists.
+	//*/
+
+		// if it already exists...
+		if(is_dir($dir)) return true;
+
+		// make it...
 		$umask = umask(0);
 		@mkdir($dir,0777,true);
 		umask($umask);
 
+		// find out if it was successful, lol.
 		return is_dir($dir);
 	}
 
