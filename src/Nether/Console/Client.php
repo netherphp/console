@@ -6,6 +6,12 @@ use \Exception;
 
 class Client {
 
+	const ErrorNoInput = -1;
+	const ErrorNoHandler = -2;
+
+	////////
+	////////
+
 	protected $Inputs;
 	/*//
 	@type array
@@ -154,6 +160,7 @@ class Client {
 	//*/
 
 		$restore = false;
+		$return = 0;
 
 		////////
 		////////
@@ -163,9 +170,9 @@ class Client {
 			// that was given to us. execute as though this array defined
 			// the original command input.
 
-			$data = static::ParseCommandArgs($cmd,false);
-
 			$restore = [ 'Inputs'=>$this->Inputs, 'Options'=>$this->Options ];
+
+			$data = static::ParseCommandArgs($cmd,false);
 			$this->Inputs = $data['Inputs'];
 			$this->Options = $data['Options'];
 
@@ -176,25 +183,28 @@ class Client {
 		////////
 
 		if(!$cmd && !($cmd = $this->GetInput(1))) {
-			if($this->DefaultHandlerName) {
-				$cmd = $this->DefaultHandlerName;
-			} else {
+			if(!$this->DefaultHandlerName) {
 				echo "No input provided.", PHP_EOL;
-				return -2;
+				return static::ErrorNoInput;
+
+			}
+
+			$cmd = $this->DefaultHandlerName;
+		}
+
+		////////
+		////////
+
+		$method = static::GetMethodFromCommand($cmd);
+		echo $method, PHP_EOL;
+		try { $this->Run_ByMethod($method); }
+		catch(Exception $e) {
+			try { $this->Run_ByCallable($cmd); }
+			catch(Exception $e) {
+				echo "no handler or method found for {$cmd}", PHP_EOL;
+				return static::ErrorNoHandler;
 			}
 		}
-
-		if(!array_key_exists($cmd,$this->Handlers)) {
-			echo "No handler defined for `{$cmd}`.", PHP_EOL;
-			return -1;
-		}
-
-		////////
-		////////
-
-		$return = call_user_func(function($cli,$func){
-			return $func($cli);
-		},$this,$this->Handlers[$cmd]);
 
 		////////
 		////////
@@ -207,6 +217,30 @@ class Client {
 		}
 
 		return $return;
+	}
+
+	protected function
+	Run_ByCallable($cmd) {
+	/*//
+	//*/
+
+		if(!array_key_exists($cmd,$this->Handlers))
+		throw new Exception("no handler found {$cmd}");
+
+		return call_user_func(function($cli,$func){
+			return $func($cli);
+		},$this,$this->Handlers[$cmd]);
+	}
+
+	protected function
+	Run_ByMethod($method) {
+	/*//
+	//*/
+
+		if(!method_exists($this,$method))
+		throw new Exception("no method found {$method}");
+
+		return call_user_func([$this,$method]);
 	}
 
 	////////////////////////////////
@@ -378,6 +412,20 @@ class Client {
 
 		// find out if it was successful, lol.
 		return is_dir($dir);
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	static public function
+	GetMethodFromCommand($cmd) {
+	/*//
+	//*/
+
+		return sprintf(
+			'Handle%s',
+			str_replace(' ','',ucwords(preg_replace('/[-_]/',' ',$cmd)))
+		);
 	}
 
 }
