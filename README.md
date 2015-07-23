@@ -184,3 +184,16 @@ Switch blocks are not currently supported. Example, `-omg` is an option named
 * **`static void Console::Quit(string Msg default null, int Error default 0)`**
 
   exit the script, printing this message with this exit status code.
+
+
+
+# Testing
+
+Nether\Console uses PHPUnit to test.
+
+	$ composer dump-autoload
+	Generating autoload files
+	
+	$ phpunit --bootstrap vendor/autoload.php tests
+	OK (6 tests, 21 assertions)
+
