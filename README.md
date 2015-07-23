@@ -191,7 +191,8 @@ Switch blocks are not currently supported. Example, `-omg` is an option named
 
 Nether\Console uses PHPUnit to test.
 
-	$ composer dump-autoload
+	$ composer install
+	Installing netherphp/object
 	Generating autoload files
 	
 	$ phpunit --bootstrap vendor/autoload.php tests
