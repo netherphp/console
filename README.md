@@ -104,6 +104,30 @@ the script like this...
 
 
 
+# Example: Handlers by Extending Console Client
+
+Of course you can always write a more solid application by extending the class
+rather than writing all your handlers inline. Instead of using AddHandler you
+can create methods prefixed with "Handle" - so to process the command
+`php MyConsoleApp.php build something` you would create a method named
+`HandleBuild` for it to execute.
+
+	class MyConsoleApp
+	extends Nether\Console\Client {
+
+		public function
+		HandleBuild() {
+			$what = $this->GetInput(2);
+			static::Message("consider {$what} built.");
+			return;
+		}
+
+	}
+
+	(new MyConsoleApp)
+	->Run();
+
+
 # About Options
 
 All options may be specified with - or -- prefixes.
