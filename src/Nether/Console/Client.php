@@ -196,10 +196,10 @@ class Client {
 		////////
 
 		$method = static::GetMethodFromCommand($cmd);
-		echo $method, PHP_EOL;
-		try { $this->Run_ByMethod($method); }
+
+		try { $return = $this->Run_ByMethod($method); }
 		catch(Exception $e) {
-			try { $this->Run_ByCallable($cmd); }
+			try { $return = $this->Run_ByCallable($cmd); }
 			catch(Exception $e) {
 				echo "no handler or method found for {$cmd}", PHP_EOL;
 				return static::ErrorNoHandler;
@@ -424,7 +424,7 @@ class Client {
 
 		return sprintf(
 			'Handle%s',
-			str_replace(' ','',ucwords(preg_replace('/[-_]/',' ',$cmd)))
+			str_replace(' ','',ucwords(preg_replace('/[-_]/',' ',strtolower($cmd))))
 		);
 	}
 
