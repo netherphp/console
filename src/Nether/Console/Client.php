@@ -196,11 +196,10 @@ class Client {
 		////////
 
 		$method = static::GetMethodFromCommand($cmd);
-
 		try { $return = $this->Run_ByMethod($method); }
-		catch(Exception $e) {
+		catch(ClientHandlerException $e) {
 			try { $return = $this->Run_ByCallable($cmd); }
-			catch(Exception $e) {
+			catch(ClientHandlerException $e) {
 				echo "no handler or method found for {$cmd}", PHP_EOL;
 				return static::ErrorNoHandler;
 			}
@@ -225,7 +224,7 @@ class Client {
 	//*/
 
 		if(!array_key_exists($cmd,$this->Handlers))
-		throw new Exception("no handler found {$cmd}");
+		throw new ClientHandlerException("no handler found {$cmd}");
 
 		return call_user_func(function($cli,$func){
 			return $func($cli);
@@ -238,7 +237,7 @@ class Client {
 	//*/
 
 		if(!method_exists($this,$method))
-		throw new Exception("no method found {$method}");
+		throw new ClientHandlerException("no method found {$method}");
 
 		return call_user_func([$this,$method]);
 	}
