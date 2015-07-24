@@ -1,5 +1,7 @@
 # Nether Console
 
+[![nether.io](https://img.shields.io/badge/nether-console-C661D2.svg)](http://nether.io/) [![Build Status](https://travis-ci.org/netherphp/console.svg)](https://travis-ci.org/netherphp/console)  [![Packagist](https://img.shields.io/packagist/v/netherphp/console.svg)](https://packagist.org/packages/netherphp/console) [![Packagist](https://img.shields.io/packagist/dt/netherphp/console.svg)](https://packagist.org/packages/netherphp/console)
+
 A CLI Parser.
 
 
