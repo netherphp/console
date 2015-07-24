@@ -55,35 +55,6 @@ class Client {
 	////////////////////////////////
 
 	public function
-	PrintMessage($msg='',$opt=null) {
-	/*//
-	@deprecated
-	this method had no reason to access instance data.
-	//*/
-
-		static::Message('NOTICE: Client->PrintMessage() is deprecated. Use Client::Message().');
-		static::Message($msg,$opt);
-		return $this;
-	}
-
-	public function PrintStrings() {
-	/*//
-	@depreciated
-	this method had no reason to access instance data.
-	//*/
-
-		static::Message('NOTICE: Client->PrintStrings() is deprecated. Use Client::Messages().');
-		call_user_func_array(
-			[static::class,'Messages'],
-			func_get_args()
-		);
-		return $this;
-	}
-
-	////////////////////////////////
-	////////////////////////////////
-
-	public function
 	GetInput($offset) {
 	/*//
 	fetch the specified input value by offset. if you want the 1st input then
