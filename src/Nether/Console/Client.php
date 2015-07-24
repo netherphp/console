@@ -317,7 +317,10 @@ class Client {
 			if($key === 0 && $skipfirst) continue;
 
 			if($option = static::ParseCommandOption($segment)) {
-				$output['Options'][key($option)] = current($option);
+				$output['Options'] = array_merge(
+					$output['Options'],
+					$option
+				);
 			} else {
 				$output['Inputs'][] = $segment;
 			}
@@ -342,7 +345,22 @@ class Client {
 	returns an assoc array if we identified an option, else returns false.
 	//*/
 
-		if(!preg_match('/^-{1,2}/',$input)) return false;
+		if(preg_match('/^(-{1,2})/',$input,$m)) {
+			if($m[1] === '--')
+			return static::ParseCommandOption_LongForm($input);
+
+			elseif($m[1] === '-')
+			return static::ParseCommandOption_ShortForm($input);
+		}
+
+		return false;
+	}
+
+	static protected function
+	ParseCommandOption_LongForm($input) {
+	/*//
+	parse the long option form of --option=value
+	//*/
 
 		$opt = explode('=',$input,2);
 		switch(count($opt)) {
@@ -355,6 +373,34 @@ class Client {
 				break;
 			}
 		}
+
+		return $output;
+	}
+
+	static protected function
+	ParseCommandOption_ShortForm($input) {
+	/*//
+	parse the short option form of -zomg=bbq (-z -o -m -g=bbq)
+	//*/
+
+
+		$output = [];
+		$value = false;
+		$opt = explode('=',ltrim($input,'-'),2);
+
+		// figure out what the last value was.
+		if(count($opt) === 2) $value = trim($opt[1]);
+		else $value = true;
+
+		// break the options apart setting them true.
+		foreach(str_split($opt[0]) as $letter)
+		$output[$letter] = true;
+
+		// if the parsing did not really work send false out.
+		if(!count($output)) return false;
+
+		// then write the optional value to the last argument.
+		end($output); $output[key($output)] = $value; reset($output);
 
 		return $output;
 	}

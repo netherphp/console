@@ -134,15 +134,18 @@ can create methods prefixed with "Handle" - so to process the command
 
 All options may be specified with - or -- prefixes.
 
-* `php whatever.php --opt1 --opt2 -o -m -g`
+* `--opt1 --opt2 -o -m -g`
 
 All options may have optional values added by equals.
 
-* `php whatever.php --opt1=omg --opt2=wtf -t="bbq lol"`
+* `--opt1=omg --opt2=wtf -t="bbq lol"`
 
-Switch blocks are not currently supported. Example, `-omg` is an option named
-'omg' not -o -m and -g.
+Switchblocks are supported, but to pass a value to the last item you still
+need the equals sign.
 
+* `-zomg=bbq`
+
+That evaluates as z, o, and m === true, while g === 'bbq'.
 
 
 # Console API
@@ -196,7 +199,7 @@ Nether\Console uses PHPUnit to test.
 	$ composer install
 	Installing netherphp/object
 	Generating autoload files
-	
+
 	$ phpunit --bootstrap vendor/autoload.php tests
 	OK (6 tests, 21 assertions)
 
