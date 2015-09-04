@@ -197,9 +197,18 @@ class Client {
 		if(!array_key_exists($cmd,$this->Handlers))
 		throw new ClientHandlerException("no handler found {$cmd}");
 
-		return call_user_func(function($cli,$func){
-			return $func($cli);
-		},$this,$this->Handlers[$cmd]);
+		if($this->Handlers[$cmd] instanceof \Closure) {
+			$closure = $this->Handlers[$cmd]->BindTo($this);
+			$closure();
+			unset($closure);
+
+			// the php70 version of the above.
+			// $this->Handlers[$cmd]->Call($this);
+		} else {
+			return call_user_func(function($cli,$func){
+				return $func($cli);
+			},$this,$this->Handlers[$cmd]);
+		}
 	}
 
 	protected function
