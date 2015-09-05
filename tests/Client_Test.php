@@ -7,8 +7,12 @@ use \Codeception;
 ////////////////////////////////
 ////////////////////////////////
 
-class LocalExtensionTest extends Nether\Console\Client {
-	public function HandleTaco() { return 42; }
+class LocalExtensionTest
+extends Nether\Console\Client {
+	public function
+	HandleTaco() { return 42; }
+	public function
+	HandleNacho() { return func_num_args() === 0; }
 }
 
 ////////////////////////////////
@@ -16,8 +20,36 @@ class LocalExtensionTest extends Nether\Console\Client {
 
 class Console_Test extends \PHPUnit_Framework_TestCase {
 
+	static public function
+	LocalNachoFunction($cli) {
+	/*//
+	dummy function for TestFunctionPassesObject.
+	//*/
+
+		return (func_num_args()===1 && $cli instanceof Nether\Console\Client);
+	}
+
+	////////
+	////////
+
+	/** @test */
 	public function
-	testGetMethodFromCommand() {
+	SetUp() {
+	/*//
+	phpunit test env setup.
+	//*/
+
+		$_SERVER['argv'] = ['test.php','taco','omg','--lol=bbq'];
+		return;
+	}
+
+	/** @test */
+	public function
+	TestGetMethodFromCommand() {
+	/*//
+	test that the command to methodname translation is working as intended
+	for various inputs.
+	//*/
 
 		$this->AssertEquals(
 			'HandleRun',
@@ -39,8 +71,9 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 	}
 
 
+	/** @test */
 	public function
-	testParseCommandOption() {
+	TestParseCommandOption() {
 	/*//
 	test that input data as expected the way they come from _SERVER['argv']
 	parses as valid option switches.
@@ -106,8 +139,9 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
+	/** @test */
 	public function
-	testParseCommandArgs() {
+	TestParseCommandArgs() {
 	/*//
 	test that passing command arrays in the same format as they come from
 	_SERVER['argv'] parse as expected.
@@ -147,15 +181,12 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
+	/** @test */
 	public function
-	testGeneralUse() {
+	TestGeneralUse() {
 	/*//
 	test that the basic mechanics of the object are working.
 	//*/
-
-		$_SERVER['argv'] = [
-			'test.php', 'taco', 'omg', '--lol=bbq'
-		];
 
 		$cli = new Nether\Console\Client;
 		$this->AssertTrue($cli->GetInput(1) === 'taco');
@@ -165,16 +196,13 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
+	/** @test */
 	public function
-	testInlineHandlerUse() {
+	TestInlineHandlerUse() {
 	/*//
 	test that the quick dirty way to use Console with inline handler
 	definitions works as intended in general.
 	//*/
-
-		$_SERVER['argv'] = [
-			'test.php', 'taco', 'omg', '--lol=bbq'
-		];
 
 		$cli = (new Nether\Console\Client)
 		->SetHandler('taco',function(){ return 42; });
@@ -183,20 +211,72 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
+
+	/** @test */
 	public function
-	testExtendedHandlerUse() {
+	TestExtendedHandlerUse() {
 	/*//
 	test that extending the class with handler methods works as intended
 	in general.
 	//*/
 
-		$_SERVER['argv'] = [
-			'test.php', 'taco', 'omg', '--lol=bbq'
-		];
-
 		$cli = new LocalExtensionTest;
 
 		$this->AssertTrue($cli->Run() === 42);
+		return;
+	}
+
+	/** @test */
+	public function
+	TestClosureBindsThis() {
+	/*//
+	test that when you define a handler with a closure, that the command
+	object gets bound to $this instead of requiring an argument for the
+	objet.
+	//*/
+
+		$that = $this;
+		$cli = new Nether\Console\Client;
+
+		$cli->SetHandler('taco',function() use($that){
+			$that->AssertTrue(func_num_args() === 0);
+			$that->AssertTrue($this instanceof Nether\Console\Client);
+		});
+
+		$cli->Run();
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestExtensionLikeClosure() {
+	/*//
+	tests that the extended object works in the same way as the closure,
+	not passing the cli argument in because its a fkn extension lol.
+	//*/
+
+		$_SERVER['argv'][1] = 'nacho';
+		$cli = new LocalExtensionTest;
+
+		$this->AssertTrue($cli->Run());
+		return;
+	}
+
+	/** @test */
+	public function
+	TestFunctionPassesObject() {
+	/*//
+	tests that the client passes itself to boring functions that are set
+	to be used as the handlers.
+	//*/
+
+		$_SERVER['argv'][1] = 'nacho';
+
+		$cli = new Nether\Console\Client;
+		$cli->SetHandler('nacho',[__CLASS__,'LocalNachoFunction']);
+
+		$this->AssertTrue($cli->Run());
 		return;
 	}
 

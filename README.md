@@ -201,5 +201,5 @@ Nether\Console uses PHPUnit to test.
 	Generating autoload files
 
 	$ phpunit --bootstrap vendor/autoload.php tests
-	OK (6 tests, 21 assertions)
+	OK (10 tests, 41 assertions)
 

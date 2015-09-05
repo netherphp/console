@@ -199,11 +199,11 @@ class Client {
 
 		if($this->Handlers[$cmd] instanceof \Closure) {
 			$closure = $this->Handlers[$cmd]->BindTo($this);
-			$closure();
+			return $closure();
 			unset($closure);
 
 			// the php70 version of the above.
-			// $this->Handlers[$cmd]->Call($this);
+			// return $this->Handlers[$cmd]->Call($this);
 		} else {
 			return call_user_func(function($cli,$func){
 				return $func($cli);
