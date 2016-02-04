@@ -305,7 +305,7 @@ class Client {
 	}
 
 	static public function
-	Print($msg='',$opt=null) {
+	PrintLine($msg='',$opt=null) {
 	/*//
 	@arg string Input, ...
 	consider this an alias of Message with line wrapping disabled by default.
