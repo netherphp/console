@@ -270,12 +270,13 @@ class Client {
 
 		////////
 		////////
+		if($opt->Width) {
+			// consider the prefix length.
+			$opt->Width -= strlen($opt->Prefix);
 
-		// consider the prefix length.
-		$opt->Width -= strlen($opt->Prefix);
-
-		// wrap the text.
-		$msg = wordwrap($msg,$opt->Width,$opt->EOL);
+			// wrap the text.
+			$msg = wordwrap($msg,$opt->Width,$opt->EOL);
+		}
 
 		// apply the prefix.
 		$lines = explode($opt->EOL,$msg);
@@ -301,6 +302,20 @@ class Client {
 
 		foreach(func_get_args() as $string)
 		static::Message($string);
+	}
+
+	static public function
+	Print($msg='',$opt=null) {
+	/*//
+	@arg string Input, ...
+	consider this an alias of Message with line wrapping disabled by default.
+	//*/
+
+		$opt = new Nether\Object($opt,[
+			'Width' => false
+		]);
+
+		return static::Message($msg,$opt);
 	}
 
 	////////////////////////////////
