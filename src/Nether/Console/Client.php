@@ -118,6 +118,9 @@ class Client {
 		return $this;
 	}
 
+	////////////////////////////////
+	////////////////////////////////
+
 	public function
 	Run($cmd=null) {
 	/*//
@@ -316,6 +319,36 @@ class Client {
 		]);
 
 		return static::Message($msg,$opt);
+	}
+
+	static public function
+	Prompt(?String $Msg=NULL, ?String $Prompt=NULL):
+	String {
+	/*//
+	ask the user a question and await a response.
+	//*/
+
+		if($Msg)
+		echo $Msg, PHP_EOL;
+
+		if($Prompt)
+		echo $Prompt, ' ';
+
+		$Result = trim(fgets(STDIN));
+		echo PHP_EOL;
+
+		return $Result;
+	}
+
+	static public function
+	PromptEquals(?String $Msg=NULL, ?String $Prompt=NULL, String $Condition):
+	Bool {
+	/*//
+	ask the user a question, and check that their response is a match in a
+	case insensitive way, since this will mostly be used for y/n questions.
+	//*/
+
+		return (strtolower(static::Prompt($Msg,$Prompt)) === strtolower($Condition));
 	}
 
 	////////////////////////////////
