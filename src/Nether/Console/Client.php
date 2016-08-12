@@ -63,7 +63,7 @@ class Client {
 
 		--$offset;
 
-		if(!array_key_exists($offset,$this->Inputs)) return false;
+		if(!array_key_exists($offset,$this->Inputs)) return NULL;
 		else return $this->Inputs[$offset];
 	}
 
@@ -82,7 +82,7 @@ class Client {
 	fetch the specified option input value by name.
 	//*/
 
-		if(!array_key_exists($name,$this->Options)) return false;
+		if(!array_key_exists($name,$this->Options)) return NULL;
 		else return $this->Options[$name];
 	}
 
