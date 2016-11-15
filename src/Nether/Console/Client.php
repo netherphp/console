@@ -166,23 +166,33 @@ class Client {
 			$cmd = [$this->DefaultHandlerName];
 		}
 
-		else { 
+		else {
 			$cmd = $this->GetInputs();
 		}
 
 		////////
 		////////
 
+		$Commanded = FALSE;
+
 		foreach($cmd as $cur) {
 			$method = static::GetMethodFromCommand($cur);
-			try { $return = $this->Run_ByMethod($method); }
-			catch(ClientHandlerException $e) {
-				try { $return = $this->Run_ByCallable($cur); }
-				catch(ClientHandlerException $e) {
-					echo "no handler or method found for {$cur}", PHP_EOL;
-					return static::ErrorNoHandler;
-				}
+			try {
+				$return = $this->Run_ByMethod($method);
+				$Commanded = TRUE;
 			}
+			catch(ClientHandlerException $e) {
+				try {
+					$return = $this->Run_ByCallable($cur);
+					$Commanded = TRUE;
+				}
+				catch(ClientHandlerException $e) { /* ... */ }
+			}
+		}
+
+		if(!$Commanded) {
+			echo "no handler or method found for {$cur}", PHP_EOL;
+			return static::ErrorNoHandler;
 		}
 
 		////////
