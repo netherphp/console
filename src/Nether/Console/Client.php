@@ -56,6 +56,18 @@ class Client {
 		$this->Inputs = $data['Inputs'];
 		$this->Options = $data['Options'];
 
+		$this->__ready();
+		return;
+	}
+
+	public function
+	__ready():
+	Void {
+	/*//
+	prototype method for implementing things to do on object construction
+	without overwriting the actual object constructor.
+	//*/
+
 		return;
 	}
 
