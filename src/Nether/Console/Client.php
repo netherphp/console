@@ -102,6 +102,9 @@ class Client {
 	fetch the specified option input value by name.
 	//*/
 
+		// @todo insert case insensitive code here if the name is more than
+		// one character long.
+
 		if(!array_key_exists($name,$this->Options)) return NULL;
 		else return $this->Options[$name];
 	}
@@ -485,6 +488,10 @@ class Client {
 	//*/
 
 		$opt = explode('=',$input,2);
+
+		// @todo insert case insensitive code here. likely moving the ltrim
+		// up to be part of the name preprocessed.
+
 		switch(count($opt)) {
 			case 1: {
 				$output[ltrim($opt[0],'-')] = true;
