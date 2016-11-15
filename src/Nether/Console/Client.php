@@ -60,7 +60,7 @@ class Client {
 		return;
 	}
 
-	public function
+	protected function
 	__ready():
 	Void {
 	/*//
