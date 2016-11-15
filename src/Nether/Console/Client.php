@@ -36,6 +36,14 @@ class Client {
 	a list of callables for handling input.
 	//*/
 
+	protected
+	$ChainCommands = TRUE;
+	/*//
+	@type Bool
+	if we should process commands until we run out, or just the first one that
+	we encounter.
+	//*/
+
 	////////////////////////////////
 	////////////////////////////////
 
@@ -93,6 +101,30 @@ class Client {
 	//*/
 
 		return $this->Options;
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	public function
+	WillChainCommands():
+	Bool {
+	/*//
+	@get ->ChainCommands
+	//*/
+
+		return $this->ChainCommands;
+	}
+
+	public function
+	SetChainCommands(Bool $State):
+	self {
+	/*//
+	@set ->ChainCommands
+	//*/
+
+		$this->ChainCommands = $State;
+		return $this;
 	}
 
 	////////////////////////////////
@@ -186,7 +218,12 @@ class Client {
 					$return = $this->Run_ByCallable($cur);
 					$Commanded = TRUE;
 				}
-				catch(ClientHandlerException $e) { /* ... */ }
+				catch(ClientHandlerException $e) {
+					if(!$this->ChainCommands) {
+						echo "no handler or method found for {$cur}", PHP_EOL;
+						return static::ErrorNoHandler;
+					}
+				}
 			}
 		}
 
