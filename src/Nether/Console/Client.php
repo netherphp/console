@@ -97,16 +97,19 @@ class Client {
 	}
 
 	public function
-	GetOption($name) {
+	GetOption($Name) {
 	/*//
-	fetch the specified option input value by name.
+	fetch the specified option input value by name. if the name is longer than
+	one character then we check case insensitive.
 	//*/
 
-		// @todo insert case insensitive code here if the name is more than
-		// one character long.
+		if(strlen($Name) > 1)
+		$Name = strtolower($Name);
 
-		if(!array_key_exists($name,$this->Options)) return NULL;
-		else return $this->Options[$name];
+		if(array_key_exists($Name,$this->Options))
+		return $this->Options[$Name];
+
+		return NULL;
 	}
 
 	public function
@@ -482,34 +485,38 @@ class Client {
 	}
 
 	static protected function
-	ParseCommandOption_LongForm($input) {
+	ParseCommandOption_LongForm($Input) {
 	/*//
-	parse the long option form of --option=value
+	parse the long option form of --option=value. options which are one char
+	long are kept case sensitive. options longer than one char are made case
+	insensitive.
 	//*/
 
-		$opt = explode('=',$input,2);
+		$Opt = explode('=',$Input,2);
+		$Opt[0] = ltrim($Opt[0],'-');
 
-		// @todo insert case insensitive code here. likely moving the ltrim
-		// up to be part of the name preprocessed.
+		if(strlen($Opt[0]) > 1)
+		$Opt[0] = strtolower($Opt[0]);
 
-		switch(count($opt)) {
+		switch(count($Opt)) {
 			case 1: {
-				$output[ltrim($opt[0],'-')] = true;
+				$Output[$Opt[0]] = TRUE;
 				break;
 			}
 			case 2: {
-				$output[ltrim($opt[0],'-')] = trim($opt[1]);
+				$Output[$Opt[0]] = trim($Opt[1]);
 				break;
 			}
 		}
 
-		return $output;
+		return $Output;
 	}
 
 	static protected function
 	ParseCommandOption_ShortForm($input) {
 	/*//
-	parse the short option form of -zomg=bbq (-z -o -m -g=bbq)
+	parse the short option form of -zomg=bbq (-z -o -m -g=bbq). short form
+	are always one character long and therefore kept case sensitive.
 	//*/
 
 

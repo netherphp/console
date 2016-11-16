@@ -279,4 +279,55 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
+	/** @test */
+	public function
+	TestOptionCaseSensitivity() {
+	/*//
+	that that short options are case sensitive while long options are not.
+	//*/
+
+		$_SERVER['argv'][1] = 'vehicle';
+		$_SERVER['argv'][2] = '-t=car';
+		$_SERVER['argv'][3] = '-T=muscle';
+		$_SERVER['argv'][4] = '--make=Ford';
+		$_SERVER['argv'][5] = '--Model=Mustang';
+		$_SERVER['argv'][6] = '--yeaR=2016';
+
+		$that = $this;
+
+		$CLI = (new Nether\Console\Client)
+		->SetHandler('vehicle',function() use($that){
+
+			$that->AssertTrue(
+				$this->GetOption('t') === 'car',
+				'reading type flag (t) case sensitive'
+			);
+
+			$that->AssertTrue(
+				$this->GetOption('T') === 'muscle',
+				'reading template flag (T) case sensitive'
+			);
+
+			$that->AssertTrue(
+				$this->GetOption('Make') === 'Ford',
+				'reading make case insensitive'
+			);
+
+			$that->AssertTrue(
+				$this->GetOption('Model') === 'Mustang',
+				'reading model case insensitive'
+			);
+
+			$that->AssertTrue(
+				$this->GetOption('Year') === '2016',
+				'reading year case insensitive'
+			);
+
+			return TRUE;
+		});
+
+		$this->AssertTrue($CLI->Run());
+		return;
+	}
+
 }
