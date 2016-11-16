@@ -167,7 +167,7 @@ need the equals sign.
 That evaluates as z, o, and m === true, while g === 'bbq'.
 
 Single letter options will retain their case sensitivity, so -t and -T are two
-different options. Longer option mames are case insensitive.
+different options. Longer option names are case insensitive.
 
 
 # Console API
