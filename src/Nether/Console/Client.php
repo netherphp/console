@@ -37,7 +37,7 @@ class Client {
 	//*/
 
 	protected
-	$ChainCommands = TRUE;
+	$ChainCommands = FALSE;
 	/*//
 	@type Bool
 	if we should process commands until we run out, or just the first one that
@@ -236,13 +236,11 @@ class Client {
 					$return = $this->Run_ByCallable($cur);
 					$Commanded = TRUE;
 				}
-				catch(ClientHandlerException $e) {
-					if(!$this->ChainCommands) {
-						echo "no handler or method found for {$cur}", PHP_EOL;
-						return static::ErrorNoHandler;
-					}
-				}
+				catch(ClientHandlerException $e) { }
 			}
+
+			if($Commanded && !$this->ChainCommands)
+			break;
 		}
 
 		if(!$Commanded) {

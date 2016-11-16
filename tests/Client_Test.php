@@ -210,7 +210,6 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		return;
 	}
 
-
 	/** @test */
 	public function
 	TestExtendedHandlerUse() {
@@ -327,6 +326,30 @@ class Console_Test extends \PHPUnit_Framework_TestCase {
 		});
 
 		$this->AssertTrue($CLI->Run());
+		return;
+	}
+
+	/** @test */
+	public function
+	TestInputChaining() {
+	/*//
+	test that the input chaining option works as intended and that the proper
+	value is returned as expected from a chain.
+	//*/
+
+		$CLI = (new Nether\Console\Client)
+		->SetHandler('one',function(){ return 1; })
+		->SetHandler('two',function(){ return 2; })
+		->SetHandler('three',function(){ return 3; });
+
+		// disallow chaining.
+		$CLI->SetChainCommands(FALSE);
+		$this->AssertTrue( $CLI->Run(['one','two','three']) === 1 );
+
+		// allow chaining.
+		$CLI->SetChainCommands(TRUE);
+		$this->AssertTrue( $CLI->Run(['one','two','three']) === 3 );
+
 		return;
 	}
 
