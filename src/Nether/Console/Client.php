@@ -327,7 +327,7 @@ class Client {
 	if was a string to start with, then we will just use that prefix.
 	//*/
 
-		$opt = new Nether\Object($opt,[
+		$opt = new Nether\Object\Mapped($opt,[
 			'EOL'    => PHP_EOL,
 			'Prefix' => true,
 			'Width'  => 75
@@ -383,7 +383,7 @@ class Client {
 	consider this an alias of Message with line wrapping disabled by default.
 	//*/
 
-		$opt = new Nether\Object($opt,[
+		$opt = new Nether\Object\Mapped($opt,[
 			'Width' => false
 		]);
 
