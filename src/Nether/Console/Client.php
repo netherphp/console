@@ -48,20 +48,25 @@ class Client {
 	////////////////////////////////
 
 	public function
-	__construct($opt=null) {
+	__Construct($Opt=NULL) {
+
 		if(!array_key_exists('argv',$_SERVER))
 		throw new Exception('register_argc_argv must be enabled');
 
-		$data = static::ParseCommandArgs($_SERVER['argv'],true);
-		$this->Inputs = $data['Inputs'];
-		$this->Options = $data['Options'];
+		$Opt = new Nether\Object\Mapped($Opt,[
+			'Argv' => $_SERVER['argv']
+		]);
 
-		$this->__ready();
+		$Data = static::ParseCommandArgs($Opt->Argv,TRUE);
+		$this->Inputs = $Data['Inputs'];
+		$this->Options = $Data['Options'];
+
+		$this->__Ready();
 		return;
 	}
 
 	protected function
-	__ready():
+	__Ready():
 	Void {
 	/*//
 	prototype method for implementing things to do on object construction

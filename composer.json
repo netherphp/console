@@ -10,7 +10,9 @@
 		  "role":"developer" }
 	],
 	"require": {
-		"netherphp/object": "^3.0.0"
+		"netherphp/object": "^3.0.0",
+		"ramsey/uuid": "^3.9",
+		"react/react": "^1.0"
 	},
 	"autoload": {
 		"psr-0": {
