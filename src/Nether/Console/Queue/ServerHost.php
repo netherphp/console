@@ -2,48 +2,99 @@
 
 namespace Nether\Console\Queue;
 
-use \React as React;
+use \React  as React;
 use \Nether as Nether;
+use \Ramsey as Ramsey;
 
 use \Throwable as Throwable;
 
 class ServerHost {
+/*//
+this class provides a basic queue service. its features include tcp connection
+handling so that commands may be sent to the queue, automatic queue processing
+with multiple worker support, and persistent storage of the queue so that if
+it needed to be shutdown while there were still things waiting, that those jobs
+can be brought back next time you start the service.
+
+intended use case:
+	* class YourProjectQueue extends ServerHost
+	* override OnCommand to parse the commands you want to send to it via tcp.
+	* override OnJob to handle your parsed commands and do the work.
+	* execute it from a cli script, new YourProjectQueue;
+//*/
 
 	protected
 	$Queue = NULL;
+	/*//
+	@type Nether\Object\Datastore
+	//*/
 
 	protected
 	$Workers = [];
+	/*//
+	@type Array
+	//*/
 
 	protected
-	$MaxWorkers = 2;
+	$MaxWorkers = 0;
+	/*//
+	@type Int
+	//*/
 
 	protected
 	$Bind = NULL;
+	/*//
+	@type String "host:port"
+	//*/
 
 	protected
 	$Quiet = NULL;
+	/*//
+	@type Bool
+	//*/
+
+	protected
+	$UUID = NULL;
+	/*//
+	@type String
+	//*/
+
+	protected
+	$DateFormat = NULL;
+	/*//
+	@type String
+	//*/
 
 	public function
 	__Construct($Opt=NULL) {
+	/*//
+	@date 2020-06-23
+	//*/
 
 		$Opt = new Nether\Object\Mapped($Opt,[
 			'Bind'       => '127.0.0.1:11301',
 			'Datafile'   => NULL,
 			'MaxWorkers' => 2,
-			'Quiet'      => FALSE
+			'Quiet'      => FALSE,
+			'UUID'       => Ramsey\Uuid\Uuid::UUID4()->ToString(),
+			'DateFormat' => 'Y-m-d H:i:s'
 		]);
 
 		$this->Bind = $Opt->Bind;
 		$this->MaxWorkers = (Int)$Opt->MaxWorkers;
 		$this->Queue = new Nether\Object\Datastore;
 		$this->Quiet = $Opt->Quiet;
+		$this->UUID = $Opt->UUID;
+		$this->DateFormat = $Opt->DateFormat;
 
 		if($Opt->Datafile)
 		$this->PrepareDatafile($Opt->Datafile);
 
-		if(!$this->Quiet)
-		echo ">> Queue Length: {$this->Queue->Count()}, Max Workers: {$this->MaxWorkers}", PHP_EOL;
+		$this->PrintLn(sprintf(
+			'Queue Length: %s, Max Workers: %s',
+			$this->Queue->Count(),
+			$this->MaxWorkers
+		));
 
 		$this->Run();
 		return;
@@ -52,6 +103,11 @@ class ServerHost {
 	protected function
 	PrepareDatafile(?String $Datafile):
 	Void {
+	/*//
+	@date 2020-06-23
+	try to load the datafile to disk to prime the queue with any jobs that were
+	not executed yet when it was shutdown.
+	//*/
 
 		$Error = NULL;
 		$WriteError = NULL;
@@ -60,8 +116,7 @@ class ServerHost {
 		return;
 
 		try {
-			if(!$this->Quiet)
-			echo ">> Loading {$Datafile}", PHP_EOL;
+			$this->PrintLn(sprintf('Loading %s',$Datafile));
 
 			($this->Queue)
 			->SetFilename($Datafile)
@@ -70,8 +125,7 @@ class ServerHost {
 
 		catch(Throwable $Error) {
 			if($Error->GetCode() === 1) {
-				if(!$this->Quiet)
-				echo ">> Creating {$Datafile}", PHP_EOL;
+				$this->PrintLn(sprintf('Creating %s',$Datafile));
 
 				try { $this->Queue->Write($Datafile); }
 				catch(Throwable $WriteError) { echo $WriteError->GetMessage(), PHP_EOL; }
@@ -86,18 +140,44 @@ class ServerHost {
 
 	public function
 	Run() {
+	/*//
+	@date 2020-06-23
+	perform the actual execution of the queue where we hand off program
+	control to react.
+	//*/
 
 		$this->Loop = React\EventLoop\Factory::Create();
-		$this->Server = new React\Socket\Server($this->Bind,$this->Loop);
 
-		if(!$this->Quiet)
-		echo ">> Server: {$this->Bind}", PHP_EOL;
+		////////
 
-		($this->Loop)
-		->AddTimer(1,[$this,'QueueKick']);
+		try {
+			$this->Server = new React\Socket\Server($this->Bind,$this->Loop);
+		}
+
+		catch(Throwable $Error) {
+			$this->PrintLn(sprintf(
+				'Error Starting Service: %s',
+				$Error->GetMessage()
+			));
+			return;
+		}
+
+		////////
 
 		($this->Server)
 		->On('connection',[$this,'OnOpen']);
+
+		$this->PrintLn(sprintf(
+			'Server: %s, Listening: %s',
+			$this->UUID,
+			$this->Bind
+		));
+
+		// once the queue is up we will want to have it kick off any jobs
+		// that were still pending.
+
+		($this->Loop)
+		->AddTimer(1,[$this,'QueueKick']);
 
 		$this->Loop->Run();
 		return;
@@ -106,6 +186,10 @@ class ServerHost {
 	public function
 	OnOpen(React\Socket\Connection $Connection):
 	Void {
+	/*//
+	@date 2020-06-23
+	tcp client connect.
+	//*/
 
 		$Client = new ServerClient($Connection);
 
@@ -113,8 +197,7 @@ class ServerHost {
 		->On('close',function() use($Client) { return $this->OnClose($Client); })
 		->On('data',function($Input) use($Client) { return $this->OnRecv($Client,$Input); });
 
-		if(!$this->Quiet)
-		echo ">> Connect: {$Client->Socket->GetRemoteAddress()}", PHP_EOL;
+		$this->PrintLn(sprintf('Connect: %s',$Client->Socket->GetRemoteAddress()));
 
 		return;
 	}
@@ -122,16 +205,23 @@ class ServerHost {
 	public function
 	OnClose(ServerClient $Client):
 	Void {
+	/*//
+	@date 2020-06-23
+	tcp client disconnect.
+	//*/
 
-		if(!$this->Quiet)
-		echo ">> Disconnect: {$Client->Socket->GetRemoteAddress()}", PHP_EOL;
-
+		$this->PrintLn(sprintf('Disconnect: %s',$Client->Socket->GetRemoteAddress()));
 		return;
 	}
 
 	public function
 	OnRecv(ServerClient $Client, String $Data):
 	Void {
+	/*//
+	@date 2020-06-23
+	when the tcp input gets data throw it into the buffer and then
+	see if we have managed to assemble a full command yet.
+	//*/
 
 		$Command = NULL;
 
@@ -143,15 +233,33 @@ class ServerHost {
 		return;
 	}
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	public function
 	OnCommand(ServerClient $Client, String $Command):
 	Void {
 	/*//
+	@date 2020-06-23
 	@template
+	this method gets executed when a full command (newline based protocol)
+	is assembled and ready to be processed. generally what you would do is
+	overwrite this method with your own implementation to parse the data
+	of the command and push it into the queue in a meaningful way.
 	//*/
 
-		if(!$this->Quiet)
-		echo ">> Command: {$Client->Socket->GetRemoteAddress()} {$Command}", PHP_EOL;
+		// this default implementation is literally just pushing the command
+		// string into the queue.
+
+		// example 1 part 1
+		// a more useful implementation would be, the command is actually json
+		// data, so you parse it here and then push it into the queue.
+
+		$this->PrintLn(sprintf(
+			'Command: %s %s',
+			$Client->Socket->GetRemoteAddress(),
+			$Command
+		));
 
 		$this->QueuePush($Command);
 		return;
@@ -161,100 +269,93 @@ class ServerHost {
 	OnJob(ServerJob $Job):
 	Void {
 	/*//
+	@date 2020-06-23
 	@template
+	this method gets executed when it is time for a job to start doing
+	its work. generally what you would do is overwrite this method with
+	your own implementation that can parse whatever it was you pushed
+	into the queue and do it.
 	//*/
 
-		if(!$this->Quiet)
-		echo ">> Job {$Job->UUID} Start", PHP_EOL;
+		// this default implementation is literally just getting the strings
+		// the default OnCommand shoved into the queue and... doing... it.
+		// it is important that you flag the job as done when it is done so
+		// that it worker can be released to do the next job.
 
-		if(!$this->Quiet)
-		echo ">> Job {$Job->UUID} Done", PHP_EOL;
+		// example 1 part 2
+		// a more useful implementation would be looking at the json that
+		// was parsed, determining which script file it describes, and using
+		// the RunChildProcess to execute it in a non-blocking way, which will
+		// also flag the job as done when done automatically.
+
+		$this->PrintLn(sprintf(
+			'OnJob: %s %s',
+			$Job->UUID,
+			$Job->Entry
+		));
 
 		$this->JobDone($Job);
 		return;
 	}
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	public function
 	JobDone(ServerJob $Job):
 	Void {
+	/*//
+	@date 2020-06-23
+	unregister the finished worker and kick off the next job.
+	//*/
 
 		unset($this->Workers[$Job->UUID]);
 
-		if(!$this->Quiet)
-		echo ">> Worker Done, Active: ", count($this->Workers), ", Queue Size: {$this->Queue->Count()}", PHP_EOL;
+		$this->PrintLn(sprintf(
+			'Worker Done: %s, Active: %d, Queue Size: %d',
+			$Job->UUID,
+			count($this->Workers),
+			$this->Queue->Count()
+		));
 
 		$this->QueueKick();
-
 		return;
 	}
 
 	public function
 	JobRetry(ServerJob $Job):
 	Void {
+	/*//
+	@date 2020-06-23
+	unregister the finished worker, push this job back into the queue,
+	which also kicks off the next job.
+	//*/
 
 		unset($this->Workers[$Job->UUID]);
+
+		$this->PrintLn(sprintf(
+			'Worker Done: %s, Active: %d, Queue Size: %d',
+			$Job->UUID,
+			count($this->Workers),
+			$this->Queue->Count()
+		));
+
 		$this->QueuePush($Job->Entry);
 
 		return;
 	}
 
-	public function
-	QueuePush($Entry):
-	Void {
-
-		$Job = new ServerJob;
-		$Job->Entry = $Entry;
-
-		($this->Queue)
-		->Push($Job)
-		->Write();
-
-		if(!$this->Quiet)
-		echo ">> Queue Push: {$Job->UUID}, Current Size: {$this->Queue->Count()}", PHP_EOL;
-
-		if(count($this->Workers) < $this->MaxWorkers)
-		$this->QueueKick();
-
-		return;
-	}
-
-	public function
-	QueueNext():
-	?ServerJob {
-
-		$Job = $this->Queue->Shift();
-		$this->Queue->Write();
-
-		return $Job;
-	}
-
-	public function
-	QueueKick():
-	Void {
-
-		if(!$this->Queue->Count()) {
-			return;
-		}
-
-		$Job = $this->QueueNext();
-
-		$this->Workers[$Job->UUID] = $Job;
-		$Job->Tries += 1;
-
-		if(!$this->Quiet)
-		echo ">> Worker Start: {$Job->UUID}, Active: ", count($this->Workers), PHP_EOL;
-
-		$this->OnJob($Job);
-
-		if(count($this->Workers) < $this->MaxWorkers)
-		$this->QueueKick();
-
-		return;
-	}
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	public function
 	RunChildProcess(Array $Opt):
 	Void {
+	/*//
+	@date 2020-06-23
+	the meat of the trick to the async processing. push out a child process
+	that actually does the work.
+	//*/
 
 		$Opt = new Nether\Object\Mapped($Opt,[
 			'Job'       => NULL,
@@ -265,11 +366,14 @@ class ServerHost {
 		]);
 
 		if(!($Opt->Job instanceof ServerJob)) {
-			echo ">> Run Child Process: Missing Job", PHP_EOL;
+			$this->PrintLn('Run Child Prcess: Missing Job');
 			return;
 		}
 
-		echo "[{$Opt->Job->UUID}] Start: {$Opt->Command}", PHP_EOL;
+		$this->PrintLn(sprintf(
+			'Job Start: %s',
+			$Opt->Job->UUID
+		));
 
 		$Task = new React\ChildProcess\Process($Opt->Command);
 		$Task->Start($this->Loop);
@@ -277,12 +381,22 @@ class ServerHost {
 		$Task->On('exit',function(Int $Errno) use($Opt){
 
 			if($Errno !== 0 && $Opt->Requeue) {
-				echo "[{$Opt->Job->UUID}] Requeue: {$Errno} {$Opt->Job->Tries}", PHP_EOL;
+				$this->PrintLn(sprintf(
+					'Job Requeue: %s, Exit: %d, Tries: %d',
+					$Opt->Job->UUID,
+					$Errno,
+					$Opt->Job->Tries
+				));
 				$this->JobRetry($Opt->Job);
 			}
 
 			else {
-				echo "[{$Opt->Job->UUID}] Done: {$Errno}", PHP_EOL;
+				$this->PrintLn(sprintf(
+					'Job Done: %s, Exit: %d, Tries: %d',
+					$Opt->Job->UUID,
+					$Errno,
+					$Opt->Job->Tries
+				));
 				$this->JobDone($Opt->Job);
 			}
 
@@ -291,11 +405,113 @@ class ServerHost {
 
 		$Task->stdout->On('data',function(String $Input) use($Opt){
 
-			if(!$this->Quiet && trim($Input))
-			echo "[{$Opt->Job->UUID}] Said: ", trim($Input), PHP_EOL;
+			if($Input = trim($Input))
+			$this->PrintLn(sprintf(
+				'Job Msg: %s, Said: %s',
+				$Opt->Job->UUID,
+				$Input
+			));
 
 			return;
 		});
+
+		return;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	public function
+	QueuePush($Entry):
+	Void {
+	/*//
+	@date 2020-06-23
+	push some content into the queue. wraps it with a job object
+	to uniquely identify it but the format of the content is your
+	own to invent and validate.
+	//*/
+
+		$Job = new ServerJob;
+		$Job->Entry = $Entry;
+
+		($this->Queue)
+		->Push($Job)
+		->Write();
+
+		$this->PrintLn(sprintf(
+			'Queue Push: %s, Queue Size: %d',
+			$Job->UUID,
+			$this->Queue->Count()
+		));
+
+		if(count($this->Workers) < $this->MaxWorkers)
+		$this->QueueKick();
+
+		return;
+	}
+
+	public function
+	QueueNext():
+	?ServerJob {
+	/*//
+	@date 2020-06-23
+	swipe the next job off the top of the todo list.
+	//*/
+
+		$Job = $this->Queue->Shift();
+		$this->Queue->Write();
+
+		return $Job;
+	}
+
+	public function
+	QueueKick():
+	Void {
+	/*//
+	@date 2020-06-23
+	kick queue processing off if nothing is going on until the
+	max numer of workers are used.
+	//*/
+
+		while(count($this->Workers) < $this->MaxWorkers) {
+			if(!($Job = $this->QueueNext()))
+			break;
+
+			$this->Workers[$Job->UUID] = $Job;
+			$Job->Tries += 1;
+
+			$this->PrintLn(sprintf(
+				'Worker Start: %s, Active: %d',
+				$Job->UUID,
+				count($this->Workers)
+			));
+
+			$this->OnJob($Job);
+		}
+
+		return;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	public function
+	PrintLn(String $Content):
+	Void {
+	/*//
+	@date 2020-06-26
+	printing output to the console if not silenced.
+	//*/
+
+		if($this->Quiet)
+		return;
+
+		printf(
+			'[%s] %s%s',
+			date($this->DateFormat),
+			$Content,
+			PHP_EOL
+		);
 
 		return;
 	}
