@@ -73,7 +73,7 @@ intended use case:
 
 		$Opt = new Nether\Object\Mapped($Opt,[
 			'Bind'       => '127.0.0.1:11301',
-			'Datafile'   => NULL,
+			'Datafile'   => 'queue.phson',
 			'MaxWorkers' => 2,
 			'Quiet'      => FALSE,
 			'UUID'       => Ramsey\Uuid\Uuid::UUID4()->ToString(),
