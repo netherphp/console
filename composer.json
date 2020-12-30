@@ -5,11 +5,12 @@
 	"license":"BSD-3-Clause",
 	"authors":[
 		{ "name":"Bob Majdak Jr",
-		  "email":"bob@nether.io",
-		  "homepage":"http://nether.io",
+		  "email":"bob@majdak.net",
+		  "homepage":"http://github.com/bobmagicii",
 		  "role":"developer" }
 	],
 	"require": {
+		"php": "^8.0",
 		"netherphp/object": "^3.0.0",
 		"ramsey/uuid": "^3.9",
 		"react/react": "^1.0"
@@ -18,5 +19,8 @@
 		"psr-0": {
 			"Nether\\":"src/"
 		}
-	}
+	},
+	"bin": [
+		"bin/nether-crontab"
+	]
 }
