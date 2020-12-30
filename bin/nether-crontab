@@ -38,7 +38,12 @@ $App = (
 			if(!$Raw)
 			print_r(
 				($Crontab->GetEntries())
-				->Map(function($Val){ return (String)$Val; })
+				->Map(function($Val){
+					if($Val instanceof Nether\Console\Crontab\Entry)
+					return $Val->GetAsWords();
+
+					return (String)$Val;
+				})
 				->GetData()
 			);
 
