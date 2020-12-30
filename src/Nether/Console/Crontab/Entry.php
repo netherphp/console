@@ -18,8 +18,14 @@ implements Stringable {
 	$Weekday = '*',
 	$Command = '';
 
-	public ?String
-	$Comment = NULL;
+	static public Array
+	$TimeMacros = [
+		'@hourly'  => [ '0', '*', '*', '*', '*' ],
+		'@daily'   => [ '0', '0', '*', '*', '*' ],
+		'@weekly'  => [ '0', '0', '*', '*', '0' ],
+		'@monthly' => [ '0', '0', '1', '*', '*' ],
+		'@yearly'  => [ '0', '0', '1', '1', '*' ]
+	];
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
@@ -57,7 +63,7 @@ implements Stringable {
 	//*/
 
 		if(!$this->Parse_CronBasic($Line))
-		if(!$this->Parse_CronFancy($Line))
+		if(!$this->Parse_CronMacro($Line))
 		throw new Exception('unable to parse the line');
 
 		return $this;
@@ -71,7 +77,7 @@ implements Stringable {
 	//*/
 
 		$Match = NULL;
-		$Pattern = '/^([^#]+?) (.+?) (.+?) (.+?) (.+?) (.+)$/';
+		$Pattern = '/^([^#\h]+?) ([^\h]+?) ([^\h]+?) ([^\h]+?) ([^\h]+?) (.+)$/';
 
 		if(!preg_match($Pattern,$Line,$Match))
 		return FALSE;
@@ -89,16 +95,38 @@ implements Stringable {
 	}
 
 	protected function
-	Parse_CronFancy(String $Line):
+	Parse_CronMacro(String $Line):
 	Bool {
 	/*//
 	@date 2020-12-30
 	//*/
 
+		$Match = NULL;
+		$Pattern = '/^([^#\h]+?) (.+)$/';
+
+		if(!preg_match($Pattern,$Line,$Match))
 		return FALSE;
+
+		if(!array_key_exists($Match[1],static::$TimeMacros))
+		return FALSE;
+
+		$this->Command = $Match[2];
+
+		list(
+			0 => $this->Minute,
+			1 => $this->Hour,
+			2 => $this->Day,
+			3 => $this->Month,
+			4 => $this->Weekday
+		) = static::$TimeMacros[$Match[1]];
+
+		return TRUE;
 	}
 
-	protected function
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	public function
 	GetAsLine():
 	String {
 	/*//
@@ -115,21 +143,6 @@ implements Stringable {
 			$this->Command
 		);
 	}
-
-	protected function
-	GetAsWords():
-	String {
-	/*//
-	@date 2020-12-30
-	//*/
-
-		$Output = '';
-
-		return $Output;
-	}
-
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////

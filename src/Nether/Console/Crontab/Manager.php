@@ -21,7 +21,6 @@ class Manager {
 	//*/
 
 		$this->List = new Nether\Object\Datastore;
-
 		return;
 	}
 
