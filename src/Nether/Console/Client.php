@@ -44,6 +44,12 @@ class Client {
 	we encounter.
 	//*/
 
+	protected
+	$Cols = 80;
+
+	protected
+	$Rows = 20;
+
 	////////////////////////////////
 	////////////////////////////////
 
@@ -335,7 +341,7 @@ class Client {
 		$opt = new Nether\Object\Mapped($opt,[
 			'EOL'    => PHP_EOL,
 			'Prefix' => true,
-			'Width'  => 75
+			'Width'  => static::GetTerminalSize()[1]
 		]);
 
 		////////
@@ -546,6 +552,22 @@ class Client {
 
 	////////////////////////////////
 	////////////////////////////////
+
+	static public function
+	GetTerminalSize():
+	Array {
+	/*//
+	@date 2021-01-04
+	//*/
+
+		$Output = [80,20];
+		$Size = explode(' ',trim(shell_exec('stty size')));
+
+		if($Size && count($Size) >= 2)
+		list($Output[0],$Output[1]) = $Size;
+
+		return $Output;
+	}
 
 	static public function
 	MakeDirectory($dir) {
