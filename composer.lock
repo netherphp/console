@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "424e66e6d0b8a9d5525efe17cec05b00",
+    "content-hash": "e6d30a6c0f6a8a79fa182d99620cbc02",
     "packages": [
         {
             "name": "brick/math",
@@ -111,20 +111,20 @@
         },
         {
             "name": "netherphp/object",
-            "version": "v3.0.11",
+            "version": "v4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netherphp/object.git",
-                "reference": "70913e59f47ae9c704aae361f8b952ea3f6ef819"
+                "reference": "921d5ea5887affe5c96ed95417ec828d338e2937"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netherphp/object/zipball/70913e59f47ae9c704aae361f8b952ea3f6ef819",
-                "reference": "70913e59f47ae9c704aae361f8b952ea3f6ef819",
+                "url": "https://api.github.com/repos/netherphp/object/zipball/921d5ea5887affe5c96ed95417ec828d338e2937",
+                "reference": "921d5ea5887affe5c96ed95417ec828d338e2937",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1.0"
+                "php": ">=8.0"
             },
             "require-dev": {
                 "netherphp/standards": "~0.1.0"
@@ -154,9 +154,9 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/object/issues",
-                "source": "https://github.com/netherphp/object/tree/v3.0.11"
+                "source": "https://github.com/netherphp/object/tree/v4.0.0"
             },
-            "time": "2020-10-22T06:19:01+00:00"
+            "time": "2021-01-06T02:08:20+00:00"
         },
         {
             "name": "psr/http-message",
@@ -1171,7 +1171,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.0"
+        "php": ">=8.0"
     },
     "platform-dev": [],
     "plugin-api-version": "2.0.0"

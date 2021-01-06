@@ -1,8 +1,9 @@
 <?php
 
 namespace Nether\Avenue;
-use \Nether;
-use \Codeception;
+
+use Nether;
+use PHPUnit;
 
 ////////////////////////////////
 ////////////////////////////////
@@ -18,7 +19,7 @@ extends Nether\Console\Client {
 ////////////////////////////////
 ////////////////////////////////
 
-class Console_Test extends \PHPUnit\Framework\TestCase {
+class ConsoleClientTest extends PHPUnit\Framework\TestCase {
 
 	static public function
 	LocalNachoFunction($cli) {
@@ -33,7 +34,8 @@ class Console_Test extends \PHPUnit\Framework\TestCase {
 	////////
 
 	public function
-	SetUp() {
+	SetUp():
+	Void {
 	/*//
 	phpunit test env setup.
 	//*/

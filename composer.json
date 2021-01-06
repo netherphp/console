@@ -10,8 +10,8 @@
 		  "role":"developer" }
 	],
 	"require": {
-		"php": "^8.0",
-		"netherphp/object": "^3.0",
+		"php": ">=8.0",
+		"netherphp/object": ">=4.0.0",
 		"ramsey/uuid": "^4.1",
 		"react/react": "^1.1"
 	},
