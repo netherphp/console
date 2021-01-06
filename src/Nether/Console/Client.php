@@ -1,8 +1,14 @@
 <?php
 
 namespace Nether\Console;
-use \Nether;
-use \Exception;
+
+use Nether;
+
+use Exception;
+use ReflectionClass;
+use ReflectionMethod;
+use ReflectionAttribute;
+use Nether\Object\Datastore;
 
 class Client {
 
@@ -597,12 +603,112 @@ class Client {
 	static public function
 	GetMethodFromCommand($cmd) {
 	/*//
+	@date 2016-02-04
 	//*/
 
 		return sprintf(
 			'Handle%s',
 			str_replace(' ','',ucwords(preg_replace('/[-_]/',' ',strtolower($cmd))))
 		);
+	}
+
+	static public function
+	GetCommandFromMethod(String $Method) {
+	/*//
+	@date 2021-01-05
+	//*/
+
+		$Command = preg_replace('/^Handle/','',$Method);
+		$Command = strtolower(preg_replace('/([a-z0-9])([A-Z])/ms','\\1-\\2',$Command));
+
+		return $Command;
+	}
+
+	static public function
+	GetCommandName():
+	String {
+	/*//
+	@date 2021-01-05
+	//*/
+
+		return basename($_SERVER['PHP_SELF']);
+	}
+
+	////////////////////////////////
+	////////////////////////////////
+
+	#[Nether\Console\Meta\Subcommand]
+	#[Nether\Console\Meta\Info('Displays this help info.')]
+	public function
+	HandleHelp():
+	Int {
+
+		$Command = static::GetCommandName();
+		$Class = new ReflectionClass(static::class);
+		$Methods = NULL;
+		$Lines = [];
+
+
+		// build a list of all the methods that have the subcommand attribute
+		// attached to them to process as console commands.
+
+		$Methods = (
+			(new Datastore($Class->GetMethods()))
+			->Each(
+				fn(ReflectionMethod $Method) =>
+				$Method->Attributes = new Datastore($Method->GetAttributes())
+			)
+			->Filter(
+				fn($Method) =>
+				count($Method->Attributes->Distill(
+					fn(ReflectionAttribute $Attrib) =>
+					$Attrib->GetName() === Nether\Console\Meta\Subcommand::class
+				))
+			)
+			->Each(
+				fn($Method) =>
+				$Method->Attributes->Remap(
+					fn(ReflectionAttribute $A) =>
+					$A->NewInstance()->BuildFromReflection($Method)
+				)
+			)
+		);
+
+		// start compiling the help text.
+
+		$Lines[] = "USAGE: {$Command} <command> <options>";
+		$Lines[] = "";
+
+		$Methods->Each(function($Method) use(&$Lines) {
+			$Subcommand = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\Subcommand)->Revalue()->Get(0);
+			$Info = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\Info)->Revalue()->Get(0);
+			$Args = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\SubcommandArg);
+			$Options = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\SubcommandOption);
+
+			$Option = NULL;
+			$Prefix = "  ";
+
+			// subcommand definition.
+
+			$Lines[] = "{$Prefix}{$Subcommand->GetNameArgsOptions($Args,$Options)}";
+			$Lines[] = ($Info instanceof Meta\Info)?("{$Prefix}{$Info}"):("{$Prefix}No info available.");
+			$Lines[] = "";
+
+			// subcommand option list.
+
+			foreach($Options as $Option) {
+				$Lines[] = "{$Prefix}{$Prefix}{$Option->GetNameValue()}";
+
+				if($Option->GetText())
+				$Lines[] = "{$Prefix}{$Prefix}{$Option->GetText()}";
+
+				$Lines[] = "";
+			}
+			return;
+		});
+
+		static::Messages(...$Lines);
+		return 0;
 	}
 
 }
