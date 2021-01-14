@@ -315,15 +315,43 @@ class Client {
 	////////////////////////////////
 
 	static public function
-	Quit($msg='',$code=0) {
+	Quit(String $Msg='', Int $Code=0) {
 	/*//
 	@argv string Message, int ErrorCode default 0
 	print a message and kill off the application.
 	//*/
 
-		if($msg) echo $msg, PHP_EOL, PHP_EOL;
+		if($Msg === '' && $Code !== 0)
+		$Msg = static::Quit_GetMessageFromAttributes($Code);
 
-		exit($code);
+		if($Msg)
+		echo $Msg, PHP_EOL, PHP_EOL;
+
+		exit($Code);
+		return;
+	}
+
+	static protected function
+	Quit_GetMessageFromAttributes(Int $Code):
+	String {
+
+		$Stack = (new Exception)->GetTrace();
+
+		if(!array_key_exists(2,$Stack))
+		return '';
+
+		$Method = new ReflectionMethod($Stack[2]['class'],$Stack[2]['function']);
+		$Attribs = (
+			(new Datastore($Method->GetAttributes()))
+			->Remap(fn(ReflectionAttribute $Val) => $Val->NewInstance())
+			->Filter(fn(Object $Val) => (($Val instanceof Nether\Console\Meta\Error) && ($Val->GetCode() === $Code)))
+			->Revalue()
+		);
+
+		if($Attribs->Count() === 0)
+		return 'ERROR: Unknown';
+
+		return "ERROR: {$Attribs[0]->GetText()}";
 	}
 
 	////////////////////////////////
