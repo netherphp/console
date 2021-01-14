@@ -354,6 +354,35 @@ class Client {
 		return "ERROR: {$Attribs[0]->GetText()}";
 	}
 
+	static public function
+	EndOfLine(Int $Code=0, Array $Dataset=[]):
+	Void {
+	/*//
+	@date 2021-01-14
+	//*/
+
+		$Message = '';
+		$Key = NULL;
+		$Val = NULL;
+
+		////////
+
+		if($Code !== 0) {
+			$Message = static::Quit_GetMessageFromAttributes($Code);
+
+			foreach($Dataset as $Key => $Val)
+			$Message = str_replace(
+				"{\${$Key}}", $Val,
+				$Message
+			);
+		}
+
+		vprintf($Message,$Dataset);
+		echo PHP_EOL;
+
+		exit($Code);
+	}
+
 	////////////////////////////////
 	////////////////////////////////
 
@@ -704,10 +733,11 @@ class Client {
 
 		// start compiling the help text.
 
-		$Lines[] = "USAGE: {$Command} <command> <options>";
+		$F = new Nether\Console\TerminalFormatter;
+		$Lines[] = "{$F->BoldWhite()}USAGE: {$Command} <command> <options>{$F->Reset()}";
 		$Lines[] = "";
 
-		$Methods->Each(function($Method) use(&$Lines) {
+		$Methods->Each(function($Method) use(&$Lines,&$F) {
 			$Subcommand = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\Subcommand)->Revalue()->Get(0);
 			$Info = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\Info)->Revalue()->Get(0);
 			$Args = $Method->Attributes->Distill(fn($A) => $A instanceof Meta\SubcommandArg);
@@ -716,16 +746,17 @@ class Client {
 			$Option = NULL;
 			$Prefix = "  ";
 
+
 			// subcommand definition.
 
-			$Lines[] = "{$Prefix}{$Subcommand->GetNameArgsOptions($Args,$Options)}";
+			$Lines[] = "{$Prefix}{$F->BoldYellow($Subcommand->GetNameArgsOptions($Args,$Options))}";
 			$Lines[] = ($Info instanceof Meta\Info)?("{$Prefix}{$Info}"):("{$Prefix}No info available.");
 			$Lines[] = "";
 
 			// subcommand option list.
 
 			foreach($Options as $Option) {
-				$Lines[] = "{$Prefix}{$Prefix}{$Option->GetNameValue()}";
+				$Lines[] = "{$Prefix}{$Prefix}{$F->Yellow2($Option->GetNameValue())}";
 
 				if($Option->GetText())
 				$Lines[] = "{$Prefix}{$Prefix}{$Option->GetText()}";
