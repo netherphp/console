@@ -449,9 +449,11 @@ class Client {
 	bin file to see what i mean.
 	//*/
 
+		$Width = static::GetTerminalSize()[0];
+
 		foreach(func_get_args() as $string)
 		static::Message($string,[
-			'Width' => static::GetTerminalSize()[0]
+			'Width' => $Width
 		]);
 	}
 
@@ -629,12 +631,55 @@ class Client {
 	//*/
 
 		$Output = [80,20];
+		$Size = NULL;
 
-		if(PHP_OS === 'Linux') {
-			$Size = explode(' ',trim(shell_exec('stty size')));
+		$Size = match(strtoupper(PHP_OS)) {
+			'LINUX' => static::GetTerminalSize_Linux(),
+			'WINNT' => static::GetTerminalSize_Windows(),
+			default => NULL
+		};
 
-			if($Size && count($Size) >= 2)
-			list($Output[1],$Output[0]) = $Size;
+		if(is_array($Size) && count($Size) === 2)
+		$Output = $Size;
+
+		return $Output;
+	}
+
+	static protected function
+	GetTerminalSize_Linux():
+	?Array {
+	/*//
+	@date 2021-01-14
+	//*/
+
+		$Output = NULL;
+		$Size = explode(' ',trim(shell_exec('stty size')));
+
+		if($Size && count($Size) >= 2)
+		list($Output[1],$Output[0]) = $Size;
+
+		return $Output;
+	}
+
+	static protected function
+	GetTerminalSize_Windows():
+	?Array {
+	/*//
+	@date 2021-01-14
+	//*/
+
+		$Output = NULL;
+		$Result = shell_exec('mode CON');
+		$Match = NULL;
+		$Key = NULL;
+
+		preg_match_all('/([a-z0-9]+):\h+(\d+)/i',$Result,$Match);
+
+		foreach(array_keys($Match[1]) as $Key) {
+			if($Match[1][$Key] === 'Lines')
+			$Output[1] = $Match[2][$Key];
+			elseif($Match[1][$Key] === 'Columns')
+			$Output[0] = $Match[2][$Key];
 		}
 
 		return $Output;
