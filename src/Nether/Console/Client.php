@@ -634,7 +634,7 @@ class Client {
 			$Size = explode(' ',trim(shell_exec('stty size')));
 
 			if($Size && count($Size) >= 2)
-			list($Output[0],$Output[1]) = $Size;
+			list($Output[1],$Output[0]) = $Size;
 		}
 
 		return $Output;
