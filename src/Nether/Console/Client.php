@@ -404,8 +404,11 @@ class Client {
 		$opt = new Nether\Object\Mapped($opt,[
 			'EOL'    => PHP_EOL,
 			'Prefix' => true,
-			'Width'  => static::GetTerminalSize()[1]
+			'Width'  => NULL
 		]);
+
+		if($opt->Width === NULL)
+		$opt->Width = static::GetTerminalSize()[0];
 
 		////////
 		////////
@@ -447,7 +450,9 @@ class Client {
 	//*/
 
 		foreach(func_get_args() as $string)
-		static::Message($string);
+		static::Message($string,[
+			'Width' => static::GetTerminalSize()[0]
+		]);
 	}
 
 	static public function
@@ -624,10 +629,13 @@ class Client {
 	//*/
 
 		$Output = [80,20];
-		$Size = explode(' ',trim(shell_exec('stty size')));
 
-		if($Size && count($Size) >= 2)
-		list($Output[0],$Output[1]) = $Size;
+		if(PHP_OS === 'Linux') {
+			$Size = explode(' ',trim(shell_exec('stty size')));
+
+			if($Size && count($Size) >= 2)
+			list($Output[0],$Output[1]) = $Size;
+		}
 
 		return $Output;
 	}
