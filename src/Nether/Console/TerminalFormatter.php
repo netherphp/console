@@ -23,7 +23,15 @@ class TerminalFormatter {
 		'Magenta' => 35, 'Magenta2' => 95,
 		'Cyan'    => 36, 'Cyan2'    => 96,
 		'Grey'    => 37, 'Grey2'    => 97,
-		'White'   => 97, 'White2'   => 97
+		'White'   => 97, 'White2'   => 97,
+
+		'_Red'     => 41,
+		'_Green'   => 42,
+		'_Yellow'  => 43,
+		'_Blue'    => 44,
+		'_Magenta' => 45,
+		'_Cyan'    => 46,
+		'_White'   => 47
 	];
 
 	public function
@@ -49,7 +57,7 @@ class TerminalFormatter {
 		// digest this function name into codes.
 		// eg. BoldYellow = [Bold, Yellow]
 
-		preg_match_all('/[A-Z][a-z0-9]+/',$Fn,$Codes);
+		preg_match_all('/_?[A-Z][a-z0-9]+/',$Fn,$Codes);
 
 		if(!array_key_exists(0,$Codes))
 		throw new Exception('error handing __call fn name');
