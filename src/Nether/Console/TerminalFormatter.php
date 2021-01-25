@@ -70,6 +70,16 @@ class TerminalFormatter {
 	}
 
 	public function
+	__Get(String $Fn):
+	Mixed {
+	/*//
+	@date 2021-01-25
+	//*/
+
+		return $this->__Call($Fn,[]);
+	}
+
+	public function
 	Sequence(...$Codes):
 	String {
 	/*//
