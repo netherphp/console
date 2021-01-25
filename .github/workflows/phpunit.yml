@@ -19,7 +19,7 @@ jobs:
           coverage: none
           extensions: mbstring, intl
           tools: phpunit
-      - name: Run PHPUnit
-        run: |
-          composer install
-          phpunit tests --bootstrap vendor/autoload.php
+      - name: 🎵🎶
+        run: composer install
+      - name: 🔥🔨
+        run: phpunit tests --bootstrap vendor/autoload.php
