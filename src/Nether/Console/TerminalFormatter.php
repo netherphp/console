@@ -6,7 +6,8 @@ use Exception;
 
 class TerminalFormatter {
 
-	const Codes = [
+	const
+	Codes = [
 		'Reset'     => 0,
 		'Bright'    => 1, 'Bold'      => 1,
 		'Dim'       => 2,
@@ -33,6 +34,12 @@ class TerminalFormatter {
 		'_Cyan'    => 46,
 		'_White'   => 47
 	];
+
+	private
+	Bool $Enabled = TRUE;
+
+	////////
+	////////
 
 	public function
 	__Construct() {
@@ -106,10 +113,18 @@ class TerminalFormatter {
 		return $this->__Call($Fn,[]);
 	}
 
-	////////
-	////////
+	public function
+	__Set(String $Fn):
+	Mixed {
+	/*//
+	@date 2021-01-26
+	//*/
 
-	private Bool $Enabled = TRUE;
+		return NULL;
+	}
+
+	////////
+	////////
 
 	public function
 	Enable(Bool $Enabled):
