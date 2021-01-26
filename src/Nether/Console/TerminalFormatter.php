@@ -127,7 +127,7 @@ class TerminalFormatter {
 	////////
 
 	public function
-	Enable(Bool $Enabled):
+	Enable(Bool $Enabled=TRUE):
 	static {
 	/*//
 	@date 2021-01-26
@@ -135,6 +135,16 @@ class TerminalFormatter {
 
 		$this->Enabled = $Enabled;
 		return $this;
+	}
+
+	public function
+	Disable():
+	static {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		return $this->Enable(FALSE);
 	}
 
 	public function
