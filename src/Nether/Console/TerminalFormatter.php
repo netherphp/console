@@ -35,6 +35,25 @@ class TerminalFormatter {
 	];
 
 	public function
+	__Construct() {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		// most use cases are in terminal apps being used so we will
+		// use this as a means to enable or disable the formatter by
+		// default. if it looks like we are in a terminal we will
+		// enable the escape sequences.
+
+		// this will make it so piping or redirecting output will not
+		// send the colour codes to the files.
+
+		$this->Enabled = stream_isatty(STDOUT);
+
+		return;
+	}
+
+	public function
 	__Invoke(...$Codes):
 	String {
 	/*//
@@ -87,6 +106,35 @@ class TerminalFormatter {
 		return $this->__Call($Fn,[]);
 	}
 
+	////////
+	////////
+
+	private Bool $Enabled = TRUE;
+
+	public function
+	Enable(Bool $Enabled):
+	static {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		$this->Enabled = $Enabled;
+		return $this;
+	}
+
+	public function
+	IsEnabled():
+	Bool {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		return $this->Enabled;
+	}
+
+	////////
+	////////
+
 	public function
 	Sequence(...$Codes):
 	String {
@@ -94,8 +142,12 @@ class TerminalFormatter {
 	@date 2021-01-14
 	//*/
 
-		$Output = '';
 		$Code = NULL;
+
+		if(!$this->Enabled)
+		return '';
+
+		////////
 
 		if(!count($Codes))
 		$Codes[] = 'Reset';
