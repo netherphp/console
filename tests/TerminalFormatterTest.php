@@ -39,6 +39,19 @@ extends PHPUnit\Framework\TestCase {
 @date 2021-01-23
 //*/
 
+	static public function
+	NewFormatter():
+	TerminalFormatter {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		return (
+			(new TerminalFormatter)
+			->Enable(TRUE)
+		);
+	}
+
 	/** @test */
 	public function
 	TestCheckFormatterErrorCheck() {
@@ -67,7 +80,7 @@ extends PHPUnit\Framework\TestCase {
 	@date 2021-01-23
 	//*/
 
-		$F = new TerminalFormatter;
+		$F = static::NewFormatter();
 		$Method = NULL;
 		$Test = NULL;
 
