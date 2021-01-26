@@ -110,7 +110,7 @@ extends PHPUnit\Framework\TestCase {
 		$this->AssertTrue(
 			$Test($F->{$Method}()),
 			sprintf(
-				"{$Method} {$Test} %s",
+				"Method({$Method}, {$Test}) Result(%s)",
 				filter_var(
 					$Test->Result,
 					FILTER_SANITIZE_ENCODED,
@@ -123,7 +123,7 @@ extends PHPUnit\Framework\TestCase {
 		$this->AssertTrue(
 			$Test($F->{$Method}($Method)),
 			sprintf(
-				"{$Method} {$Test} %s",
+				"Method({$Method}, {$Test}) Result(%s)",
 				filter_var(
 					$Test->Result,
 					FILTER_SANITIZE_ENCODED,
