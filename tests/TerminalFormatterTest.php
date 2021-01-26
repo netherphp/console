@@ -297,6 +297,40 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
+	TestSequencesWithInvalidBits():
+	Void {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		$F = static::NewFormatter();
+		$Want = "\e[31m";
+
+		$this->AssertTrue(
+			($F->Red === $Want),
+			'basic valid sequence'
+		);
+
+		$this->AssertTrue(
+			($F->Rip === ''),
+			'basic invalid sequence'
+		);
+
+		$this->AssertTrue(
+			($F->RedRip === $Want),
+			'partial invalid sequence'
+		);
+
+		$this->AssertTrue(
+			($F->RipRed === $Want),
+			'partial invalid sequence'
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
 	TestEnablerToggle() {
 	/*//
 	@date 2021-01-26

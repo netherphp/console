@@ -168,6 +168,7 @@ class TerminalFormatter {
 	//*/
 
 		$Code = NULL;
+		$Final = [];
 
 		if(!$this->Enabled)
 		return '';
@@ -177,11 +178,14 @@ class TerminalFormatter {
 		if(!count($Codes))
 		$Codes[] = 'Reset';
 
-		foreach($Codes as &$Code)
+		foreach($Codes as $Code)
 		if(array_key_exists($Code,static::Codes))
-		$Code = static::Codes[$Code];
+		$Final[] = static::Codes[$Code];
 
-		return sprintf("\e[%sm",join(';',$Codes));
+		if(!count($Final))
+		return '';
+
+		return sprintf("\e[%sm",join(';',$Final));
 	}
 
 }
