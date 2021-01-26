@@ -11,6 +11,9 @@ use Nether\Console\TerminalFormatter;
 
 class FormatterErrorCheck
 implements Stringable {
+/*//
+@date 2021-01-23
+//*/
 
 	public String $Expect;
 	public String $Message;
@@ -52,9 +55,24 @@ extends PHPUnit\Framework\TestCase {
 		);
 	}
 
+	static public function
+	Escapify(String $Input):
+	String {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		return filter_var(
+			$Input,
+			FILTER_SANITIZE_ENCODED,
+			['flags'=>FILTER_FLAG_ENCODE_LOW]
+		);
+	}
+
 	/** @test */
 	public function
-	TestCheckFormatterErrorCheck() {
+	TestCheckFormatterErrorCheck():
+	Void {
 	/*//
 	@date 2021-01-23
 	//*/
@@ -75,7 +93,7 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
-	TestBasicFormatterSequences() {
+	TestMagicInvokeSingleSequence() {
 	/*//
 	@date 2021-01-23
 	//*/
@@ -99,6 +117,36 @@ extends PHPUnit\Framework\TestCase {
 			)
 		];
 
+		////////
+
+		// using assert true beacuse assert equals will dump
+		// a diff of the values and break your terminal lol.
+
+		foreach($TestSingle as $Method => $Test)
+		$this->AssertTrue(
+			$Test($F->{$Method}()),
+			sprintf(
+				'Method(%s, %s) Result(%s)',
+				$Method,
+				$Test,
+				static::Escapify($Test->Result)
+			)
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestMagicInvokeWrappedSequence() {
+	/*//
+	@date 2021-01-23
+	//*/
+
+		$F = static::NewFormatter();
+		$Method = NULL;
+		$Test = NULL;
+
 		$TestWrapped = [
 			'Yellow' => new FormatterErrorCheck(
 				"\e[33mYellow\e[0m",
@@ -119,30 +167,88 @@ extends PHPUnit\Framework\TestCase {
 		// using assert true beacuse assert equals will dump
 		// a diff of the values and break your terminal lol.
 
-		foreach($TestSingle as $Method => $Test)
-		$this->AssertTrue(
-			$Test($F->{$Method}()),
-			sprintf(
-				"Method({$Method}, {$Test}) Result(%s)",
-				filter_var(
-					$Test->Result,
-					FILTER_SANITIZE_ENCODED,
-					['flags'=>FILTER_FLAG_ENCODE_LOW]
-				)
-			)
-		);
-
 		foreach($TestWrapped as $Method => $Test)
 		$this->AssertTrue(
 			$Test($F->{$Method}($Method)),
 			sprintf(
 				"Method({$Method}, {$Test}) Result(%s)",
-				filter_var(
-					$Test->Result,
-					FILTER_SANITIZE_ENCODED,
-					['flags'=>FILTER_FLAG_ENCODE_LOW]
-				)
+				static::Escapify($Test->Result)
 			)
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestMagicGetSingleSequence() {
+	/*//
+	@date 2021-01-23
+	//*/
+
+		$F = static::NewFormatter();
+		$Prop = NULL;
+		$Test = NULL;
+
+		$TestSingle = [
+			'Red' => new FormatterErrorCheck(
+				"\e[31m",
+				'expected \e[31m'
+			),
+			'White_Red' => new FormatterErrorCheck(
+				"\e[97;41m",
+				'expected \e[97;41m'
+			),
+			'BrightWhiteUnderline_Red' => new FormatterErrorCheck(
+				"\e[1;97;4;41m",
+				'expected \e[1;97;4;41m'
+			)
+		];
+
+		////////
+
+		// using assert true beacuse assert equals will dump
+		// a diff of the values and break your terminal lol.
+
+		foreach($TestSingle as $Prop => $Test)
+		$this->AssertTrue(
+			$Test($F->{$Prop}),
+			sprintf(
+				'Property(%s, %s) Result(%s)',
+				$Prop,
+				$Test,
+				static::Escapify($Test->Result)
+			)
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestEnablerToggle() {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		$F = static::NewFormatter();
+
+		$F->Enable(TRUE);
+		$this->AssertTrue($F->IsEnabled());
+
+		$F->Enable(FALSE);
+		$this->AssertFalse($F->IsEnabled());
+
+		$F->Enable();
+		$this->AssertTrue(
+			($F->Red() !== ''),
+			'formatter did not get enabled'
+		);
+
+		$F->Disable();
+		$this->AssertTrue(
+			($F->Red() === ''),
+			'formatter did not get disabled'
 		);
 
 		return;
