@@ -114,7 +114,7 @@ class TerminalFormatter {
 	}
 
 	public function
-	__Set(String $Fn):
+	__Set(String $Fn, Mixed $Vz):
 	Mixed {
 	/*//
 	@date 2021-01-26
