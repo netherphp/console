@@ -226,6 +226,77 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
+	TestSequenceOrderAgnosticfulness() {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		$F = static::NewFormatter();
+		$Prop = NULL;
+		$Test = NULL;
+
+		$TestSingle = [
+			'BrightWhiteUnderline_Red' => new FormatterErrorCheck(
+				"\e[1;97;4;41m",
+				'expected \e[1;97;4;41m'
+			),
+			'BrightWhite_RedUnderline' => new FormatterErrorCheck(
+				"\e[1;97;41;4m",
+				'expected \e[1;97;41;4m'
+			),
+			'Bright_RedWhiteUnderline' => new FormatterErrorCheck(
+				"\e[1;41;97;4m",
+				'expected \e[1;41;97;4m'
+			),
+			'_RedBrightWhiteUnderline' => new FormatterErrorCheck(
+				"\e[41;1;97;4m",
+				'expected \e[41;1;97;4m'
+			)
+		];
+
+		////////
+
+		// using assert true beacuse assert equals will dump
+		// a diff of the values and break your terminal lol.
+
+		foreach($TestSingle as $Prop => $Test)
+		$this->AssertTrue(
+			$Test($F->{$Prop}),
+			sprintf(
+				'Property(%s, %s) Result(%s)',
+				$Prop,
+				$Test,
+				static::Escapify($Test->Result)
+			)
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestMagicReaderConsistency():
+	Void {
+	/*//
+	@date 2021-01-26
+	//*/
+
+		$F = static::NewFormatter();
+
+		$this->AssertTrue(
+			(
+				($F->Sequence('Bright','Cyan') === $F->BrightCyan)
+				&& ($F->Sequence('Bright','Cyan') === $F->BrightCyan())
+				&& ($F->BrightCyan === $F->BrightCyan())
+			),
+			'the triangle was not complete'
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
 	TestEnablerToggle() {
 	/*//
 	@date 2021-01-26
