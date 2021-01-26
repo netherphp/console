@@ -115,12 +115,12 @@ class TerminalFormatter {
 
 	public function
 	__Set(String $Fn, Mixed $Vz):
-	Mixed {
+	Void {
 	/*//
 	@date 2021-01-26
 	//*/
 
-		return NULL;
+		return;
 	}
 
 	////////
