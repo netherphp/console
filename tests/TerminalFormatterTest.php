@@ -14,6 +14,7 @@ implements Stringable {
 
 	public String $Expect;
 	public String $Message;
+	public String $Result;
 
 	public function
 	__Construct(String $Expect, String $Message) {
@@ -28,7 +29,7 @@ implements Stringable {
 
 	public function
 	__Invoke(String $Result):
-	Bool { return ($Result === $this->Expect); }
+	Bool { return (($this->Result = $Result) === $this->Expect); }
 
 };
 
@@ -108,13 +109,27 @@ extends PHPUnit\Framework\TestCase {
 		foreach($TestSingle as $Method => $Test)
 		$this->AssertTrue(
 			$Test($F->{$Method}()),
-			"{$Method} {$Test}"
+			sprintf(
+				"{$Method} {$Test} %s",
+				filter_var(
+					$Test->Result,
+					FILTER_SANITIZE_ENCODED,
+					['flags'=>FILTER_FLAG_ENCODE_LOW]
+				)
+			)
 		);
 
 		foreach($TestWrapped as $Method => $Test)
 		$this->AssertTrue(
 			$Test($F->{$Method}($Method)),
-			"{$Method} {$Test}"
+			sprintf(
+				"{$Method} {$Test} %s",
+				filter_var(
+					$Test->Result,
+					FILTER_SANITIZE_ENCODED,
+					['flags'=>FILTER_FLAG_ENCODE_LOW]
+				)
+			)
 		);
 
 		return;
