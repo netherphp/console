@@ -4,6 +4,7 @@ namespace Nether\Console;
 
 use Nether;
 
+use Closure;
 use Exception;
 use ReflectionClass;
 use ReflectionMethod;
@@ -12,55 +13,42 @@ use Nether\Object\Datastore;
 
 class Client {
 
-	const ErrorNoInput = -1;
-	const ErrorNoHandler = -2;
+	const
+	ErrorNoInput   = -1,
+	ErrorNoHandler = -2;
 
 	////////
 	////////
 
-	protected $Inputs;
-	/*//
-	@type array
-	a list of non-switched arguments that were found.
-	//*/
-
-	protected $Options;
-	/*//
-	@type array
-	a list of switched arguments that were found.
-	//*/
-
-	protected $DefaultHandlerName = 'help';
-	/*//
-	@type string
-	the name of the default handler if no input is given.
-	//*/
-
-	protected $Handlers = [];
-	/*//
-	@type array
-	a list of callables for handling input.
-	//*/
+	protected
+	Array $Inputs;
 
 	protected
-	$ChainCommands = FALSE;
-	/*//
-	@type Bool
-	if we should process commands until we run out, or just the first one that
-	we encounter.
-	//*/
+	Array $Options;
 
 	protected
-	$Cols = 80;
+	String $DefaultHandlerName = 'help';
 
 	protected
-	$Rows = 20;
+	Array $Handlers = [];
+
+	protected
+	Bool $ChainCommands = FALSE;
+
+	protected
+	Int $Cols = 80;
+
+	protected
+	Int $Rows = 20;
 
 	////////////////////////////////
 	////////////////////////////////
 
 	public function
 	__Construct($Opt=NULL) {
+	/*//
+	@date 2016-02-03
+	//*/
 
 		if(!array_key_exists('argv',$_SERVER))
 		throw new Exception('register_argc_argv must be enabled');
@@ -92,21 +80,25 @@ class Client {
 	////////////////////////////////
 
 	public function
-	GetInput($offset) {
+	GetInput(Int $Offset) {
 	/*//
+	@date 2016-02-03
 	fetch the specified input value by offset. if you want the 1st input then
 	you will ask for 1. we will zero-pwn it internally.
 	//*/
 
-		--$offset;
+		--$Offset;
 
-		if(!array_key_exists($offset,$this->Inputs)) return NULL;
-		else return $this->Inputs[$offset];
+		if(!array_key_exists($Offset,$this->Inputs))
+		return NULL;
+
+		return $this->Inputs[$Offset];
 	}
 
 	public function
 	GetInputs() {
 	/*//
+	@date 2016-02-03
 	hand off the entire input array.
 	//*/
 
@@ -114,8 +106,9 @@ class Client {
 	}
 
 	public function
-	GetOption($Name) {
+	GetOption(String $Name) {
 	/*//
+	@date 2016-02-03
 	fetch the specified option input value by name. if the name is longer than
 	one character then we check case insensitive.
 	//*/
@@ -132,6 +125,7 @@ class Client {
 	public function
 	GetOptions() {
 	/*//
+	@date 2016-02-03
 	hand off the entire option array.
 	//*/
 
@@ -145,7 +139,7 @@ class Client {
 	WillChainCommands():
 	Bool {
 	/*//
-	@get ->ChainCommands
+	@date 2016-11-15
 	//*/
 
 		return $this->ChainCommands;
@@ -155,7 +149,7 @@ class Client {
 	SetChainCommands(Bool $State):
 	self {
 	/*//
-	@set ->ChainCommands
+	@date 2016-11-15
 	//*/
 
 		$this->ChainCommands = $State;
@@ -166,22 +160,22 @@ class Client {
 	////////////////////////////////
 
 	public function
-	SetHandler($cmd, callable $func) {
+	SetHandler(String $Cmd, Callable $Func) {
 	/*//
-	@argv string HandlerName, callable HandlerFunc
+	@date 2016-02-03
 	//*/
 
-		$this->Handlers[$cmd] = $func;
+		$this->Handlers[$Cmd] = $Func;
 		return $this;
 	}
 
 	public function
-	SetDefaultHandlerName($cmd) {
+	SetDefaultHandlerName(String $Cmd) {
 	/*//
-	@argv string HandlerName
+	@date 2016-02-03
 	//*/
 
-		$this->DefaultHandlerName = $cmd;
+		$this->DefaultHandlerName = $Cmd;
 		return $this;
 	}
 
@@ -189,71 +183,62 @@ class Client {
 	////////////////////////////////
 
 	public function
-	Run($cmd=null) {
+	Run(Mixed $Cmd=null):
+	Mixed {
 	/*//
-	@argv string HandlerName
-	@argv array CommandArgumentList
-
-	if given a string it will execute the handler defined under as that name.
-	if given an array then it will process that array as though it was the
-	_SERVER['argv'] data and execute as if that was the original command line
-	given to the object creation.
+	@date 2016-02-03
 	//*/
 
-		$restore = false;
-		$return = 0;
+		$Restore = false;
+		$Return = 0;
 
 		////////
-		////////
 
-		if(is_array($cmd)) {
+		if(is_array($Cmd)) {
 			// rewrite our input and option data with this subcommand
 			// that was given to us. execute as though this array defined
 			// the original command input.
 
-			$restore = [ 'Inputs'=>$this->Inputs, 'Options'=>$this->Options ];
+			$Restore = [ 'Inputs'=>$this->Inputs, 'Options'=>$this->Options ];
 
-			$data = static::ParseCommandArgs($cmd,false);
-			$this->Inputs = $data['Inputs'];
-			$this->Options = $data['Options'];
+			$Data = static::ParseCommandArgs($Cmd,false);
+			$this->Inputs = $Data['Inputs'];
+			$this->Options = $Data['Options'];
 
-			$cmd = $this->GetInputs();
+			$Cmd = $this->GetInputs();
 		}
 
 		////////
-		////////
 
-		if(!$cmd && !($cmd = $this->GetInput(1))) {
+		if(!$Cmd && !($Cmd = $this->GetInput(1))) {
 			if(!$this->DefaultHandlerName) {
-				echo "No input provided.", PHP_EOL;
+				static::Message('no input provided');
 				return static::ErrorNoInput;
-
 			}
 
-			$cmd = [$this->DefaultHandlerName];
+			$Cmd = [$this->DefaultHandlerName];
 		}
 
 		else {
-			$cmd = $this->GetInputs();
+			$Cmd = $this->GetInputs();
 		}
 
-		////////
 		////////
 
 		$Commanded = FALSE;
 
-		foreach($cmd as $cur) {
-			$method = static::GetMethodFromCommand($cur);
+		foreach($Cmd as $Cur) {
+			$Method = static::GetMethodFromCommand($Cur);
 			try {
-				$return = $this->Run_ByMethod($method);
+				$Return = $this->Run_ByMethod($Method);
 				$Commanded = TRUE;
 			}
-			catch(ClientHandlerException $e) {
+			catch(ClientHandlerException) {
 				try {
-					$return = $this->Run_ByCallable($cur);
+					$Return = $this->Run_ByCallable($Cur);
 					$Commanded = TRUE;
 				}
-				catch(ClientHandlerException $e) { }
+				catch(ClientHandlerException) { }
 			}
 
 			if($Commanded && !$this->ChainCommands)
@@ -261,62 +246,68 @@ class Client {
 		}
 
 		if(!$Commanded) {
-			echo "no handler or method found for {$cur}", PHP_EOL;
+			echo "no handler or method found for {$Cur}", PHP_EOL;
 			return static::ErrorNoHandler;
 		}
 
 		////////
-		////////
 
-		if($restore) {
+		if($Restore) {
 			// restore the original input data before continuing on so that
 			// we could continue processing the cli input data if needed.
-			$this->Inputs = $restore['Inputs'];
-			$this->Options = $restore['Options'];
+			$this->Inputs = $Restore['Inputs'];
+			$this->Options = $Restore['Options'];
 		}
 
-		return $return;
+		return $Return;
 	}
 
 	protected function
-	Run_ByCallable($cmd) {
+	Run_ByCallable(String $Cmd):
+	Mixed {
 	/*//
+	@date 2016-02-03
 	//*/
 
-		if(!array_key_exists($cmd,$this->Handlers))
-		throw new ClientHandlerException("no handler found {$cmd}");
+		if(!array_key_exists($Cmd,$this->Handlers))
+		throw new ClientHandlerException("no handler found {$Cmd}");
 
-		if($this->Handlers[$cmd] instanceof \Closure) {
-			$closure = $this->Handlers[$cmd]->BindTo($this);
-			return $closure();
-			unset($closure);
+		if(!is_callable($this->Handlers[$Cmd]))
+		throw new ClientHandlerException("handler {$Cmd} is not callable");
 
-			// the php70 version of the above.
-			// return $this->Handlers[$cmd]->Call($this);
-		} else {
-			return call_user_func(function($cli,$func){
-				return $func($cli);
-			},$this,$this->Handlers[$cmd]);
-		}
+		////////
+
+		if($this->Handlers[$Cmd] instanceof Closure)
+		return ($this->Handlers[$Cmd]->BindTo($this))();
+
+		return call_user_func(
+			(fn(Client $Client, Callable $Func) => $Func($Client)),
+			$this,
+			$this->Handlers[$Cmd]
+		);
 	}
 
 	protected function
-	Run_ByMethod($method) {
+	Run_ByMethod(String $Method):
+	Mixed {
 	/*//
+	@date 2016-02-03
 	//*/
 
-		if(!method_exists($this,$method))
-		throw new ClientHandlerException("no method found {$method}");
+		if(!method_exists($this,$Method))
+		throw new ClientHandlerException("no method found {$Method}");
 
-		return call_user_func([$this,$method]);
+		return call_user_func([$this,$Method]);
 	}
 
 	////////////////////////////////
 	////////////////////////////////
 
 	static public function
-	Quit(String $Msg='', Int $Code=0) {
+	Quit(String $Msg='', Int $Code=0):
+	Void {
 	/*//
+	@date 2021-01-26
 	@argv string Message, int ErrorCode default 0
 	print a message and kill off the application.
 	//*/
@@ -359,6 +350,8 @@ class Client {
 	Void {
 	/*//
 	@date 2021-01-14
+	quit the app using just an error code. error messages will be fetched
+	from the method attributes.
 	//*/
 
 		$Message = '';
@@ -387,9 +380,9 @@ class Client {
 	////////////////////////////////
 
 	static public function
-	Message($msg='',$opt=null) {
+	Message(String $Msg='', Array|Object $Opt=NULL) {
 	/*//
-	@argv string Message, object Options
+	@date 2016-02-03
 
 	print a string to the terminal, automatically doing line wrapping. if the
 	string has a prefix of white space, then that prefix will be appended
@@ -401,41 +394,39 @@ class Client {
 	if was a string to start with, then we will just use that prefix.
 	//*/
 
-		$opt = new Nether\Object\Mapped($opt,[
+		$Opt = new Nether\Object\Mapped($Opt,[
 			'EOL'    => PHP_EOL,
-			'Prefix' => true,
+			'Prefix' => TRUE,
 			'Width'  => NULL
 		]);
 
-		if($opt->Width === NULL)
-		$opt->Width = static::GetTerminalSize()[0];
+		if($Opt->Width === NULL)
+		$Opt->Width = static::GetTerminalSize()[0];
 
-		////////
 		////////
 
 		// scoop a prefix off the start of the string.
-		if($opt->Prefix === true)
-		$opt->Prefix = preg_replace('/^([\s]*).*?$/','\1',$msg);
+		if($Opt->Prefix === TRUE)
+		$Opt->Prefix = preg_replace('/^([\s]*).*?$/','\1',$Msg);
 
 		////////
-		////////
-		if($opt->Width) {
+
+		if($Opt->Width) {
 			// consider the prefix length.
-			$opt->Width -= strlen($opt->Prefix);
+			$Opt->Width -= strlen($Opt->Prefix);
 
 			// wrap the text.
-			$msg = wordwrap($msg,$opt->Width,$opt->EOL);
+			$Msg = wordwrap($Msg,$Opt->Width,$Opt->EOL);
 		}
 
 		// apply the prefix.
-		$lines = explode($opt->EOL,$msg);
-		foreach($lines as $k => $v) $lines[$k] = sprintf(
-			'%s%s',
-			$opt->Prefix,
-			ltrim($v)
-		);
 
-		echo implode($opt->EOL,$lines), $opt->EOL;
+		$Lines = explode($Opt->EOL,$Msg);
+
+		foreach($Lines as &$Line)
+		$Line = sprintf('%s%s', $Opt->Prefix, ltrim($Line));
+
+		echo implode($Opt->EOL,$Lines), $Opt->EOL;
 		return;
 	}
 
@@ -450,31 +441,33 @@ class Client {
 	//*/
 
 		$Width = static::GetTerminalSize()[0];
+		$String = NULL;
 
-		foreach(func_get_args() as $string)
-		static::Message($string,[
+		foreach(func_get_args() as $String)
+		static::Message($String,[
 			'Width' => $Width
 		]);
 	}
 
 	static public function
-	PrintLine($msg='',$opt=null) {
+	PrintLine(String $Msg='', Array|Object $Opt=null) {
 	/*//
-	@arg string Input, ...
+	@date 2016-02-03
 	consider this an alias of Message with line wrapping disabled by default.
 	//*/
 
-		$opt = new Nether\Object\Mapped($opt,[
-			'Width' => false
+		$Opt = new Nether\Object\Mapped($Opt,[
+			'Width' => FALSE
 		]);
 
-		return static::Message($msg,$opt);
+		return static::Message($Msg,$Opt);
 	}
 
 	static public function
 	Prompt(?String $Msg=NULL, ?String $Prompt=NULL):
 	String {
 	/*//
+	@date 2016-08-11
 	ask the user a question and await a response.
 	//*/
 
@@ -494,6 +487,7 @@ class Client {
 	PromptEquals(?String $Msg=NULL, ?String $Prompt=NULL, String $Condition):
 	Bool {
 	/*//
+	@date 2016-08-11
 	ask the user a question, and check that their response is a match in a
 	case insensitive way, since this will mostly be used for y/n questions.
 	//*/
@@ -505,8 +499,11 @@ class Client {
 	////////////////////////////////
 
 	static public function
-	ParseCommandArgs($data,$skipfirst=false) {
+	ParseCommandArgs(Array $Data, Bool $SkipFirst=FALSE):
+	Array {
 	/*//
+	@date 2016-02-03
+
 	parse the command line into digestable components. we got lucky in that
 	php already handled breaking up the command line statement into nice
 	chunks, handling quotes and tokens and all that stuff. this means we
@@ -514,30 +511,29 @@ class Client {
 	also means we can reuse this fact later when we want to override what the
 	command line was with our own commands.
 
-	$data[ 'filename', 'input1', 'input2', 'input3', '--someopt=with a value' ]
+	$Data[ 'filename', 'input1', 'input2', 'input3', '--someopt=with a value' ]
 	//*/
 
-		$output = [ 'Inputs'=>[], 'Options'=>[] ];
-		$option = null;
+		$Output = [ 'Inputs'=>[], 'Options'=>[] ];
+		$Option = NULL;
 
-		foreach($data as $key => $segment) {
-			if($key === 0 && $skipfirst) continue;
+		foreach($Data as $Key => $Segment) {
+			if($Key === 0 && $SkipFirst)
+			continue;
 
-			if($option = static::ParseCommandOption($segment)) {
-				$output['Options'] = array_merge(
-					$output['Options'],
-					$option
-				);
-			} else {
-				$output['Inputs'][] = $segment;
-			}
+			if($Option = static::ParseCommandOption($Segment))
+			$Output['Options'] = array_merge($Output['Options'], $Option);
+
+			else
+			$Output['Inputs'][] = $Segment;
 		}
 
-		return $output;
+		return $Output;
 	}
 
 	static public function
-	ParseCommandOption($input) {
+	ParseCommandOption(String $Input):
+	?Array {
 	/*//
 	@argv string Input
 	@return array or false
@@ -552,24 +548,30 @@ class Client {
 	returns an assoc array if we identified an option, else returns false.
 	//*/
 
-		if(preg_match('/^(-{1,2})/',$input,$m)) {
-			if($m[1] === '--')
-			return static::ParseCommandOption_LongForm($input);
+		$Match = NULL;
 
-			elseif($m[1] === '-')
-			return static::ParseCommandOption_ShortForm($input);
+		if(preg_match('/^(-{1,2})/',$Input,$Match)) {
+			if($Match[1] === '--')
+			return static::ParseCommandOption_LongForm($Input);
+
+			elseif($Match[1] === '-')
+			return static::ParseCommandOption_ShortForm($Input);
 		}
 
-		return false;
+		return NULL;
 	}
 
 	static protected function
-	ParseCommandOption_LongForm($Input) {
+	ParseCommandOption_LongForm(String $Input):
+	?Array {
 	/*//
+	@date 2021-02-03
 	parse the long option form of --option=value. options which are one char
 	long are kept case sensitive. options longer than one char are made case
 	insensitive.
 	//*/
+
+		$Output = [];
 
 		$Opt = explode('=',$Input,2);
 		$Opt[0] = ltrim($Opt[0],'-');
@@ -592,32 +594,43 @@ class Client {
 	}
 
 	static protected function
-	ParseCommandOption_ShortForm($input) {
+	ParseCommandOption_ShortForm(String $Input):
+	?Array {
 	/*//
+	@date 2021-02-03
 	parse the short option form of -zomg=bbq (-z -o -m -g=bbq). short form
 	are always one character long and therefore kept case sensitive.
 	//*/
 
-
-		$output = [];
-		$value = false;
-		$opt = explode('=',ltrim($input,'-'),2);
+		$Output = [];
+		$Value = FALSE;
+		$Opt = explode('=',ltrim($Input,'-'),2);
 
 		// figure out what the last value was.
-		if(count($opt) === 2) $value = trim($opt[1]);
-		else $value = true;
+
+		if(count($Opt) === 2)
+		$Value = trim($Opt[1]);
+
+		else
+		$Value = TRUE;
 
 		// break the options apart setting them true.
-		foreach(str_split($opt[0]) as $letter)
-		$output[$letter] = true;
+
+		foreach(str_split($Opt[0]) as $Letter)
+		$Output[$Letter] = TRUE;
 
 		// if the parsing did not really work send false out.
-		if(!count($output)) return false;
+
+		if(!count($Output))
+		return NULL;
 
 		// then write the optional value to the last argument.
-		end($output); $output[key($output)] = $value; reset($output);
 
-		return $output;
+		end($Output);
+		$Output[key($Output)] = $Value;
+		reset($Output);
+
+		return $Output;
 	}
 
 	////////////////////////////////
@@ -686,44 +699,57 @@ class Client {
 	}
 
 	static public function
-	MakeDirectory($dir) {
+	MakeDirectory(String $Dir):
+	Bool {
 	/*//
-	@argv string Directory
-	@return bool
-
+	@date 2016-02-03
 	make a directory. returns if successful or not. allows you to
 	blindly call it if it already exists to ensure it exists.
 	//*/
 
 		// if it already exists...
-		if(is_dir($dir)) return true;
+
+		if(is_dir($Dir))
+		return TRUE;
 
 		// make it...
-		$umask = umask(0);
-		@mkdir($dir,0777,true);
-		umask($umask);
+
+		if(php_sapi_name() === 'cli') {
+			$Mask = umask(0);
+			@mkdir($Dir,0777,true);
+			umask($Mask);
+		}
+
+		else
+		@mkdir($Dir,0777,true);
 
 		// find out if it was successful, lol.
-		return is_dir($dir);
+
+		return is_dir($Dir);
 	}
 
 	////////////////////////////////
 	////////////////////////////////
 
 	static public function
-	GetMethodFromCommand($cmd) {
+	GetMethodFromCommand(String $Cmd):
+	String {
 	/*//
 	@date 2016-02-04
 	//*/
 
 		return sprintf(
 			'Handle%s',
-			str_replace(' ','',ucwords(preg_replace('/[-_]/',' ',strtolower($cmd))))
+			str_replace(' ','',ucwords(preg_replace(
+				'/[-_]/', ' ',
+				strtolower($Cmd)
+			)))
 		);
 	}
 
 	static public function
-	GetCommandFromMethod(String $Method) {
+	GetCommandFromMethod(String $Method):
+	String {
 	/*//
 	@date 2021-01-05
 	//*/
@@ -752,12 +778,14 @@ class Client {
 	public function
 	HandleHelp():
 	Int {
+	/*//
+	@date 2021-01-05
+	//*/
 
 		$Command = static::GetCommandName();
 		$Class = new ReflectionClass(static::class);
 		$Methods = NULL;
 		$Lines = [];
-
 
 		// build a list of all the methods that have the subcommand attribute
 		// attached to them to process as console commands.

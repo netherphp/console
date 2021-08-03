@@ -80,7 +80,7 @@ class ConsoleClientTest extends PHPUnit\Framework\TestCase {
 	parses as valid option switches.
 	//*/
 
-		$this->AssertFalse(
+		$this->AssertNull(
 			Nether\Console\Client::ParseCommandOption('onlytest')
 		);
 
