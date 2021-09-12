@@ -65,6 +65,9 @@ intended use case:
 	@type String
 	//*/
 
+	protected int
+	$PulseFreq = 30;
+
 	public function
 	__Construct($Opt=NULL) {
 	/*//
@@ -177,8 +180,15 @@ intended use case:
 		// that were still pending.
 
 		($this->Loop)
-		->AddPeriodicTimer(60,function(){
-			$this->PrintLn('Heartbeat');
+		->AddTimer(0.25,function(){
+			$this->PrintLn('Queue Init');
+			$this->QueueKick();
+			return;
+		});
+
+		($this->Loop)
+		->AddPeriodicTimer($this->PulseFreq,function(){
+			$this->PrintLn('Queue Heartbeat');
 			$this->QueueKick();
 			return;
 		});
@@ -425,7 +435,7 @@ intended use case:
 	////////////////////////////////////////////////////////////////
 
 	public function
-	QueuePush($Entry):
+	QueuePush(mixed $Entry, int $TimeTodo=0):
 	void {
 	/*//
 	@date 2020-06-23
@@ -436,6 +446,7 @@ intended use case:
 
 		$Job = new ServerJob;
 		$Job->Entry = $Entry;
+		$Job->TimeTodo = $TimeTodo;
 
 		($this->Queue)
 		->Push($Job)
@@ -461,8 +472,15 @@ intended use case:
 	swipe the next job off the top of the todo list.
 	//*/
 
-		$Job = $this->Queue->Shift();
-		$this->Queue->Write();
+		$Job = (
+			($this->Queue)
+			->Distill(fn(ServerJob $A)=> ($A->TimeTodo <= time()))
+			->Shift()
+		);
+
+		($this->Queue)
+		->Filter(fn(ServerJob $A)=> $A !== $Job)
+		->Write();
 
 		return $Job;
 	}

@@ -2,37 +2,45 @@
 
 namespace Nether\Console\Queue;
 
-use \Ramsey as Ramsey;
+use Ramsey;
+use Nether;
 
-class ServerJob {
+class ServerJob
+extends Nether\Object\Prototype {
 /*//
 provide a structure to store job data in since we do not force any
 specific protocol or data requirements for what can be pushed in.
 //*/
 
-	public
-	$UUID = NULL;
-	/*//
-	@type String
-	//*/
+	public string
+	$UUID;
 
-	public
+	public int
+	$TimeCreated;
+
+	////////
+
+	public int
 	$Tries = 0;
-	/*//
-	@type Int
-	//*/
 
-	public
+	public mixed
 	$Entry = NULL;
-	/*//
-	@type Turbo Mixed
-	literally whatever data you decided to throw into the queue from
-	within your server's OnCommand method.
-	//*/
 
-	public function
-	__Construct() {
+	public int
+	$TimeTodo = 0;
+
+	////////
+
+	protected function
+	OnReady(Nether\Object\Prototype\ConstructArgs $Args):
+	void {
+
+		if(!isset($this->TimeCreated))
+		$this->TimeCreated = time();
+
+		if(!isset($this->UUID))
 		$this->UUID = Ramsey\Uuid\Uuid::UUID4()->ToString();
+
 		return;
 	}
 
