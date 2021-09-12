@@ -5,7 +5,7 @@ namespace Nether\Console\Queue;
 use \React  as React;
 use \Nether as Nether;
 use \Ramsey as Ramsey;
-
+use React\EventLoop\Loop;
 use \Throwable as Throwable;
 
 class ServerHost {
@@ -101,8 +101,8 @@ intended use case:
 	}
 
 	protected function
-	PrepareDatafile(?String $Datafile):
-	Void {
+	PrepareDatafile(?string $Datafile):
+	void {
 	/*//
 	@date 2020-06-23
 	try to load the datafile to disk to prime the queue with any jobs that were
@@ -146,12 +146,12 @@ intended use case:
 	control to react.
 	//*/
 
-		$this->Loop = React\EventLoop\Factory::Create();
+		$this->Loop = Loop::Get();
 
 		////////
 
 		try {
-			$this->Server = new React\Socket\Server($this->Bind,$this->Loop);
+			$this->Server = new React\Socket\SocketServer($this->Bind);
 		}
 
 		catch(Throwable $Error) {
@@ -177,15 +177,18 @@ intended use case:
 		// that were still pending.
 
 		($this->Loop)
-		->AddTimer(1,[$this,'QueueKick']);
+		->AddPeriodicTimer(60,function(){
+			$this->PrintLn('Heartbeat');
+			$this->QueueKick();
+			return;
+		});
 
-		$this->Loop->Run();
 		return;
 	}
 
 	public function
 	OnOpen(React\Socket\Connection $Connection):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	tcp client connect.
@@ -204,7 +207,7 @@ intended use case:
 
 	public function
 	OnClose(ServerClient $Client):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	tcp client disconnect.
@@ -215,8 +218,8 @@ intended use case:
 	}
 
 	public function
-	OnRecv(ServerClient $Client, String $Data):
-	Void {
+	OnRecv(ServerClient $Client, string $Data):
+	void {
 	/*//
 	@date 2020-06-23
 	when the tcp input gets data throw it into the buffer and then
@@ -237,8 +240,8 @@ intended use case:
 	////////////////////////////////////////////////////////////////
 
 	public function
-	OnCommand(ServerClient $Client, String $Command):
-	Void {
+	OnCommand(ServerClient $Client, string $Command):
+	void {
 	/*//
 	@date 2020-06-23
 	@template
@@ -267,7 +270,7 @@ intended use case:
 
 	public function
 	OnJob(ServerJob $Job):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	@template
@@ -303,7 +306,7 @@ intended use case:
 
 	public function
 	JobDone(ServerJob $Job):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	unregister the finished worker and kick off the next job.
@@ -324,7 +327,7 @@ intended use case:
 
 	public function
 	JobRetry(ServerJob $Job):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	unregister the finished worker, push this job back into the queue,
@@ -349,8 +352,8 @@ intended use case:
 	////////////////////////////////////////////////////////////////
 
 	public function
-	RunChildProcess(Array $Opt):
-	Void {
+	RunChildProcess(array $Opt):
+	void {
 	/*//
 	@date 2020-06-23
 	the meat of the trick to the async processing. push out a child process
@@ -376,7 +379,7 @@ intended use case:
 		));
 
 		$Task = new React\ChildProcess\Process($Opt->Command);
-		$Task->Start($this->Loop);
+		$Task->Start(Loop::Get());
 
 		$Task->On('exit',function(Int $Errno) use($Opt){
 
@@ -423,7 +426,7 @@ intended use case:
 
 	public function
 	QueuePush($Entry):
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	push some content into the queue. wraps it with a job object
@@ -466,7 +469,7 @@ intended use case:
 
 	public function
 	QueueKick():
-	Void {
+	void {
 	/*//
 	@date 2020-06-23
 	kick queue processing off if nothing is going on until the
@@ -496,8 +499,8 @@ intended use case:
 	////////////////////////////////////////////////////////////////
 
 	public function
-	PrintLn(String $Content):
-	Void {
+	PrintLn(string $Content):
+	void {
 	/*//
 	@date 2020-06-26
 	printing output to the console if not silenced.
