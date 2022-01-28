@@ -484,7 +484,7 @@ class Client {
 	}
 
 	static public function
-	PromptEquals(?String $Msg=NULL, ?String $Prompt=NULL, String $Condition):
+	PromptEquals(?String $Msg=NULL, ?String $Prompt=NULL, String $Condition='y'):
 	Bool {
 	/*//
 	@date 2016-08-11
