@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9259f5f3b57a4e757a9a2cb0cf757f76",
+    "content-hash": "14e6c5d20b77ad867c9ecbb934803b44",
     "packages": [
         {
             "name": "brick/math",
@@ -115,16 +115,16 @@
         },
         {
             "name": "netherphp/object",
-            "version": "v4.1.4",
+            "version": "dev-redux",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netherphp/object.git",
-                "reference": "b55b795259b515fdde78fbc01f28b5957b284259"
+                "reference": "9671ae688fb156ba7da05ecee12f847fdaa41a21"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netherphp/object/zipball/b55b795259b515fdde78fbc01f28b5957b284259",
-                "reference": "b55b795259b515fdde78fbc01f28b5957b284259",
+                "url": "https://api.github.com/repos/netherphp/object/zipball/9671ae688fb156ba7da05ecee12f847fdaa41a21",
+                "reference": "9671ae688fb156ba7da05ecee12f847fdaa41a21",
                 "shasum": ""
             },
             "require": {
@@ -132,7 +132,8 @@
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
-                "netherphp/standards": ">=0.1.0"
+                "netherphp/standards": ">=0.1.0",
+                "phpunit/phpunit": "^9.5"
             },
             "type": "library",
             "autoload": {
@@ -159,9 +160,9 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/object/issues",
-                "source": "https://github.com/netherphp/object/tree/v4.1.4"
+                "source": "https://github.com/netherphp/object/tree/redux"
             },
-            "time": "2021-09-10T03:10:07+00:00"
+            "time": "2022-08-29T19:01:30+00:00"
         },
         {
             "name": "psr/http-message",
@@ -3376,12 +3377,14 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "netherphp/object": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.0"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }
