@@ -1,3 +1,4 @@
-# bof
-/vendor/
-# eof
+
+/.phpunit.cache
+/vendor
+

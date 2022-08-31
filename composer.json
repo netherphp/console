@@ -1,29 +1,33 @@
 {
-	"name":"netherphp/console",
-	"description":"A CLI Parser",
-	"keywords":["php","cli","console"],
+	"name": "netherphp/console",
+	"description": "A CLI Parser",
+	"keywords": [ "php", "cli", "console", "terminal" ],
 	"license":"BSD-3-Clause",
-	"authors":[
-		{ "name":"Bob Majdak Jr",
-		  "email":"bob@majdak.net",
-		  "homepage":"http://github.com/bobmagicii",
-		  "role":"developer" }
+	"authors": [
+		{
+			"name": "Bob Majdak Jr",
+			"email": "bmajdak@php.net",
+			"homepage": "https://pegasusgate.net/+bob",
+			"role": "developer"
+		}
 	],
 	"require": {
 		"php": ">=8.0",
-		"netherphp/object": "dev-redux",
-		"ramsey/uuid": "^4.1",
-		"react/react": "^1.1"
+		"netherphp/object": "dev-redux"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "^9.5",
+		"netherphp/standards": ">=0.1.9",
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.2"
 	},
 	"autoload": {
 		"psr-0": {
 			"Nether\\":"src/"
 		}
 	},
-	"bin": [
-		"bin/nether-crontab"
-	],
-	"require-dev": {
-		"phpunit/phpunit": "^9.5"
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	}
 }

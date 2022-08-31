@@ -19,7 +19,8 @@ extends Nether\Console\Client {
 ////////////////////////////////
 ////////////////////////////////
 
-class ConsoleClientTest extends PHPUnit\Framework\TestCase {
+class ClientTest
+extends PHPUnit\Framework\TestCase {
 
 	static public function
 	LocalNachoFunction($cli) {
