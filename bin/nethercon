@@ -1,0 +1,58 @@
+#!/usr/bin/php
+<?php
+
+require('vendor/autoload.php');
+
+use Nether\Console\Meta\Command;
+use Nether\Console\Meta\Info;
+use Nether\Console\Meta\Arg;
+use Nether\Console\Meta\Toggle;
+use Nether\Console\Meta\Value;
+use Nether\Console\Meta\Error;
+
+class App
+extends Nether\Console\Client {
+
+	#[Command('yolo')]
+	#[Info('Obviously the best command in the entire suite.')]
+	#[Arg('num', 'number of iterations')]
+	public function
+	YoloArigatoMrRoboto():
+	int {
+
+		$Num = (int)$this->GetInput(1);
+
+		while($Num > 0) {
+			$Num -= 1;
+
+			echo 'YOLO ARIGATO MR ROBOTO', PHP_EOL;
+		}
+
+		return 0;
+	}
+
+	#[Command('failboat')]
+	#[Info('This fails half the time.')]
+	#[Toggle('--hard', 'Fail like all the time.')]
+	#[Toggle('--defy', 'Impossible to fail.')]
+	#[Error(1, 'accidentally did a thing.')]
+	#[Error(2, 'forcefully did a thing.')]
+	public function
+	Failboat():
+	int {
+
+		if($this->GetOption('defy'))
+		$this->Quit(0);
+
+		if($this->GetOption('hard'))
+		$this->Quit(2);
+
+		if(!!random_int(0, 1))
+		$this->Quit(1);
+
+		return 0;
+	}
+
+}
+
+(new App)->Run();

@@ -2,16 +2,26 @@
 
 namespace Nether\Console\Meta;
 
+
 use Attribute;
 use Stringable;
-use Reflector;
+use ReflectionMethod;
+use ReflectionAttribute;
+use Nether\Object\Prototype\MethodInfo;
+use Nether\Object\Prototype\MethodInfoInterface;
 
-#[Attribute(Attribute::IS_REPEATABLE|Attribute::TARGET_ALL)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Error
 implements Stringable {
 
+	public int
+	$Code;
+
+	public string
+	$Text;
+
 	public function
-	__Construct(Int $Code, String $Text) {
+	__Construct(int $Code, string $Text) {
 
 		$this->Code = $Code;
 		$this->Text = $Text;
@@ -20,73 +30,15 @@ implements Stringable {
 
 	public function
 	__ToString():
-	String {
+	string {
 
-		return $this->GetText() ?? 'No info has been provided.';
-	}
-
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-
-	public function
-	BuildFromReflection(Reflector $Reflect):
-	static {
-
-		return $this;
-	}
-
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-
-	protected ?Int
-	$Code = NULL;
-
-	public function
-	GetCode():
-	?Int {
-	/*//
-	@date 2021-01-05
-	//*/
-
-		return $this->Code;
+		return $this->Text ?? 'No info has been provided.';
 	}
 
 	public function
-	SetCode(?Int $Code):
-	static {
-	/*//
-	@date 2021-01-05
-	//*/
+	OnMethodInfo(MethodInfo $Info, ReflectionMethod $RefMethod, ReflectionAttribute $RefAttrib) {
 
-		$this->Code = $Code;
-		return $this;
-	}
-
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
-
-	protected ?String
-	$Text = NULL;
-
-	public function
-	GetText():
-	?String {
-	/*//
-	@date 2021-01-05
-	//*/
-
-		return $this->Text;
-	}
-
-	public function
-	SetText(?String $Text):
-	static {
-	/*//
-	@date 2021-01-05
-	//*/
-
-		$this->Text = $Text;
-		return $this;
+		return;
 	}
 
 }

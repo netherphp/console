@@ -2,6 +2,9 @@
 
 namespace Nether\Console\Meta;
 
+use Toaster;
+use Nether;
+
 use Attribute;
 use Stringable;
 use ReflectionMethod;
@@ -9,22 +12,25 @@ use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
 use Nether\Object\Prototype\MethodInfoInterface;
 
-#[Attribute]
-class Info
+#[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
+class Option
 implements MethodInfoInterface, Stringable {
 
-	public ?string
+	public string
+	$Name;
+
+	public string
 	$Text;
 
-	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
+	public bool
+	$TakesValue;
 
 	public function
-	__Construct(string $Text) {
+	__Construct(string $Name, bool $TakesValue=FALSE, string $Text='') {
 
-		// cheeky nullify.
-
-		$this->Text = trim($Text) ?: NULL;
+		$this->Name = $Name;
+		$this->TakesValue = $TakesValue;
+		$this->Text = $Text;
 
 		return;
 	}
@@ -33,7 +39,7 @@ implements MethodInfoInterface, Stringable {
 	__ToString():
 	string {
 
-		return $this->Text ?? 'No info provided.';
+		return $this->Name ?? '<unknown>';
 	}
 
 	public function
@@ -41,6 +47,5 @@ implements MethodInfoInterface, Stringable {
 
 		return;
 	}
-
 
 }

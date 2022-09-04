@@ -25,6 +25,9 @@
 			"Nether\\":"src/"
 		}
 	},
+	"bin": [
+		"bin\/nethercon"
+	],
 	"config": {
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
