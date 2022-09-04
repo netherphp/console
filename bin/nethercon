@@ -53,6 +53,26 @@ extends Nether\Console\Client {
 		return 0;
 	}
 
+	#[Command('ama')]
+	#[Info('Ask me anything. Not sure it will help any though.')]
+	#[Error(1, 'you waste my time with nothing.')]
+	#[Error(2, 'that does not look like a question.')]
+	public function
+	AskMeAnything():
+	int {
+
+		$Input = $this->Prompt('What would you like to ask me?', '> ');
+
+		if(!$Input)
+		$this->Quit(1);
+
+		if(!str_ends_with($Input, '?'))
+		$this->Quit(2);
+
+		$this->PrintLn('If you ever see me one day you should ask that.');
+		return 0;
+	}
+
 }
 
 (new App)->Run();

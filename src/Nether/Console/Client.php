@@ -147,7 +147,7 @@ class Client {
 		$Message = '';
 
 		if($Err !== 0)
-		$Message .= 'ERROR: ';
+		$Message .= "ERROR({$Err}): ";
 
 		if($Errors) {
 			$Errors = (
@@ -168,6 +168,39 @@ class Client {
 		exit($Err);
 
 		return;
+	}
+
+	public function
+	PrintLn(string $Line):
+	static {
+
+		echo $Line, PHP_EOL;
+		return $this;
+	}
+
+	public function
+	Prompt(?string $Msg=NULL, ?string $Prompt=NULL):
+	string {
+
+		if($Msg !== NULL)
+		echo $Msg, PHP_EOL;
+
+		if($Prompt !== NULL)
+		echo $Prompt, ' ';
+
+		$Result = trim(fgets(STDIN));
+		echo PHP_EOL;
+
+		return $Result;
+	}
+
+	public function
+	PromptEquals(?string $Msg=NULL, ?string $Prompt=NULL, string $Condition='y'):
+	bool {
+
+		$Result = $this->Prompt($Msg, $Prompt);
+
+		return ($Result === $Condition);
 	}
 
 	////////////////////////////////////////////////////////////////
