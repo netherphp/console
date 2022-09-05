@@ -62,7 +62,7 @@ class TerminalFormatter {
 
 	public function
 	__Invoke(...$Codes):
-	String {
+	string {
 	/*//
 	@date 2021-01-14
 	//*/
@@ -71,8 +71,8 @@ class TerminalFormatter {
 	}
 
 	public function
-	__Call(String $Fn, Array $Argv):
-	Mixed {
+	__Call(string $Fn, array $Argv):
+	mixed {
 	/*//
 	@date 2021-01-14
 	//*/
@@ -84,9 +84,6 @@ class TerminalFormatter {
 		// eg. BoldYellow = [Bold, Yellow]
 
 		preg_match_all('/_?[A-Z][a-z0-9]+/',$Fn,$Codes);
-
-		if(!array_key_exists(0,$Codes))
-		throw new Exception('error handing __call fn name');
 
 		if(!count($Codes[0]))
 		throw new Exception('error handing __call fn name');
@@ -104,8 +101,8 @@ class TerminalFormatter {
 	}
 
 	public function
-	__Get(String $Fn):
-	Mixed {
+	__Get(string $Fn):
+	mixed {
 	/*//
 	@date 2021-01-25
 	//*/
@@ -114,8 +111,8 @@ class TerminalFormatter {
 	}
 
 	public function
-	__Set(String $Fn, Mixed $Vz):
-	Void {
+	__Set(string $Fn, mixed $Vz):
+	void {
 	/*//
 	@date 2021-01-26
 	//*/
@@ -127,7 +124,7 @@ class TerminalFormatter {
 	////////
 
 	public function
-	Enable(Bool $Enabled=TRUE):
+	Enable(bool $Enabled=TRUE):
 	static {
 	/*//
 	@date 2021-01-26
@@ -149,7 +146,7 @@ class TerminalFormatter {
 
 	public function
 	IsEnabled():
-	Bool {
+	bool {
 	/*//
 	@date 2021-01-26
 	//*/
@@ -162,7 +159,7 @@ class TerminalFormatter {
 
 	public function
 	Sequence(...$Codes):
-	String {
+	string {
 	/*//
 	@date 2021-01-14
 	//*/

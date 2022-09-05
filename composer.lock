@@ -266,19 +266,20 @@
         },
         {
             "name": "netherphp/standards",
-            "version": "v0.2.6",
+            "version": "v0.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netherphp/standards.git",
-                "reference": "b38cf44e6c742cc2eb6a1780e03f98f2f94a59a8"
+                "reference": "4f8bb88805c345813e01542b671900f4dad203b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netherphp/standards/zipball/b38cf44e6c742cc2eb6a1780e03f98f2f94a59a8",
-                "reference": "b38cf44e6c742cc2eb6a1780e03f98f2f94a59a8",
+                "url": "https://api.github.com/repos/netherphp/standards/zipball/4f8bb88805c345813e01542b671900f4dad203b8",
+                "reference": "4f8bb88805c345813e01542b671900f4dad203b8",
                 "shasum": ""
             },
             "require": {
+                "php": "^8.0",
                 "squizlabs/php_codesniffer": "^3.5"
             },
             "bin": [
@@ -308,9 +309,9 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/standards/issues",
-                "source": "https://github.com/netherphp/standards/tree/v0.2.6"
+                "source": "https://github.com/netherphp/standards/tree/v0.2.7"
             },
-            "time": "2022-09-04T19:22:41+00:00"
+            "time": "2022-09-05T00:46:47+00:00"
         },
         {
             "name": "nikic/php-parser",

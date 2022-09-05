@@ -5,6 +5,7 @@ use PHPUnit;
 
 use Stringable;
 use Nether\Console\TerminalFormatter;
+use Exception;
 
 class FormatterErrorCheck
 implements Stringable {
@@ -90,7 +91,7 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
-	TestMagicInvokeSingleSequence() {
+	TestMagicCallSingleSequence() {
 	/*//
 	@date 2021-01-23
 	//*/
@@ -135,7 +136,7 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
-	TestMagicInvokeWrappedSequence() {
+	TestMagicCallWrappedSequence() {
 	/*//
 	@date 2021-01-23
 	//*/
@@ -178,6 +179,51 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
+	TestMagicInvokeSingleSequence() {
+	/*//
+	@date 2021-01-23
+	//*/
+
+		$F = static::NewFormatter();
+		$Method = NULL;
+		$Test = NULL;
+
+		$TestSingle = [
+			'Red' => new FormatterErrorCheck(
+				"\e[31m",
+				'expected \e[31m'
+			),
+			'White|_Red' => new FormatterErrorCheck(
+				"\e[97;41m",
+				'expected \e[97;41m'
+			),
+			'Bright|White|Underline|_Red' => new FormatterErrorCheck(
+				"\e[1;97;4;41m",
+				'expected \e[1;97;4;41m'
+			)
+		];
+
+		////////
+
+		// using assert true beacuse assert equals will dump
+		// a diff of the values and break your terminal lol.
+
+		foreach($TestSingle as $Method => $Test)
+		$this->AssertTrue(
+			$Test($F( ...explode('|', $Method) )),
+			sprintf(
+				'Method(%s, %s) Result(%s)',
+				$Method,
+				$Test,
+				static::Escapify($Test->Result)
+			)
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
 	TestMagicGetSingleSequence() {
 	/*//
 	@date 2021-01-23
@@ -199,6 +245,10 @@ extends PHPUnit\Framework\TestCase {
 			'BrightWhiteUnderline_Red' => new FormatterErrorCheck(
 				"\e[1;97;4;41m",
 				'expected \e[1;97;4;41m'
+			),
+			'Reset' => new FormatterErrorCheck(
+				"\e[0m",
+				'expected \e[0m'
 			)
 		];
 
@@ -351,6 +401,64 @@ extends PHPUnit\Framework\TestCase {
 		$this->AssertTrue(
 			($F->Red() === ''),
 			'formatter did not get disabled'
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestMagiCallMore():
+	void {
+
+		$F = new TerminalFormatter;
+		$HadErr = FALSE;
+
+		try {
+			$HadErr = FALSE;
+			$F->__Call('', []);
+		}
+
+		catch(Exception $Err) {
+			$HadErr = TRUE;
+		}
+
+		$this->AssertTrue($HadErr);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestMagicalSet():
+	void {
+
+		// the magic set throws it all away
+		// so we do not care.
+
+		$F = new TerminalFormatter;
+		$F->__Set('BoldWhite', 'Banana');
+
+		$this->AssertTrue(TRUE);
+		return;
+	}
+
+	/** @test */
+	public function
+	TestSequenceMore():
+	void {
+
+		$Test = new FormatterErrorCheck("\e[0m", 'expected \e[0m');
+		$F = new TerminalFormatter;
+
+		$this->AssertTrue(
+			$Test($F->Sequence()),
+			sprintf(
+				'Method(%s, %s) Result(%s)',
+				'Reset',
+				$Test,
+				static::Escapify($Test->Result)
+			)
 		);
 
 		return;

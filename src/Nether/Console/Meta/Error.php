@@ -4,7 +4,6 @@ namespace Nether\Console\Meta;
 
 
 use Attribute;
-use Stringable;
 use ReflectionMethod;
 use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
@@ -12,7 +11,7 @@ use Nether\Object\Prototype\MethodInfoInterface;
 
 #[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Error
-implements Stringable {
+implements MethodInfoInterface {
 
 	public int
 	$Code;
@@ -26,13 +25,6 @@ implements Stringable {
 		$this->Code = $Code;
 		$this->Text = $Text;
 		return;
-	}
-
-	public function
-	__ToString():
-	string {
-
-		return $this->Text ?? 'No info has been provided.';
 	}
 
 	public function

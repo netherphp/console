@@ -75,4 +75,5 @@ extends Nether\Console\Client {
 
 }
 
-(new App)->Run();
+exit((new App)->Run());
+

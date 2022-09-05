@@ -7,7 +7,6 @@ use Nether;
 
 use Attribute;
 use Exception;
-use Stringable;
 use ReflectionMethod;
 use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
@@ -15,7 +14,7 @@ use Nether\Object\Prototype\MethodInfoInterface;
 
 #[Attribute(Attribute::IS_REPEATABLE|Attribute::TARGET_ALL)]
 class Arg
-implements MethodInfoInterface, Stringable {
+implements MethodInfoInterface {
 
 	public string
 	$Name;
@@ -33,13 +32,6 @@ implements MethodInfoInterface, Stringable {
 		$this->Info = $Info;
 
 		return;
-	}
-
-	public function
-	__ToString():
-	string {
-
-		return $this->Name ?? '<unknown>';
 	}
 
 	public function

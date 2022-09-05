@@ -6,7 +6,6 @@ use Toaster;
 use Nether;
 
 use Attribute;
-use Stringable;
 use ReflectionMethod;
 use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
@@ -14,7 +13,7 @@ use Nether\Object\Prototype\MethodInfoInterface;
 
 #[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Option
-implements MethodInfoInterface, Stringable {
+implements MethodInfoInterface {
 
 	public string
 	$Name;
@@ -33,13 +32,6 @@ implements MethodInfoInterface, Stringable {
 		$this->Text = $Text;
 
 		return;
-	}
-
-	public function
-	__ToString():
-	string {
-
-		return $this->Name ?? '<unknown>';
 	}
 
 	public function

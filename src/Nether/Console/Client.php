@@ -118,28 +118,8 @@ class Client {
 	}
 
 	public function
-	Run():
-	static {
-
-		$Method = NULL;
-
-		if($this->Commands->HasKey($this->Command)) {
-			$Method = $this->Commands[$this->Command];
-
-			if(method_exists($this, $Method->Name))
-			$this->{$Method->Name}();
-		}
-
-		else {
-			$this->HandleCommandHelp();
-		}
-
-		return $this;
-	}
-
-	public function
-	Quit(int $Err):
-	void {
+	GetQuitMessage(int $Err):
+	string {
 
 		$Command = $this->Commands[$this->Command];
 		$Errors = $Command->GetAttribute(Nether\Console\Meta\Error::class);
@@ -164,10 +144,51 @@ class Client {
 			}
 		}
 
-		echo $Message, PHP_EOL;
-		exit($Err);
+		return $Message;
+	}
 
-		return;
+	public function
+	Run():
+	int {
+
+		$Method = NULL;
+		$Result = NULL;
+		$Message = NULL;
+		$Code = NULL;
+
+		////////
+
+		if(!$this->Commands->HasKey($this->Command))
+		return $this->HandleCommandHelp();
+
+		////////
+
+		$Method = $this->Commands[$this->Command];
+
+		try {
+			$Result = $this->{$Method->Name}();
+		}
+
+		catch(Error\QuitException $Quit) {
+			$Message = $Quit->GetMessage();
+			$Code = $Quit->GetCode();
+
+			if($Message)
+			echo $Message, PHP_EOL;
+
+			return $Code;
+		}
+
+		return $Result;
+	}
+
+	public function
+	Quit(int $Err):
+	never {
+
+		throw new Error\QuitException(
+			$Err, $this->GetQuitMessage($Err)
+		);
 	}
 
 	public function
@@ -179,7 +200,7 @@ class Client {
 	}
 
 	public function
-	Prompt(?string $Msg=NULL, ?string $Prompt=NULL):
+	Prompt(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
 	string {
 
 		if($Msg !== NULL)
@@ -188,17 +209,17 @@ class Client {
 		if($Prompt !== NULL)
 		echo $Prompt, ' ';
 
-		$Result = trim(fgets(STDIN));
+		$Result = trim(fgets($Input));
 		echo PHP_EOL;
 
 		return $Result;
 	}
 
 	public function
-	PromptEquals(?string $Msg=NULL, ?string $Prompt=NULL, string $Condition='y'):
+	PromptEquals(?string $Msg=NULL, ?string $Prompt=NULL, string $Condition='y', mixed $Input=STDIN):
 	bool {
 
-		$Result = $this->Prompt($Msg, $Prompt);
+		$Result = $this->Prompt($Msg, $Prompt, $Input);
 
 		return ($Result === $Condition);
 	}
@@ -267,7 +288,7 @@ class Client {
 				'%s%s%s%s',
 				$Indent,
 				$this->Formatter->{$this->ColourPrimary}($Command->Name),
-				($Args ? $Args->Map(fn($Val)=> " <{$Val}>")->Join('') : ''),
+				($Args ? $Args->Map(fn($Val)=> " <{$Val->Name}>")->Join('') : ''),
 				str_repeat(PHP_EOL, 2)
 			);
 

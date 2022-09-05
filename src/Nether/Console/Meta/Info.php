@@ -3,7 +3,6 @@
 namespace Nether\Console\Meta;
 
 use Attribute;
-use Stringable;
 use ReflectionMethod;
 use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
@@ -11,7 +10,7 @@ use Nether\Object\Prototype\MethodInfoInterface;
 
 #[Attribute]
 class Info
-implements MethodInfoInterface, Stringable {
+implements MethodInfoInterface {
 
 	public ?string
 	$Text;
@@ -27,13 +26,6 @@ implements MethodInfoInterface, Stringable {
 		$this->Text = trim($Text) ?: NULL;
 
 		return;
-	}
-
-	public function
-	__ToString():
-	string {
-
-		return $this->Text ?? 'No info provided.';
 	}
 
 	public function

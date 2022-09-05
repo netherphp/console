@@ -12,9 +12,47 @@ use Exception;
 class TestApp
 extends Nether\Console\Client {
 
+	public string
+	$Output = 'nope';
+
 	#[Nether\Console\Meta\Command]
 	public function
 	Test():
+	int {
+
+		$this->Output = 'test';
+		return 0;
+	}
+
+	#[Nether\Console\Meta\Command]
+	public function
+	TestQuit1():
+	int {
+
+		$this->Quit(1);
+
+		return 0;
+	}
+
+	#[Nether\Console\Meta\Command]
+	#[Nether\Console\Meta\Error(2, 'two')]
+	public function
+	TestQuit2():
+	int {
+
+		$this->Quit(2);
+
+		return 0;
+	}
+
+	#[Nether\Console\Meta\Command('loaded')]
+	#[Nether\Console\Meta\Arg('<thing>', 'input thing')]
+	#[Nether\Console\Meta\Option('--ok', FALSE, 'does ok')]
+	#[Nether\Console\Meta\Toggle('--togg', 'does toggle')]
+	#[Nether\Console\Meta\Value('--val', 'does value')]
+	#[Nether\Console\Meta\Error(1, 'did error')]
+	public function
+	TestLoaded():
 	int {
 
 		return 0;
@@ -27,20 +65,6 @@ extends Nether\Console\Client {
 
 class ClientTest
 extends PHPUnit\Framework\TestCase {
-
-	/** @test */
-	public function
-	TestBasic():
-	void {
-
-		$App = new TestApp;
-
-		$this->AssertEquals(2, $App->Commands->Count());
-		$this->AssertTrue($App->Commands->HasKey('test'));
-		$this->AssertTrue($App->Commands->HasKey('help'));
-
-		return;
-	}
 
 	/**
 	 * @test
@@ -83,6 +107,19 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
+	TestBasic():
+	void {
+
+		$App = new TestApp;
+
+		$this->AssertTrue($App->Commands->HasKey('test'));
+		$this->AssertTrue($App->Commands->HasKey('help'));
+
+		return;
+	}
+
+	/** @test */
+	public function
 	TestGetInput():
 	void {
 
@@ -107,6 +144,194 @@ extends PHPUnit\Framework\TestCase {
 		$this->AssertEquals(TRUE, $App->GetOption('f'));
 		$this->AssertEquals(TRUE, $App->GetOption('l'));
 
+		return;
+	}
+
+	/** @test */
+	public function
+	TestRunNoInput():
+	void {
+
+		$App = new TestApp([ 'test.lulz' ]);
+		$App->Formatter->Disable();
+		$this->AssertEquals('nope', $App->Output);
+		$this->AssertEquals('help', $App->Command);
+
+		ob_start();
+		$App->Run();
+		$Output = trim(ob_get_clean());
+
+		$this->AssertTrue(str_starts_with($Output, 'USAGE:'));
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestRunTest():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+		$this->AssertEquals('nope', $App->Output);
+
+		$App->Run();
+		$this->AssertEquals('test', $App->Output);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestRunUnknown():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'omgwtfbbq' ]);
+		$App->Formatter->Disable();
+		$this->AssertEquals('nope', $App->Output);
+		$this->AssertEquals('omgwtfbbq', $App->Command);
+
+		ob_start();
+		$App->Run();
+		$Output = trim(ob_get_clean());
+
+		$this->AssertTrue(str_starts_with($Output, 'USAGE:'));
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestQuit1():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test-quit-1' ]);
+		$App->Formatter->Disable();
+
+		ob_start();
+		$Result = $App->Run();
+		$Output = ob_get_clean();
+
+		$this->AssertEquals(1, $Result);
+		$this->AssertTrue(str_starts_with($Output, 'ERROR(1): '));
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestQuit2():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test-quit-2' ]);
+		$App->Formatter->Disable();
+
+		ob_start();
+		$Result = $App->Run();
+		$Output = trim(ob_get_clean());
+
+		$this->AssertEquals(2, $Result);
+		$this->AssertEquals('ERROR(2): two', $Output);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestPrintLn():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+
+		ob_start();
+		$App->PrintLn('test');
+		$Output = ob_get_clean();
+
+		$this->AssertEquals(
+			sprintf('test%s', PHP_EOL),
+			$Output
+		);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestPrompt():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+
+		$Input = tmpfile();
+		fwrite($Input, "best\n");
+		fseek($Input, 0);
+
+		ob_start();
+		$Result = $App->Prompt('Test?', '??>', $Input);
+		$Output = ob_get_clean();
+		fclose($Input);
+
+		// test it rendered the prompt as we expected.
+
+		$this->AssertEquals(
+			sprintf('Test?%s??> %s', PHP_EOL, PHP_EOL),
+			$Output
+		);
+
+		// test that it ate and spit out the test data as expected.
+
+		$this->AssertEquals('best', $Result);
+
+		// nice
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestPromptEquals():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+
+		$Input = tmpfile();
+		fwrite($Input, "garnet\n");
+		fseek($Input, 0);
+
+		ob_start();
+		$Result = $App->PromptEquals('pearl?', '??>', 'pearl', $Input);
+		$Output = ob_get_clean();
+
+		// test it rendered the prompt as we expected.
+
+		$this->AssertEquals(
+			sprintf('pearl?%s??> %s', PHP_EOL, PHP_EOL),
+			$Output
+		);
+
+		// the prompt was expecting pearl but we fed it garnet so it
+		// should have sput out a false.
+
+		$this->AssertFalse($Result);
+
+		////////
+
+		fseek($Input, 0);
+		ob_start();
+		$Result = $App->PromptEquals('garnet?', '??>', 'garnet', $Input);
+		$Output = ob_get_clean();
+
+		// test it rendered the prompt as we expected.
+
+		$this->AssertEquals(
+			sprintf('garnet?%s??> %s', PHP_EOL, PHP_EOL),
+			$Output
+		);
+
+		// the prompt was expecting garnet and we fed it one.
+
+		$this->AssertTrue($Result);
+
+		fclose($Input);
 		return;
 	}
 

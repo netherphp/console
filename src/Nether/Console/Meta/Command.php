@@ -3,7 +3,6 @@
 namespace Nether\Console\Meta;
 
 use Attribute;
-use Stringable;
 use ReflectionMethod;
 use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
@@ -12,7 +11,7 @@ use Nether\Console\Util;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class Command
-implements MethodInfoInterface, Stringable {
+implements MethodInfoInterface {
 
 	public string
 	$Name;
@@ -34,16 +33,6 @@ implements MethodInfoInterface, Stringable {
 		$this->Hide = $Hide;
 
 		return;
-	}
-
-	public function
-	__ToString():
-	string {
-
-		if(isset($this->Name))
-		return $this->Name;
-
-		return '<unknown>';
 	}
 
 	////////////////////////////////////////////////////////////////
