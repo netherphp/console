@@ -450,6 +450,7 @@ extends PHPUnit\Framework\TestCase {
 
 		$Test = new FormatterErrorCheck("\e[0m", 'expected \e[0m');
 		$F = new TerminalFormatter;
+		$F->Enable();
 
 		$this->AssertTrue(
 			$Test($F->Sequence(...[])),
