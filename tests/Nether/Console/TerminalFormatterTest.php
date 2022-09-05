@@ -452,7 +452,7 @@ extends PHPUnit\Framework\TestCase {
 		$F = new TerminalFormatter;
 
 		$this->AssertTrue(
-			$Test($F->Sequence()),
+			$Test($F->Sequence(...[])),
 			sprintf(
 				'Method(%s, %s) Result(%s)',
 				'Reset', $Test,
