@@ -455,8 +455,7 @@ extends PHPUnit\Framework\TestCase {
 			$Test($F->Sequence()),
 			sprintf(
 				'Method(%s, %s) Result(%s)',
-				'Reset',
-				$Test,
+				'Reset', $Test,
 				static::Escapify($Test->Result)
 			)
 		);
