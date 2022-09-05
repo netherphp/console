@@ -45,7 +45,7 @@ extends Nether\Console\Client {
 		return 0;
 	}
 
-	#[Nether\Console\Meta\Command('loaded')]
+	#[Nether\Console\Meta\Command('loaded', Hide: TRUE)]
 	#[Nether\Console\Meta\Arg('<thing>', 'input thing')]
 	#[Nether\Console\Meta\Option('--ok', FALSE, 'does ok')]
 	#[Nether\Console\Meta\Toggle('--togg', 'does toggle')]
@@ -332,6 +332,64 @@ extends PHPUnit\Framework\TestCase {
 		$this->AssertTrue($Result);
 
 		fclose($Input);
+		return;
+	}
+
+	/** @test */
+	public function
+	TestFormatterShortuts():
+	void {
+
+		$App = new TestApp;
+
+		$this->AssertEquals(
+			$App->Formatter->{$App->ColourPrimary}('test'),
+			$App->FormatPrimary('test')
+		);
+
+		$this->AssertEquals(
+			$App->Formatter->{$App->ColourSecondary}('test'),
+			$App->FormatSecondary('test')
+		);
+
+		return;
+	}
+
+
+	/** @test */
+	public function
+	TestExecuteCommandLine():
+	void {
+
+		$App = new TestApp;
+		$Command = 'echo lol';
+		$Output = NULL;
+		$Error = NULL;
+
+		ob_start();
+		$App->Formatter->Disable();
+		$App->ExecuteCommandLine($Command, $Output, $Error);
+		ob_end_clean();
+
+		$this->AssertEquals('lol', join(PHP_EOL, $Output));
+		$this->AssertEquals(0, $Error);
+
+		return;
+	}
+
+	/**
+	 * @test
+	 */
+	public function
+	TestSudo():
+	void {
+
+		$App = new TestApp;
+
+		// have not quite figured out how to test
+		// $App->Sudo() yet.
+
+		$this->AssertTrue(TRUE);
 		return;
 	}
 

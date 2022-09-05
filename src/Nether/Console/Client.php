@@ -148,6 +148,20 @@ class Client {
 	}
 
 	public function
+	FormatPrimary(string $Text):
+	string {
+
+		return $this->Formatter->{$this->ColourPrimary}($Text);
+	}
+
+	public function
+	FormatSecondary(string $Text):
+	string {
+
+		return $this->Formatter->{$this->ColourSecondary}($Text);
+	}
+
+	public function
 	Run():
 	int {
 
@@ -183,19 +197,19 @@ class Client {
 	}
 
 	public function
-	Quit(int $Err):
+	Quit(int $Err, ...$MsgTokens):
 	never {
 
 		throw new Error\QuitException(
-			$Err, $this->GetQuitMessage($Err)
+			$Err, vsprintf($this->GetQuitMessage($Err), $MsgTokens)
 		);
 	}
 
 	public function
-	PrintLn(string $Line):
+	PrintLn(?string $Line=NULL):
 	static {
 
-		echo $Line, PHP_EOL;
+		echo ($Line ?? ''), PHP_EOL;
 		return $this;
 	}
 
@@ -222,6 +236,41 @@ class Client {
 		$Result = $this->Prompt($Msg, $Prompt, $Input);
 
 		return ($Result === $Condition);
+	}
+
+	public function
+	ExecuteCommandLine(string $Command, mixed &$Output=NULL, mixed &$Error=NULL):
+	bool {
+
+		$this->PrintLn(sprintf(
+			'%s %s',
+			$this->FormatPrimary('[ExecuteCommandLine]'),
+			$Command
+		));
+
+		exec($Command, $Output, $Error);
+
+		return ($Error === 0);
+	}
+
+	public function
+	Sudo():
+	bool {
+	/*//
+	return true if a privilege escilaton was performed. return false if we
+	are already good to go.
+	//*/
+
+		$IsAdmin = (posix_getuid() === 0);
+		$SudoPath = trim(`which sudo`);
+
+		if($IsAdmin)
+		return FALSE;
+
+		return pcntl_exec(
+			$SudoPath,
+			$this->Args->Source
+		);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -258,6 +307,9 @@ class Client {
 			$Indent = "  ";
 
 			if($Command->Name === 'help')
+			continue;
+
+			if($Command->Hide)
 			continue;
 
 			////////

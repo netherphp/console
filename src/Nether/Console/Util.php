@@ -31,6 +31,8 @@ class Util {
 		$Option = NULL;
 		$Segment = NULL;
 
+		$Output->Source = $Argv;
+
 		foreach($Argv as $Segment) {
 			if($Option = static::ParseCommandOption($Segment))
 			$Output->Options->MergeRight($Option);

@@ -6,6 +6,9 @@ use Nether\Object\Datastore;
 
 class CommandArgs {
 
+	public array
+	$Source;
+
 	public Datastore
 	$Inputs;
 
