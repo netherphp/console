@@ -1,9 +1,6 @@
 <?php
 
-namespace Nether\Avenue;
-
-use Closure;
-use Nether;
+namespace NetherTestSuite\Console\TerminalFormatter;
 use PHPUnit;
 
 use Stringable;
@@ -20,7 +17,7 @@ implements Stringable {
 	public String $Result;
 
 	public function
-	__Construct(String $Expect, String $Message) {
+	__Construct(string $Expect, string $Message) {
 		$this->Expect = $Expect;
 		$this->Message = $Message;
 		return;
@@ -28,11 +25,11 @@ implements Stringable {
 
 	public function
 	__ToString():
-	String { return $this->Message; }
+	string { return $this->Message; }
 
 	public function
-	__Invoke(String $Result):
-	Bool { return (($this->Result = $Result) === $this->Expect); }
+	__Invoke(string $Result):
+	bool { return (($this->Result = $Result) === $this->Expect); }
 
 };
 
@@ -56,8 +53,8 @@ extends PHPUnit\Framework\TestCase {
 	}
 
 	static public function
-	Escapify(String $Input):
-	String {
+	Escapify(string $Input):
+	string {
 	/*//
 	@date 2021-01-26
 	//*/
@@ -72,7 +69,7 @@ extends PHPUnit\Framework\TestCase {
 	/** @test */
 	public function
 	TestCheckFormatterErrorCheck():
-	Void {
+	void {
 	/*//
 	@date 2021-01-23
 	//*/
@@ -276,7 +273,7 @@ extends PHPUnit\Framework\TestCase {
 	/** @test */
 	public function
 	TestMagicReaderConsistency():
-	Void {
+	void {
 	/*//
 	@date 2021-01-26
 	//*/
@@ -298,7 +295,7 @@ extends PHPUnit\Framework\TestCase {
 	/** @test */
 	public function
 	TestSequencesWithInvalidBits():
-	Void {
+	void {
 	/*//
 	@date 2021-01-26
 	//*/

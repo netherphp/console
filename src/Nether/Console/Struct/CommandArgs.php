@@ -13,10 +13,10 @@ class CommandArgs {
 	$Options;
 
 	public function
-	__Construct(?array $Inputs=NULL, ?Datastore $Options=NULL) {
+	__Construct(?array $Inputs=NULL, ?array $Options=NULL) {
 
-		$this->Inputs = new Datastore($Inputs) ?? new Datastore;
-		$this->Options = $Options ?? new Datastore;
+		$this->Inputs = new Datastore(is_array($Inputs) ? $Inputs : []);
+		$this->Options = new Datastore(is_array($Options) ? $Options : []);
 
 		return;
 	}

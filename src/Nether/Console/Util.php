@@ -24,23 +24,19 @@ class Util {
 
 
 	static public function
-	ParseCommandArgs(array $Argv, bool $SkipFirst=FALSE):
+	ParseCommandArgs(array $Argv):
 	CommandArgs {
 
 		$Output = new CommandArgs;
 		$Option = NULL;
-		$Key = NULL;
 		$Segment = NULL;
 
-		foreach($Argv as $Key => $Segment) {
-			if($Key === 0 && $SkipFirst)
-			continue;
-
+		foreach($Argv as $Segment) {
 			if($Option = static::ParseCommandOption($Segment))
 			$Output->Options->MergeRight($Option);
 
 			else
-			$Output->Inputs[] = $Segment;
+			$Output->Inputs->Push($Segment);
 		}
 
 		return $Output;
@@ -70,10 +66,10 @@ class Util {
 		$Output = [];
 
 		$Opt = explode('=', $Input, 2);
-		$Opt[0] = ltrim($Opt[0], '-');
+		$Opt[0] = strtolower(ltrim($Opt[0], '-'));
 
-		if(strlen($Opt[0]) > 1)
-		$Opt[0] = strtolower($Opt[0]);
+		if(!$Opt[0])
+		return NULL;
 
 		switch(count($Opt)) {
 			case 1: {
@@ -108,10 +104,11 @@ class Util {
 
 		// break the options apart setting them true.
 
+		if($Opt[0])
 		foreach(str_split($Opt[0]) as $Letter)
 		$Output[$Letter] = TRUE;
 
-		// if the parsing did not really work send false out.
+		// if the parsing did not really work send null out.
 
 		if(!count($Output))
 		return NULL;

@@ -17,22 +17,22 @@ class Client {
 	public string
 	$Command = 'help';
 
-	protected string
+	public string
 	$Name;
 
-	protected Datastore
+	public Datastore
 	$Commands;
 
-	protected CommandArgs
+	public CommandArgs
 	$Args;
 
-	protected TerminalFormatter
+	public TerminalFormatter
 	$Formatter;
 
-	protected string
+	public string
 	$ColourPrimary = 'BoldYellow';
 
-	protected string
+	public string
 	$ColourSecondary = 'Yellow';
 
 	public function
