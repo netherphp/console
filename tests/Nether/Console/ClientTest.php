@@ -341,6 +341,7 @@ extends PHPUnit\Framework\TestCase {
 	void {
 
 		$App = new TestApp;
+		$App->Formatter->Enable();
 
 		$this->AssertEquals(
 			$App->Formatter->{$App->ColourPrimary}('test'),
