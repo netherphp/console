@@ -277,18 +277,25 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	#[Nether\Console\Meta\Command('help')]
-	#[Nether\Console\Meta\Arg('command')]
+	#[Nether\Console\Meta\Arg('command', 'Only show help for specific command.')]
+	#[Nether\Console\Meta\Toggle('--verbose', 'Shows all of the helpful.')]
 	#[Nether\Console\Meta\Info('Display this help.')]
 	public function
 	HandleCommandHelp():
 	int {
 
 		$Picked = $this->GetInput(1);
+		$Verbose = $this->GetOption('verbose') ?? FALSE;
 		$Method = NULL;
 		$Command = NULL;
 		$Args = NULL;
 		$Options = NULL;
 		$Info = NULL;
+
+		if($Picked !== NULL)
+		$Verbose = TRUE;
+
+		////////
 
 		printf(
 			'%1$s %2$s <command> <args>%3$s%3$s',
@@ -296,6 +303,21 @@ class Client {
 			$this->Name,
 			PHP_EOL
 		);
+
+		if(!$Picked) {
+			printf(
+				'%s - view help for specific command.%s',
+				$this->FormatSecondary('help <command>'),
+				PHP_EOL
+			);
+
+			printf(
+				'%s - view help all help for all commands.%s%s',
+				$this->FormatSecondary('help --verbose'),
+				PHP_EOL,
+				PHP_EOL
+			);
+		}
 
 		foreach($this->Commands as $Method) {
 			/** @var MethodInfo $Method */
@@ -307,9 +329,6 @@ class Client {
 			$Values = $Method->GetAttribute(Nether\Console\Meta\Value::class);
 			$Info = $Method->GetAttribute(Nether\Console\Meta\Info::class);
 			$Indent = "  ";
-
-			if($Command->Name === 'help')
-			continue;
 
 			if($Command->Hide)
 			continue;
@@ -357,7 +376,7 @@ class Client {
 				str_repeat(PHP_EOL, 2)
 			);
 
-			if($Options)
+			if($Verbose && $Options)
 			foreach($Options as $Option) {
 				printf(
 					'%s%s%s%s',
