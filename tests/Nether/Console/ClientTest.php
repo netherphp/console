@@ -1,10 +1,28 @@
 <?php
 
-namespace NetherTestSuite\Console\Client;
+namespace Nether\Console;
 use Nether;
 use PHPUnit;
 
 use Exception;
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
+class SudoFoolery {
+	static public int
+	$GetUID = 0;
+}
+
+function posix_getuid() {
+
+	return ((++SudoFoolery::$GetUID % 2) === 0) ? 0 : 100;
+}
+
+function pcntl_exec(string $Command, array $Args) {
+
+	return TRUE;
+}
 
 ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////
@@ -378,17 +396,63 @@ extends PHPUnit\Framework\TestCase {
 		return;
 	}
 
-	/**
-	 * @test
-	 */
+	/** @test */
 	public function
 	TestSudo():
 	void {
 
-		$App = new TestApp;
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+		SudoFoolery::$GetUID = 0;
 
-		// have not quite figured out how to test
-		// $App->Sudo() yet.
+		$Result = $App->Sudo();
+		$this->AssertTrue($Result);
+
+		$Result = $App->Sudo();
+		$this->AssertFalse($Result);
+
+		return;
+	}
+
+	/** @test */
+	public function
+	TestHelp():
+	void {
+
+		$App = NULL;
+
+		////////
+
+		// test basic help.
+
+		ob_start();
+		$App = new TestApp([ 'testapp.lulz' ]);
+		$App->HandleCommandHelp();
+		ob_get_clean();
+
+		// test manually asking for basic help.
+
+		ob_start();
+		$App = new TestApp([ 'testapp.lulz', 'help' ]);
+		$App->HandleCommandHelp();
+		ob_get_clean();
+
+		// test full verbose help.
+
+		ob_start();
+		$App = new TestApp([ 'testapp.lulz', 'help', '--verbose' ]);
+		$App->HandleCommandHelp();
+		ob_get_clean();
+
+		// test specific command help.
+
+		ob_start();
+		$App = new TestApp([ 'testapp.lulz', 'help', 'loaded' ]);
+		$App->HandleCommandHelp();
+		ob_get_clean();
+
+		// proper test cases for the help will be done once i stop messing
+		// with the formatting so much. the four scenerios above are the
+		// four test cases i need to test to trigger full coverage.
 
 		$this->AssertTrue(TRUE);
 		return;

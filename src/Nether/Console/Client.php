@@ -312,7 +312,7 @@ class Client {
 			);
 
 			printf(
-				'%s - view help all help for all commands.%s%s',
+				'%s - view all help for all commands.%s%s',
 				$this->FormatSecondary('help --verbose'),
 				PHP_EOL,
 				PHP_EOL
@@ -330,10 +330,10 @@ class Client {
 			$Info = $Method->GetAttribute(Nether\Console\Meta\Info::class);
 			$Indent = "  ";
 
-			if($Command->Hide)
+			if($Picked && $Command->Name !== $Picked)
 			continue;
 
-			if($Picked && $Command->Name !== $Picked)
+			if(!$Picked && $Command->Hide)
 			continue;
 
 			////////
