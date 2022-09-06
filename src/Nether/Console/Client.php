@@ -277,11 +277,13 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	#[Nether\Console\Meta\Command('help')]
+	#[Nether\Console\Meta\Arg('command')]
 	#[Nether\Console\Meta\Info('Display this help.')]
 	public function
 	HandleCommandHelp():
 	int {
 
+		$Picked = $this->GetInput(1);
 		$Method = NULL;
 		$Command = NULL;
 		$Args = NULL;
@@ -310,6 +312,9 @@ class Client {
 			continue;
 
 			if($Command->Hide)
+			continue;
+
+			if($Picked && $Command->Name !== $Picked)
 			continue;
 
 			////////
