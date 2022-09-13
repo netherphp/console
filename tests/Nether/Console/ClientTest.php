@@ -382,15 +382,15 @@ extends PHPUnit\Framework\TestCase {
 
 		$App = new TestApp;
 		$Command = 'echo lol';
-		$Output = NULL;
+		$Result = NULL;
 		$Error = NULL;
 
 		ob_start();
 		$App->Formatter->Disable();
-		$App->ExecuteCommandLine($Command, $Output, $Error);
+		$Result = $App->ExecuteCommandLine($Command);
 		ob_end_clean();
 
-		$this->AssertEquals('lol', join(PHP_EOL, $Output));
+		$this->AssertEquals('lol', join(PHP_EOL, $Result->Output));
 		$this->AssertEquals(0, $Error);
 
 		return;

@@ -27,7 +27,7 @@ class CommandLineUtil {
 	static {
 
 		$this->Output = [];
-		$this->Error = 1;
+		$this->Error = 0;
 
 		return $this;
 	}
