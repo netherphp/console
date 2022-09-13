@@ -240,7 +240,7 @@ class Client {
 
 	public function
 	ExecuteCommandLine(string $Command, mixed &$Output=NULL, mixed &$Error=NULL):
-	bool {
+	Struct\CommandLineUtil {
 
 		$this->PrintLn(sprintf(
 			'%s %s',
@@ -248,9 +248,10 @@ class Client {
 			$Command
 		));
 
-		exec($Command, $Output, $Error);
+		$CLI = new Struct\CommandLineUtil($Command);
+		$CLI->Run();
 
-		return ($Error === 0);
+		return $CLI;
 	}
 
 	public function
