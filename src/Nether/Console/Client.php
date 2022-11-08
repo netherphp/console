@@ -239,9 +239,10 @@ class Client {
 	}
 
 	public function
-	ExecuteCommandLine(string $Command, mixed &$Output=NULL, mixed &$Error=NULL):
+	ExecuteCommandLine(string $Command, bool $Silent=FALSE):
 	Struct\CommandLineUtil {
 
+		if(!$Silent)
 		$this->PrintLn(sprintf(
 			'%s %s',
 			$this->FormatPrimary('[ExecuteCommandLine]'),
