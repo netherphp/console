@@ -118,6 +118,15 @@ class Client {
 	}
 
 	public function
+	HasOption(string $Key):
+	mixed {
+
+		$Key = strtolower($Key);
+
+		return $this->Args->Options->HasKey($Key);
+	}
+
+	public function
 	GetQuitMessage(int $Err):
 	string {
 
