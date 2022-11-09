@@ -57,7 +57,9 @@ extends PHPUnit\Framework\TestCase {
 
 		// test a sucess.
 
-		$CLI = new Nether\Console\Struct\CommandLineUtil('bin/nethercon failboat --defy');
+		$Bin = Nether\Console\Util::Repath('bin/nethercon');
+
+		$CLI = new Nether\Console\Struct\CommandLineUtil("php {$Bin} failboat --defy");
 		$this->AssertEquals(0, $CLI->Error);
 
 		$CLI->Run();
@@ -66,7 +68,7 @@ extends PHPUnit\Framework\TestCase {
 		// test a fail.
 
 		unset($CLI);
-		$CLI = new Nether\Console\Struct\CommandLineUtil('bin/nethercon failboat --hard');
+		$CLI = new Nether\Console\Struct\CommandLineUtil("php {$Bin} failboat --hard");
 		$this->AssertEquals(0, $CLI->Error);
 
 		$CLI->Run();

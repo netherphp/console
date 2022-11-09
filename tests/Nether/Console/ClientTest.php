@@ -374,7 +374,6 @@ extends PHPUnit\Framework\TestCase {
 		return;
 	}
 
-
 	/** @test */
 	public function
 	TestExecuteCommandLine():
@@ -400,6 +399,11 @@ extends PHPUnit\Framework\TestCase {
 	public function
 	TestSudo():
 	void {
+
+		if(PHP_OS_FAMILY === 'Windows') {
+			$this->AssertTrue(TRUE);
+			return;
+		}
 
 		$App = new TestApp([ 'test.lulz', 'test' ]);
 		SudoFoolery::$GetUID = 0;

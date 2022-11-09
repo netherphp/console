@@ -23,7 +23,6 @@ class Util {
 		return strtolower($Output);
 	}
 
-
 	static public function
 	ParseCommandArgs(array $Argv):
 	CommandArgs {
@@ -125,7 +124,6 @@ class Util {
 		return $Output;
 	}
 
-
 	static public function
 	VarDump(mixed $Input, bool $Colour=TRUE):
 	void {
@@ -222,6 +220,13 @@ class Util {
 		}
 
 		return;
+	}
+
+	static public function
+	Repath(string $Input):
+	string {
+
+		return str_replace('\\', '/', $Input);
 	}
 
 }
