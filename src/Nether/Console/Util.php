@@ -2,6 +2,7 @@
 
 namespace Nether\Console;
 
+use Nether\Console\TerminalFormatter;
 use Nether\Console\Struct\CommandArgs;
 
 class Util {
@@ -122,6 +123,105 @@ class Util {
 		reset($Output);
 
 		return $Output;
+	}
+
+
+	static public function
+	VarDump(mixed $Input, bool $Colour=TRUE):
+	void {
+	/*//
+	@date 2022-08-11
+	@todo finish this i did it wrong while xdebug was fucking about with it.
+	//*/
+
+		$F = new TerminalFormatter;
+		$F->Enable($Colour);
+
+		ob_start();
+		var_dump($Input);
+		$Output = ob_get_clean();
+
+		// fixes the annoying newline after the arrow.
+
+		$Output = preg_replace(
+			'/(\$.+?) =>[\h\s\n]+/',
+			'\\1 => ',
+			$Output
+		);
+
+		$Output = preg_replace(
+			'/^([\h]+)(.+?) ?(\$.+?) =>[\h\s\n]+/ms',
+			sprintf(
+				'\\1 %s %s = ',
+				$F->Yellow('\\2'),
+				$F->YellowBold('\\3')
+			),
+			$Output
+		);
+
+		// convert indention to tabs.
+
+		$Output = preg_replace_callback(
+			'#^(\h+)#ms',
+			(
+				fn(array $Result)
+				=> str_repeat("\t", floor(strlen($Result[1]) / 2.0))
+			),
+			$Output
+		);
+
+		echo $Output;
+		return;
+	}
+
+	static public function
+	ObjectDump(object|array|NULL $Input, bool $Colour=TRUE):
+	void {
+
+		$Key = NULL;
+		$Val = NULL;
+		$F = new TerminalFormatter($Colour);
+
+		if($Input === NULL) {
+			echo 'NULL', PHP_EOL;
+			return;
+		}
+
+		if(is_object($Input))
+		printf(
+			'%s %s%s',
+			$F->YellowBold('Object:'),
+			$F->Yellow($Input::class),
+			PHP_EOL
+		);
+
+		elseif(is_array($Input))
+		printf(
+			'%s%s',
+			$F->YellowBold('Array:'),
+			PHP_EOL
+		);
+
+		foreach($Input as $Key => $Val) {
+			if(is_object($Input))
+			printf(
+				'%s%s = %s%s',
+				$F->MagentaBold('->'), $F->Magenta($Key), $Val,
+				PHP_EOL
+			);
+
+			else
+			printf(
+				'%s%s%s = %s%s',
+				$F->CyanBold('['),
+				$F->Cyan($Key),
+				$F->CyanBold(']'),
+				$Val,
+				PHP_EOL
+			);
+		}
+
+		return;
 	}
 
 }
