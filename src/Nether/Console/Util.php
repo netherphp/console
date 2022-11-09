@@ -206,7 +206,7 @@ class Util {
 			if(is_object($Input))
 			printf(
 				'%s%s = %s%s',
-				$F->MagentaBold('->'), $F->Magenta($Key), $Val,
+				$F->MagentaBold('->'), $F->Magenta($Key), json_encode($Val),
 				PHP_EOL
 			);
 
