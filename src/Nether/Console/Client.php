@@ -223,6 +223,16 @@ class Client {
 	}
 
 	public function
+	FormatLn(?string $Fmt=NULL, ...$Argv):
+	static {
+
+		printf($Fmt, ...$Argv);
+		echo PHP_EOL;
+
+		return $this;
+	}
+
+	public function
 	Prompt(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
 	string {
 
