@@ -12,7 +12,7 @@ use ReflectionAttribute;
 use Nether\Object\Prototype\MethodInfo;
 use Nether\Object\Prototype\MethodInfoInterface;
 
-#[Attribute(Attribute::IS_REPEATABLE|Attribute::TARGET_ALL)]
+#[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Arg
 implements MethodInfoInterface {
 

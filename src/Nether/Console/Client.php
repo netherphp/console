@@ -3,8 +3,11 @@
 namespace Nether\Console;
 use Nether;
 
+use Throwable;
 use Nether\Object\Datastore;
+use Nether\Object\Prototype\ClassInfo;
 use Nether\Object\Prototype\MethodInfo;
+use Nether\Object\Package\ClassInfoPackage;
 use Nether\Object\Package\MethodInfoPackage;
 use Nether\Console\Struct\CommandArgs;
 use Nether\Console\Error\RegisterArgcArgvUndefined;
@@ -12,6 +15,7 @@ use Nether\Console\Error\RegisterArgcArgvUndefined;
 class Client {
 
 	use
+	ClassInfoPackage,
 	MethodInfoPackage;
 
 	public string
@@ -57,6 +61,13 @@ class Client {
 
 	protected function
 	OnReady():
+	void {
+
+		return;
+	}
+
+	protected function
+	OnRun():
 	void {
 
 		return;
@@ -131,9 +142,23 @@ class Client {
 	string {
 
 		$Command = $this->Commands[$this->Command];
-		$Errors = $Command->GetAttribute(Nether\Console\Meta\Error::class);
 		$Error = NULL;
 		$Message = '';
+
+		// build a list of errors defined on the class itself that are
+		// consistent across methods, and then overwrite with any specific
+		// errors defined by the method.
+
+		$Errors = array_merge(
+			(
+				$this
+				->GetClassInfo(static::class)
+				->GetAttributes(Nether\Console\Meta\Error::class)
+			),
+			$Command->GetAttributes(Nether\Console\Meta\Error::class)
+		);
+
+		////////
 
 		if($Err !== 0)
 		$Message .= "ERROR({$Err}): ";
@@ -189,6 +214,7 @@ class Client {
 		$Method = $this->Commands[$this->Command];
 
 		try {
+			$this->OnRun();
 			$Result = $this->{$Method->Name}();
 		}
 
@@ -198,6 +224,16 @@ class Client {
 
 			if($Message)
 			echo $Message, PHP_EOL;
+
+			return $Code;
+		}
+
+		catch(Throwable $Err) {
+			printf(
+				'[UnmanagedException] %s %s',
+				$Err::class,
+				$Err->GetMessage()
+			);
 
 			return $Code;
 		}
@@ -297,16 +333,17 @@ class Client {
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
-	#[Nether\Console\Meta\Command('help')]
-	#[Nether\Console\Meta\Arg('command', 'Only show help for specific command.')]
-	#[Nether\Console\Meta\Toggle('--verbose', 'Shows all of the helpful.')]
-	#[Nether\Console\Meta\Info('Display this help.')]
+	#[Meta\Command('help')]
+	#[Meta\Arg('command', 'Only show help for specific command.')]
+	#[Meta\Toggle('--verbose', 'Shows all of the helpful.')]
+	#[Meta\Info('Display this help.')]
 	public function
 	HandleCommandHelp():
 	int {
 
 		$Picked = $this->GetInput(1);
 		$Verbose = $this->GetOption('verbose') ?? FALSE;
+		$Class = $this->GetClassInfo();
 		$Method = NULL;
 		$Command = NULL;
 		$Args = NULL;
@@ -343,13 +380,29 @@ class Client {
 		foreach($this->Commands as $Method) {
 			/** @var MethodInfo $Method */
 
-			$Command = $Method->GetAttribute(Nether\Console\Meta\Command::class);
-			$Args = $Method->GetAttribute(Nether\Console\Meta\Arg::class);
-			$Options = $Method->GetAttribute(Nether\Console\Meta\Option::class);
-			$Toggles = $Method->GetAttribute(Nether\Console\Meta\Toggle::class);
-			$Values = $Method->GetAttribute(Nether\Console\Meta\Value::class);
-			$Info = $Method->GetAttribute(Nether\Console\Meta\Info::class);
+			$Command = $Method->GetAttribute(Meta\Command::class);
+			$Info = $Method->GetAttribute(Meta\Info::class);
 			$Indent = "  ";
+
+			$Args = array_merge(
+				$Class->GetAttributes(Meta\Arg::class),
+				$Method->GetAttributes(Meta\Arg::class)
+			);
+
+			$Options = array_merge(
+				$Class->GetAttributes(Meta\Option::class),
+				$Method->GetAttributes(Meta\Option::class)
+			);
+
+			$Toggles = array_merge(
+				$Class->GetAttributes(Meta\Toggle::class),
+				$Method->GetAttributes(Meta\Toggle::class)
+			);
+
+			$Values = array_merge(
+				$Class->GetAttributes(Meta\Value::class),
+				$Method->GetAttributes(Meta\Value::class)
+			);
 
 			if($Picked && $Command->Name !== $Picked)
 			continue;
@@ -360,26 +413,27 @@ class Client {
 			////////
 
 			if($Options)
-			$Options = new Datastore(is_array($Options) ? $Options : [$Options]);
+			$Options = new Datastore($Options);
 			else
 			$Options = new Datastore;
 
 			if($Args)
-			$Args = new Datastore(is_array($Args) ? $Args : [$Args]);
+			$Args = new Datastore($Args);
 
 			////////
 
 			if($Toggles)
-			$Options->MergeRight(is_array($Toggles) ? $Toggles : [$Toggles]);
+			$Options->MergeRight($Toggles);
 
 			if($Values)
-			$Options->MergeRight(is_array($Values) ? $Values : [$Values]);
+			$Options->MergeRight($Values);
 
-			$Options
-			->Sort(function(Nether\Console\Meta\Option $A, Nether\Console\Meta\Option $B){
+			$Options->Sort(
+				fn(Meta\Option $A, Meta\Option $B)
+				=> $A->Name <=> $B->Name
+			);
 
-				return ltrim($A->Name, '!') <=> ltrim($B->Name, '!');
-			});
+			////////
 
 			printf(
 				'%s%s%s%s',
