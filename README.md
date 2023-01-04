@@ -1,9 +1,10 @@
 # **Nether Console (netherphp/console)**
 
-[![Packagist](https://img.shields.io/packagist/v/netherphp/console.svg?style=for-the-badge)](https://packagist.org/packages/netherphp/console) [![Packagist](https://img.shields.io/packagist/dt/netherphp/console.svg?style=for-the-badge)](https://packagist.org/packages/netherphp/console) [![Build Status](https://img.shields.io/github/workflow/status/netherphp/console/Unit%20Tests?style=for-the-badge)](https://github.com/netherphp/console/actions) [![codecov](https://img.shields.io/codecov/c/gh/netherphp/console?style=for-the-badge&token=VQC48XNBS2)](https://codecov.io/gh/netherphp/console)
+[![Packagist](https://img.shields.io/packagist/v/netherphp/console.svg?style=for-the-badge)](https://packagist.org/packages/netherphp/console)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/netherphp/console/phpunit.yml?style=for-the-badge)](https://github.com/netherphp/console/actions)
+[![codecov](https://img.shields.io/codecov/c/gh/netherphp/console?style=for-the-badge&token=VQC48XNBS2)](https://codecov.io/gh/netherphp/console)
 
-This package provides some basic functionality for creating command line
-interfaces via PHP 8 attributes.
+This package provides some basic functionality for creating command line interfaces via PHP 8 attributes.
 
 
 
