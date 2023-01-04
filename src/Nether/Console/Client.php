@@ -235,7 +235,7 @@ class Client {
 				$Err->GetMessage()
 			);
 
-			return $Code;
+			return $Code ?? -1;
 		}
 
 		return $Result;
