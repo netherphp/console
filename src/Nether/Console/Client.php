@@ -20,6 +20,7 @@ class Client {
 
 	const
 	AppName    = 'AppName',
+	AppDesc    = 'A CLI app.',
 	AppVersion = '0.0.0';
 
 	public string
@@ -364,6 +365,11 @@ class Client {
 		}
 
 		////////
+
+		$this
+		->FormatLn('%s %s',static::AppName,static::AppVersion)
+		->PrintLn(static::AppDesc)
+		->PrintLn();
 
 		printf(
 			'%1$s %2$s <command> <args>%3$s%3$s',
