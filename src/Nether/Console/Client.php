@@ -18,6 +18,10 @@ class Client {
 	ClassInfoPackage,
 	MethodInfoPackage;
 
+	const
+	AppName    = 'AppName',
+	AppVersion = '0.0.0';
+
 	public string
 	$Command = 'help';
 
@@ -343,6 +347,7 @@ class Client {
 
 		$Picked = $this->GetInput(1);
 		$Verbose = $this->GetOption('verbose') ?? FALSE;
+		$Version = $this->GetOption('version') ?? FALSE;
 		$Class = $this->GetClassInfo();
 		$Method = NULL;
 		$Command = NULL;
@@ -352,6 +357,11 @@ class Client {
 
 		if($Picked !== NULL)
 		$Verbose = TRUE;
+
+		if($Version) {
+			$this->PrintLn(static::AppVersion);
+			return 0;
+		}
 
 		////////
 
