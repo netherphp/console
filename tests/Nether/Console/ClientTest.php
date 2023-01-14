@@ -179,7 +179,7 @@ extends PHPUnit\Framework\TestCase {
 		$App->Run();
 		$Output = trim(ob_get_clean());
 
-		$this->AssertTrue(str_starts_with($Output, 'USAGE:'));
+		$this->AssertTrue(str_starts_with($Output, 'AppName'));
 
 		return;
 	}
@@ -212,7 +212,7 @@ extends PHPUnit\Framework\TestCase {
 		$App->Run();
 		$Output = trim(ob_get_clean());
 
-		$this->AssertTrue(str_starts_with($Output, 'USAGE:'));
+		$this->AssertTrue(str_starts_with($Output, 'AppName'));
 
 		return;
 	}
