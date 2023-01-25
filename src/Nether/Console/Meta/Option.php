@@ -8,8 +8,8 @@ use Nether;
 use Attribute;
 use ReflectionMethod;
 use ReflectionAttribute;
-use Nether\Object\Prototype\MethodInfo;
-use Nether\Object\Prototype\MethodInfoInterface;
+use Nether\Common\Prototype\MethodInfo;
+use Nether\Common\Prototype\MethodInfoInterface;
 
 #[Attribute(Attribute::TARGET_CLASS|Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Option

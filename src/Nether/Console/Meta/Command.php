@@ -5,8 +5,8 @@ namespace Nether\Console\Meta;
 use Attribute;
 use ReflectionMethod;
 use ReflectionAttribute;
-use Nether\Object\Prototype\MethodInfo;
-use Nether\Object\Prototype\MethodInfoInterface;
+use Nether\Common\Prototype\MethodInfo;
+use Nether\Common\Prototype\MethodInfoInterface;
 use Nether\Console\Util;
 
 #[Attribute(Attribute::TARGET_METHOD)]

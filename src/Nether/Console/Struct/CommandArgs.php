@@ -2,7 +2,7 @@
 
 namespace Nether\Console\Struct;
 
-use Nether\Object\Datastore;
+use Nether\Common\Datastore;
 
 class CommandArgs {
 

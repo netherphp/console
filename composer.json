@@ -13,7 +13,7 @@
 	],
 	"require": {
 		"php": ">=8.0",
-		"netherphp/object": "dev-redux"
+		"netherphp/common": "dev-master"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "^9.5",

@@ -1,22 +1,16 @@
 <?php
 
 namespace Nether\Console;
-use Nether;
+
+use Nether\Common;
 
 use Throwable;
-use Nether\Object\Datastore;
-use Nether\Object\Prototype\ClassInfo;
-use Nether\Object\Prototype\MethodInfo;
-use Nether\Object\Package\ClassInfoPackage;
-use Nether\Object\Package\MethodInfoPackage;
-use Nether\Console\Struct\CommandArgs;
-use Nether\Console\Error\RegisterArgcArgvUndefined;
 
 class Client {
 
 	use
-	ClassInfoPackage,
-	MethodInfoPackage;
+	Common\Package\ClassInfoPackage,
+	Common\Package\MethodInfoPackage;
 
 	const
 	AppName    = 'AppName',
@@ -29,10 +23,10 @@ class Client {
 	public string
 	$Name;
 
-	public Datastore
+	public Common\Datastore
 	$Commands;
 
-	public CommandArgs
+	public Struct\CommandArgs
 	$Args;
 
 	public TerminalFormatter
@@ -49,7 +43,7 @@ class Client {
 
 		if($Argv === NULL) {
 			if(!isset($_SERVER['argv']))
-			throw new RegisterArgcArgvUndefined;
+			throw new Error\RegisterArgcArgvUndefined;
 
 			$Argv = $_SERVER['argv'];
 		}
@@ -86,9 +80,9 @@ class Client {
 	static {
 
 		$this->Commands = (
-			(new Datastore(static::GetMethodsWithAttribute(Meta\Command::class)))
+			(new Common\Datastore(static::GetMethodsWithAttribute(Meta\Command::class)))
 			->RemapKeys(
-				fn(string $Key, MethodInfo $Method)
+				fn(string $Key, Common\Prototype\MethodInfo $Method)
 				=> [
 					$Method->Attributes[Meta\Command::class]->Name
 					=> $Method
@@ -158,9 +152,9 @@ class Client {
 			(
 				$this
 				->GetClassInfo(static::class)
-				->GetAttributes(Nether\Console\Meta\Error::class)
+				->GetAttributes(Meta\Error::class)
 			),
-			$Command->GetAttributes(Nether\Console\Meta\Error::class)
+			$Command->GetAttributes(Meta\Error::class)
 		);
 
 		////////
@@ -170,9 +164,9 @@ class Client {
 
 		if($Errors) {
 			$Errors = (
-				(new Datastore(is_array($Errors) ? $Errors : [$Errors]))
+				(new Common\Datastore(is_array($Errors) ? $Errors : [$Errors]))
 				->Filter(
-					fn(Nether\Console\Meta\Error $Error)
+					fn(Meta\Error $Error)
 					=> $Error->Code === $Err
 				)
 			);
@@ -431,12 +425,12 @@ class Client {
 			////////
 
 			if($Options)
-			$Options = new Datastore($Options);
+			$Options = new Common\Datastore($Options);
 			else
-			$Options = new Datastore;
+			$Options = new Common\Datastore;
 
 			if($Args)
-			$Args = new Datastore($Args);
+			$Args = new Common\Datastore($Args);
 
 			////////
 
