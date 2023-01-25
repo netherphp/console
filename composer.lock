@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "46b165dc85ab81963e97e5da102c9800",
+    "content-hash": "5dbfeb7a261fccc413130ed277c5ef86",
     "packages": [
         {
             "name": "brick/math",
@@ -64,7 +64,7 @@
         },
         {
             "name": "netherphp/common",
-            "version": "dev-master",
+            "version": "v5.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netherphp/common.git",
@@ -85,7 +85,6 @@
                 "netherphp/standards": ">=0.1.9",
                 "phpunit/phpunit": "^9.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -111,7 +110,7 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/common/issues",
-                "source": "https://github.com/netherphp/common/tree/master"
+                "source": "https://github.com/netherphp/common/tree/v5.0.5"
             },
             "time": "2023-01-25T20:23:57+00:00"
         },
@@ -2211,9 +2210,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "netherphp/common": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
