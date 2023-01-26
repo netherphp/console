@@ -15,7 +15,8 @@ class Client {
 	const
 	AppName    = 'AppName',
 	AppDesc    = 'A CLI app.',
-	AppVersion = '0.0.0';
+	AppVersion = '0.0.0',
+	AppDebug   = FALSE;
 
 	public string
 	$Command = 'help';
@@ -228,6 +229,9 @@ class Client {
 		}
 
 		catch(Throwable $Err) {
+			if(static::AppDebug)
+			throw $Err;
+
 			printf(
 				'[UnmanagedException] %s %s',
 				$Err::class,
