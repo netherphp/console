@@ -355,6 +355,60 @@ extends PHPUnit\Framework\TestCase {
 
 	/** @test */
 	public function
+	TestPromptBool():
+	void {
+
+		$App = new TestApp([ 'test.lulz', 'test' ]);
+		$Input = tmpfile();
+		$UserInput = NULL;
+		$Expected = NULL;
+		$Result = NULL;
+
+		$Tests = [
+			'y'         => TRUE,
+			'Y'         => TRUE,
+			'1'         => TRUE,
+			'true'      => TRUE,
+			'yes'       => TRUE,
+			'n'         => FALSE,
+			'N'         => FALSE,
+			'0'         => FALSE,
+			'false'     => FALSE,
+			'no'        => FALSE,
+			'totes'     => FALSE,
+			'of course' => FALSE
+		];
+
+		foreach($Tests as $UserInput => $Expected) {
+			fwrite($Input, "{$UserInput}\n");
+			fseek($Input, 0);
+
+			ob_start();
+			$Result = $App->PromptTrue('true?', '??>', $Input);
+			$Output = ob_get_clean();
+			fseek($Input, 0);
+
+			$this->AssertEquals($Expected, $Result);
+		}
+
+		foreach($Tests as $UserInput => $Expected) {
+			fwrite($Input, "{$UserInput}\n");
+			fseek($Input, 0);
+
+			ob_start();
+			$Result = $App->PromptFalse('true?', '??>', $Input);
+			$Output = ob_get_clean();
+			fseek($Input, 0);
+
+			$this->AssertEquals(!$Expected, $Result);
+		}
+
+		fclose($Input);
+		return;
+	}
+
+	/** @test */
+	public function
 	TestFormatterShortuts():
 	void {
 

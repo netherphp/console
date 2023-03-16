@@ -297,6 +297,33 @@ class Client {
 	}
 
 	public function
+	PromptBool(?string $Msg=NULL, ?string $Prompt=NULL, bool $Condition=TRUE, mixed $Input=STDIN):
+	bool {
+
+		$Result = Common\Datafilters::TypeBool($this->Prompt(
+			$Msg,
+			$Prompt,
+			$Input
+		));
+
+		return ($Result === $Condition);
+	}
+
+	public function
+	PromptTrue(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
+	bool {
+
+		return $this->PromptBool($Msg, $Prompt, TRUE, $Input);
+	}
+
+	public function
+	PromptFalse(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
+	bool {
+
+		return $this->PromptBool($Msg, $Prompt, FALSE, $Input);
+	}
+
+	public function
 	ExecuteCommandLine(string $Command, bool $Silent=FALSE):
 	Struct\CommandLineUtil {
 
