@@ -196,6 +196,20 @@ class Client {
 	}
 
 	public function
+	FormatErrorPrimary(string $Text):
+	string {
+
+		return $this->Formatter->BoldRed($Text);
+	}
+
+	public function
+	FormatErrorSecondary(string $Text):
+	string {
+
+		return $this->Formatter->Red($Text);
+	}
+
+	public function
 	Run():
 	int {
 
