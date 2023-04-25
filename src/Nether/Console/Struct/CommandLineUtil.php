@@ -55,4 +55,11 @@ class CommandLineUtil {
 		return $this;
 	}
 
+	public function
+	GetOutputString($Prefix=''):
+	string {
+
+		return join(sprintf('%s%s', PHP_EOL, $Prefix), $this->Output);
+	}
+
 }
