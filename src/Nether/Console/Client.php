@@ -18,6 +18,9 @@ class Client {
 	AppVersion = '0.0.0',
 	AppDebug   = FALSE;
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	public string
 	$Command = 'help';
 
@@ -38,6 +41,9 @@ class Client {
 
 	public string
 	$ColourSecondary = 'Yellow';
+
+	public string
+	$StatusEmoji = 'square';
 
 	public function
 	__Construct(?array $Argv=NULL) {
@@ -210,6 +216,89 @@ class Client {
 	}
 
 	public function
+	GetColourForStatus(mixed $Status):
+	Common\Units\Colour {
+
+		$Colour = match(TRUE) {
+			$Status === TRUE,
+			$Status === 'OK',
+			=> new Common\Units\Colour('#44CC44'),
+
+			$Status === FALSE,
+			$Status === 'ERROR',
+			=> new Common\Units\Colour('#CC4444'),
+
+			$Status === NULL,
+			$Status === 'UNKNOWN'
+			=> new Common\Units\Colour('#CCCCCC'),
+
+			default
+			=> new Common\Units\Colour('#ffffff')
+		};
+
+		return $Colour;
+	}
+
+	public function
+	GetFormatForStatus(mixed $Status, string $Alt=NULL):
+	array {
+
+		$Output = match(TRUE) {
+			$Status === TRUE,
+			$Status === 'OK',
+			=> [ 'Colour'=> new Common\Units\Colour('#44CC44') ],
+
+			$Status === FALSE,
+			$Status === 'ERROR',
+			=> [ 'Colour'=> new Common\Units\Colour('#CC4444') ],
+
+			$Status === NULL,
+			$Status === 'UNKNOWN'
+			=> [ 'Colour'=> new Common\Units\Colour('#CCCCCC') ],
+
+			default
+			=> []
+		};
+
+		switch($Alt) {
+			case 'alt1':
+				($Output['Colour'])
+				->Desaturate(44);
+			break;
+			case 'alt2':
+				($Output['Colour'])
+				->Desaturate(44)
+				->Rotate(45);
+			break;
+			case 'alt3':
+				($Output['Colour'])
+				->Desaturate(44)
+				->Rotate(-45);
+			break;
+		}
+
+		return $Output;
+	}
+
+	static public function
+	GetStatusEmoji(mixed $Status):
+	string {
+
+		if($Status === TRUE)
+		return '🟢';
+
+		if($Status === FALSE)
+		return '🔴';
+
+		if(is_int($Status))
+		return ['⚫', '⚪', '🟤', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣'][$Status];
+
+		////////
+
+		return '⚫';
+	}
+
+	public function
 	Run():
 	int {
 
@@ -268,22 +357,44 @@ class Client {
 	}
 
 	public function
-	PrintLn(?string $Line=NULL):
+	PrintLn(?string $Line=NULL, int $Lines=1):
 	static {
 
-		echo ($Line ?? ''), PHP_EOL;
+		echo ($Line ?? ''), str_repeat(PHP_EOL, $Lines);
+		return $this;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	public function
+	Format(string $Fmt='', string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
+	static {
+
+		if(is_string($Colour))
+		$Colour = new Common\Units\Colour($Colour);
+
+		echo Common\Text::New(
+			$Fmt,
+			Common\Text::ModeTerminal,
+			$Colour, $Bold, $Italic, $Underline
+		);
+
 		return $this;
 	}
 
 	public function
-	FormatLn(?string $Fmt=NULL, ...$Argv):
+	FormatLn(string $Fmt='', int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
 	static {
 
-		printf($Fmt, ...$Argv);
-		echo PHP_EOL;
+		$this->Format($Fmt, $Colour, $Bold, $Italic, $Underline);
+		echo str_repeat(PHP_EOL, $Lines);
 
 		return $this;
 	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	public function
 	Prompt(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
@@ -407,7 +518,10 @@ class Client {
 
 		if(!$Picked) {
 			$this
-			->FormatLn('%s %s', static::AppName, static::AppVersion)
+			->PrintLn(sprintf(
+				'%s %s',
+				static::AppName, static::AppVersion
+			))
 			->PrintLn(static::AppDesc)
 			->PrintLn();
 		}

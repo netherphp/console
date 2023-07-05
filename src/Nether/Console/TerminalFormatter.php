@@ -185,4 +185,13 @@ class TerminalFormatter {
 		return sprintf("\e[%sm",join(';',$Final));
 	}
 
+	public function
+	RGB(int $R, int $G, int $B):
+	string {
+
+		$Codes = [ 38, 2, $R, $G, $B ];
+
+		return sprintf("\e[%sm", join(';', $Codes));
+	}
+
 }
