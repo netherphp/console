@@ -244,17 +244,23 @@ class Client {
 	array {
 
 		$Output = match(TRUE) {
+
 			$Status === TRUE,
-			$Status === 'OK',
+			$Status === 'ok',
 			=> [ 'Colour'=> new Common\Units\Colour('#44CC44') ],
 
 			$Status === FALSE,
-			$Status === 'ERROR',
+			$Status === 'error',
 			=> [ 'Colour'=> new Common\Units\Colour('#CC4444') ],
 
 			$Status === NULL,
-			$Status === 'UNKNOWN'
+			$Status === 'unknown'
 			=> [ 'Colour'=> new Common\Units\Colour('#CCCCCC') ],
+
+			////////
+
+			$Status === 'primary'
+			=> [ 'Colour'=> new Common\Units\Colour('#E4D060') ],
 
 			default
 			=> []
@@ -369,25 +375,25 @@ class Client {
 
 	public function
 	Format(string $Fmt='', string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
-	static {
+	Common\Text {
 
 		if(is_string($Colour))
 		$Colour = new Common\Units\Colour($Colour);
 
-		echo Common\Text::New(
+		$Output = Common\Text::New(
 			$Fmt,
 			Common\Text::ModeTerminal,
 			$Colour, $Bold, $Italic, $Underline
 		);
 
-		return $this;
+		return $Output;
 	}
 
 	public function
 	FormatLn(string $Fmt='', int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
 	static {
 
-		$this->Format($Fmt, $Colour, $Bold, $Italic, $Underline);
+		echo $this->Format($Fmt, $Colour, $Bold, $Italic, $Underline);
 		echo str_repeat(PHP_EOL, $Lines);
 
 		return $this;

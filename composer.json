@@ -14,7 +14,6 @@
 	"require": {
 		"php": ">=8.1",
 		"netherphp/common": "^5.0.5",
-		"ssnepenthe/color-utils": "^0.4.2",
 		"ozdemirburak/iris": "^3.1"
 	},
 	"require-dev": {
