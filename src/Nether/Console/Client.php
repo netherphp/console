@@ -12,14 +12,40 @@ class Client {
 	Common\Package\ClassInfoPackage,
 	Common\Package\MethodInfoPackage;
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	const
-	AppName    = 'AppName',
-	AppDesc    = 'A CLI app.',
-	AppVersion = '0.0.0',
-	AppDebug   = FALSE;
+	FmtPrime     = 'Primary',
+	FmtPrimeAlt  = 'PrimaryAlt',
+	FmtAccent    = 'Accent',
+	FmtAccentAlt = 'AccentAlt',
+	FmtError     = 'Error',
+	FmtErrorAlt  = 'ErrorAlt',
+	FmtOK        = 'OK',
+	FmtOKAlt     = 'OKAlt',
+	FmtMuted     = 'Muted',
+	FmtMutedAlt  = 'MutedAlt';
+
+	const
+	FmtPresets = [
+		'Primary'      => [ 'Bold'=> TRUE, 'Colour'=> '#F6684E' ],
+		'PrimaryAlt'   => [ 'Bold'=> TRUE, 'Colour'=> '#FAA99A' ],
+		'Secondary'    => [ 'Bold'=> TRUE, 'Colour'=> '#E3C099' ],
+		'SecondaryAlt' => [ 'Bold'=> TRUE, 'Colour'=> '#EFDBC5' ],
+		'Error'        => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
+		'ErrorAlt'     => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
+		'OK'           => [ 'Bold'=> TRUE, 'Colour'=> '#4EA125' ],
+		'OKAlt'        => [ 'Bold'=> TRUE, 'Colour'=> '#A2D181' ],
+		'Muted'        => [ 'Colour'=> '#666666' ],
+		'MutedAlt'     => [ 'Colour'=> '#AAAAAA' ]
+	];
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
+
+	public Meta\Application
+	$AppInfo;
 
 	public string
 	$Command = 'help';
@@ -33,17 +59,32 @@ class Client {
 	public Struct\CommandArgs
 	$Args;
 
+	public string
+	$StatusEmoji = 'square';
+
+	////////////////////////////////////////////////////////////////
+	// DEPRECATED //////////////////////////////////////////////////
+
+	const
+	AppName    = 'AppName',
+	AppDesc    = 'A CLI app.',
+	AppVersion = '0.0.0',
+	AppDebug   = FALSE;
+
+	#[Common\Meta\Deprecated('2023-07-26')]
 	public TerminalFormatter
 	$Formatter;
 
+	#[Common\Meta\Deprecated('2023-07-26')]
 	public string
 	$ColourPrimary = 'BoldYellow';
 
+	#[Common\Meta\Deprecated('2023-07-26')]
 	public string
 	$ColourSecondary = 'Yellow';
 
-	public string
-	$StatusEmoji = 'square';
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	public function
 	__Construct(?array $Argv=NULL) {
@@ -56,6 +97,7 @@ class Client {
 		}
 
 		$this
+		->ReadAppInfo()
 		->BuildCommandIndex()
 		->ParseArguments($Argv);
 
@@ -83,6 +125,36 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	protected function
+	ReadAppInfo():
+	static {
+
+		$ClassInfo = static::GetClassInfo();
+		$AttrAppl = $ClassInfo->GetAttribute(Meta\Application::class);
+		$AttrInfo = $ClassInfo->GetAttribute(Meta\Info::class);
+
+		// bring in the main application information from the application
+		// attribute.
+
+		if(!$AttrAppl)
+		$AttrAppl = new Meta\Application(
+			Name: static::AppName,
+			Version: static::AppVersion,
+			AutoCmd: NULL
+		);
+
+		$this->AppInfo = $AttrAppl;
+
+		// bring in the application description from the info attribute.
+
+		if($AttrInfo)
+		$this->AppInfo->Desc = $AttrInfo->Text;
+
+		////////
+
+		return $this;
+	}
+
+	protected function
 	BuildCommandIndex():
 	static {
 
@@ -108,7 +180,21 @@ class Client {
 
 		$this->Args = Util::ParseCommandArgs($Argv, FALSE);
 		$this->Name = $this->Args->Inputs->Shift();
-		$this->Command = strtolower($this->Args->Inputs->Shift() ?? 'help');
+		$this->Command = $this->Args->Inputs->Shift() ?? 'help';
+
+		if($this->AppInfo->AutoCmd) {
+			if($this->Commands->HasKey($this->AppInfo->AutoCmd))
+			(Common\Datastore::FromArray($this->Commands[$this->AppInfo->AutoCmd]->Attributes))
+			->Filter(fn(mixed $A): bool => $A instanceof Meta\Command)
+			->Each(fn(Meta\Command $A)=> $A->Hide = TRUE);
+
+			if($this->Command !== 'help') {
+				$this->Args->Inputs->Unshift($this->Command);
+				$this->Command = $this->AppInfo->AutoCmd;
+			}
+		}
+
+		$this->Command = strtolower($this->Command);
 
 		return $this;
 	}
@@ -313,7 +399,9 @@ class Client {
 		$Message = NULL;
 		$Code = NULL;
 
-		////////
+		// if the command specified was not found then the app should bail
+		// now with whatever helpful and informative stupids i end up
+		// putting in the command attributes.
 
 		if(!$this->Commands->HasKey($this->Command))
 		return $this->HandleCommandHelp();
@@ -338,14 +426,18 @@ class Client {
 		}
 
 		catch(Throwable $Err) {
-			if(static::AppDebug)
-			throw $Err;
+			$Message = $Err->GetMessage();
+			$Code = $Err->GetCode();
 
-			printf(
-				'[UnmanagedException] %s %s',
-				$Err::class,
-				$Err->GetMessage()
-			);
+			($this)
+			->PrintLn()
+			->PrintLn(sprintf(
+				'%s %s',
+				$this->Format("[{$this->AppInfo->Name}:UnhandledException]", static::FmtError),
+				$Message
+			))
+			->PrintLn()
+			->PrintLn($this->Format($Err->GetTraceAsString(), static::FmtMuted));
 
 			return $Code ?? -1;
 		}
@@ -374,26 +466,52 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	public function
-	Format(string $Fmt='', string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
+	Format(string $Fmt='', ?string $Preset=NULL, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
 	Common\Text {
 
-		if(is_string($Colour))
-		$Colour = new Common\Units\Colour($Colour);
+		$Opts = NULL;
+
+		if($Preset !== NULL) {
+			$Opts = static::FmtPresets[$Preset];
+
+			if(isset($Opts['Colour']) && is_string($Opts['Colour']))
+			$Opts['Colour'] = new Common\Units\Colour($Opts['Colour']);
+		}
+
+		else {
+			if(is_string($Colour))
+			$Colour = new Common\Units\Colour($Colour);
+
+			$Opts = [
+				'Colour'    => $Colour,
+				'Bold'      => $Bold,
+				'Italic'    => $Italic,
+				'Underline' => $Underline
+			];
+		}
 
 		$Output = Common\Text::New(
 			$Fmt,
 			Common\Text::ModeTerminal,
-			$Colour, $Bold, $Italic, $Underline
+			...$Opts
 		);
 
 		return $Output;
 	}
 
 	public function
-	FormatLn(string $Fmt='', int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
+	FormatLn(string $Fmt='', ?string $Preset=NULL, int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
 	static {
 
-		echo $this->Format($Fmt, $Colour, $Bold, $Italic, $Underline);
+		echo $this->Format(
+			Fmt: $Fmt,
+			Colour: $Colour,
+			Bold: $Bold,
+			Italic: $Italic,
+			Underline: $Underline,
+			Preset: $Preset
+		);
+
 		echo str_repeat(PHP_EOL, $Lines);
 
 		return $this;
@@ -512,11 +630,14 @@ class Client {
 		$Options = NULL;
 		$Info = NULL;
 
+		if($this->AppInfo->AutoCmd)
+		$Picked = $this->AppInfo->AutoCmd;
+
 		if($Picked !== NULL)
 		$Verbose = TRUE;
 
 		if($Version) {
-			$this->PrintLn(static::AppVersion);
+			$this->PrintLn($this->AppInfo->Version);
 			return 0;
 		}
 
@@ -526,9 +647,9 @@ class Client {
 			$this
 			->PrintLn(sprintf(
 				'%s %s',
-				static::AppName, static::AppVersion
+				$this->AppInfo->Name, $this->AppInfo->Version
 			))
-			->PrintLn(static::AppDesc)
+			->PrintLn($this->AppInfo->Desc)
 			->PrintLn();
 		}
 
