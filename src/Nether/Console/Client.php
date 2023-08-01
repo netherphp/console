@@ -16,23 +16,27 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	const
-	FmtPrime     = 'Primary',
-	FmtPrimeAlt  = 'PrimaryAlt',
-	FmtAccent    = 'Accent',
-	FmtAccentAlt = 'AccentAlt',
-	FmtError     = 'Error',
-	FmtErrorAlt  = 'ErrorAlt',
-	FmtOK        = 'OK',
-	FmtOKAlt     = 'OKAlt',
-	FmtMuted     = 'Muted',
-	FmtMutedAlt  = 'MutedAlt';
+	FmtDefault    = 'Default',
+	FmtDefaultAlt = 'DefaultAlt',
+	FmtPrime      = 'Primary',
+	FmtPrimeAlt   = 'PrimaryAlt',
+	FmtAccent     = 'Accent',
+	FmtAccentAlt  = 'AccentAlt',
+	FmtError      = 'Error',
+	FmtErrorAlt   = 'ErrorAlt',
+	FmtOK         = 'OK',
+	FmtOKAlt      = 'OKAlt',
+	FmtMuted      = 'Muted',
+	FmtMutedAlt   = 'MutedAlt';
 
 	const
 	FmtPresets = [
+		'Default'      => [],
+		'DefaultAlt'   => [],
 		'Primary'      => [ 'Bold'=> TRUE, 'Colour'=> '#F6684E' ],
 		'PrimaryAlt'   => [ 'Bold'=> TRUE, 'Colour'=> '#FAA99A' ],
-		'Secondary'    => [ 'Bold'=> TRUE, 'Colour'=> '#E3C099' ],
-		'SecondaryAlt' => [ 'Bold'=> TRUE, 'Colour'=> '#EFDBC5' ],
+		'Accent'       => [ 'Bold'=> TRUE, 'Colour'=> '#E3C099' ],
+		'AccentAlt'    => [ 'Bold'=> TRUE, 'Colour'=> '#EFDBC5' ],
 		'Error'        => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
 		'ErrorAlt'     => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
 		'OK'           => [ 'Bold'=> TRUE, 'Colour'=> '#4EA125' ],
