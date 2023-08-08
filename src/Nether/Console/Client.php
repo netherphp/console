@@ -553,7 +553,7 @@ class Client {
 	PromptBool(?string $Msg=NULL, ?string $Prompt=NULL, bool $Condition=TRUE, mixed $Input=STDIN):
 	bool {
 
-		$Result = Common\Datafilters::TypeBool($this->Prompt(
+		$Result = Common\Filters\Numbers::BoolType($this->Prompt(
 			$Msg,
 			$Prompt,
 			$Input
