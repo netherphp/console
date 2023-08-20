@@ -446,7 +446,7 @@ class Client {
 			return $Code ?? -1;
 		}
 
-		return $Result;
+		return $Result ?? 0;
 	}
 
 	public function
@@ -775,6 +775,15 @@ class Client {
 		}
 
 		return 0;
+	}
+
+	static public function
+	Realboot():
+	int {
+
+		$App = new static;
+
+		return $App->Run();
 	}
 
 }
