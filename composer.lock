@@ -63,27 +63,194 @@
             "time": "2022-08-10T22:54:19+00:00"
         },
         {
-            "name": "netherphp/common",
-            "version": "v5.0.5",
+            "name": "fileeye/mimemap",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/netherphp/common.git",
-                "reference": "a3826e434669acdb893f957f2fd3d6233aa601b1"
+                "url": "https://github.com/FileEye/MimeMap.git",
+                "reference": "befb9f1ee77dbf6b74a2c578874e128c9a5c1a2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netherphp/common/zipball/a3826e434669acdb893f957f2fd3d6233aa601b1",
-                "reference": "a3826e434669acdb893f957f2fd3d6233aa601b1",
+                "url": "https://api.github.com/repos/FileEye/MimeMap/zipball/befb9f1ee77dbf6b74a2c578874e128c9a5c1a2d",
+                "reference": "befb9f1ee77dbf6b74a2c578874e128c9a5c1a2d",
                 "shasum": ""
             },
             "require": {
+                "php": ">=7.3"
+            },
+            "require-dev": {
+                "composer-runtime-api": "^2.0.0",
+                "phpstan/phpstan": "^1.2",
+                "phpunit/phpunit": "^9 | ^10",
+                "sebastian/comparator": ">=4",
+                "sebastian/diff": ">=4",
+                "squizlabs/php_codesniffer": ">=3.6",
+                "symfony/console": ">=5.4",
+                "symfony/filesystem": ">=5.4",
+                "symfony/var-dumper": ">=5.4",
+                "symfony/yaml": ">=5.4",
+                "vimeo/psalm": "^4.23 | ^5"
+            },
+            "bin": [
+                "bin/fileeye-mimemap"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "FileEye\\MimeMap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "description": "A PHP library to handle MIME Content-Type fields and their related file extensions.",
+            "homepage": "https://github.com/FileEye/MimeMap",
+            "keywords": [
+                "mime",
+                "mime-database",
+                "mime-parser",
+                "mime-type"
+            ],
+            "support": {
+                "issues": "https://github.com/FileEye/MimeMap/issues",
+                "source": "https://github.com/FileEye/MimeMap/tree/2.0.2"
+            },
+            "time": "2023-08-29T16:20:26+00:00"
+        },
+        {
+            "name": "monolog/monolog",
+            "version": "3.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/monolog.git",
+                "reference": "e2392369686d420ca32df3803de28b5d6f76867d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/e2392369686d420ca32df3803de28b5d6f76867d",
+                "reference": "e2392369686d420ca32df3803de28b5d6f76867d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.1",
+                "psr/log": "^2.0 || ^3.0"
+            },
+            "provide": {
+                "psr/log-implementation": "3.0.0"
+            },
+            "require-dev": {
+                "aws/aws-sdk-php": "^3.0",
+                "doctrine/couchdb": "~1.0@dev",
+                "elasticsearch/elasticsearch": "^7 || ^8",
+                "ext-json": "*",
+                "graylog2/gelf-php": "^1.4.2 || ^2.0",
+                "guzzlehttp/guzzle": "^7.4.5",
+                "guzzlehttp/psr7": "^2.2",
+                "mongodb/mongodb": "^1.8",
+                "php-amqplib/php-amqplib": "~2.4 || ^3",
+                "phpstan/phpstan": "^1.9",
+                "phpstan/phpstan-deprecation-rules": "^1.0",
+                "phpstan/phpstan-strict-rules": "^1.4",
+                "phpunit/phpunit": "^10.1",
+                "predis/predis": "^1.1 || ^2",
+                "ruflin/elastica": "^7",
+                "symfony/mailer": "^5.4 || ^6",
+                "symfony/mime": "^5.4 || ^6"
+            },
+            "suggest": {
+                "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
+                "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "elasticsearch/elasticsearch": "Allow sending log messages to an Elasticsearch server via official client",
+                "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
+                "ext-curl": "Required to send log messages using the IFTTTHandler, the LogglyHandler, the SendGridHandler, the SlackWebhookHandler or the TelegramBotHandler",
+                "ext-mbstring": "Allow to work properly with unicode symbols",
+                "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
+                "ext-openssl": "Required to send log messages using SSL",
+                "ext-sockets": "Allow sending log messages to a Syslog server (via UDP driver)",
+                "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
+                "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
+                "rollbar/rollbar": "Allow sending log messages to Rollbar",
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Monolog\\": "src/Monolog"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "https://seld.be"
+                }
+            ],
+            "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
+            "homepage": "https://github.com/Seldaek/monolog",
+            "keywords": [
+                "log",
+                "logging",
+                "psr-3"
+            ],
+            "support": {
+                "issues": "https://github.com/Seldaek/monolog/issues",
+                "source": "https://github.com/Seldaek/monolog/tree/3.4.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Seldaek",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/monolog/monolog",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-06-21T08:46:11+00:00"
+        },
+        {
+            "name": "netherphp/common",
+            "version": "v5.0.26",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/netherphp/common.git",
+                "reference": "a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/netherphp/common/zipball/a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515",
+                "reference": "a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515",
+                "shasum": ""
+            },
+            "require": {
+                "fileeye/mimemap": "^2.0",
+                "monolog/monolog": "^3.3",
+                "ozdemirburak/iris": "^3.1",
                 "php": "^8.1",
-                "ramsey/uuid": "^4.7"
+                "ramsey/uuid": "^4.7",
+                "savvywombat/color": "^1.3"
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
                 "netherphp/standards": ">=0.1.9",
-                "phpunit/phpunit": "^9.5"
+                "phpunit/phpunit": "^9.6"
             },
             "type": "library",
             "autoload": {
@@ -110,9 +277,9 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/common/issues",
-                "source": "https://github.com/netherphp/common/tree/v5.0.5"
+                "source": "https://github.com/netherphp/common/tree/v5.0.26"
             },
-            "time": "2023-01-25T20:23:57+00:00"
+            "time": "2023-08-14T01:21:48+00:00"
         },
         {
             "name": "ozdemirburak/iris",
@@ -171,6 +338,56 @@
                 "source": "https://github.com/ozdemirburak/iris/tree/3.1.1"
             },
             "time": "2023-02-22T23:12:10+00:00"
+        },
+        {
+            "name": "psr/log",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/fe5ea303b0887d5caefd3d431c3e61ad47037001",
+                "reference": "fe5ea303b0887d5caefd3d431c3e61ad47037001",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/3.0.0"
+            },
+            "time": "2021-07-14T16:46:02+00:00"
         },
         {
             "name": "ramsey/collection",
@@ -352,6 +569,67 @@
                 }
             ],
             "time": "2023-01-12T18:13:24+00:00"
+        },
+        {
+            "name": "savvywombat/color",
+            "version": "1.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SavvyWombat/color-php.git",
+                "reference": "a922e6fec299a42954743a41d536473dd0790936"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SavvyWombat/color-php/zipball/a922e6fec299a42954743a41d536473dd0790936",
+                "reference": "a922e6fec299a42954743a41d536473dd0790936",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4||^8"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.0",
+                "phpunit/phpunit": "^9.5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SavvyWombat\\Color\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stuart Jones",
+                    "email": "stuart@savvywombat.com.au",
+                    "homepage": "https://savvywombat.com.au",
+                    "role": "creator"
+                }
+            ],
+            "description": "Package for manipulating colors in multiple color spaces.",
+            "homepage": "https://github.com/SavvyWombat/color-php",
+            "keywords": [
+                "color",
+                "color space",
+                "colors",
+                "conversion",
+                "convert",
+                "hex",
+                "hsl",
+                "manipulation",
+                "rgb",
+                "savvy wombat",
+                "savvywombat",
+                "transform"
+            ],
+            "support": {
+                "issues": "https://github.com/SavvyWombat/color-php/issues",
+                "source": "https://github.com/SavvyWombat/color-php/tree/1.3.1"
+            },
+            "time": "2022-09-29T08:57:37+00:00"
         }
     ],
     "packages-dev": [

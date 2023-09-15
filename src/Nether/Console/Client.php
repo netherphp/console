@@ -66,6 +66,9 @@ class Client {
 	public string
 	$StatusEmoji = 'square';
 
+	public Common\Datastore
+	$ExtraData;
+
 	////////////////////////////////////////////////////////////////
 	// DEPRECATED //////////////////////////////////////////////////
 
@@ -106,8 +109,18 @@ class Client {
 		->ParseArguments($Argv);
 
 		$this->Formatter = new TerminalFormatter;
+		$this->ExtraData = new Common\Datastore;
 
+		$this->OnPrepare();
 		$this->OnReady();
+
+		return;
+	}
+
+	protected function
+	OnPrepare():
+	void {
+
 		return;
 	}
 
@@ -277,6 +290,7 @@ class Client {
 		return $Message;
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	FormatPrimary(string $Text):
 	string {
@@ -284,6 +298,7 @@ class Client {
 		return $this->Formatter->{$this->ColourPrimary}($Text);
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	FormatSecondary(string $Text):
 	string {
@@ -291,6 +306,7 @@ class Client {
 		return $this->Formatter->{$this->ColourSecondary}($Text);
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	FormatErrorPrimary(string $Text):
 	string {
@@ -298,6 +314,7 @@ class Client {
 		return $this->Formatter->BoldRed($Text);
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	FormatErrorSecondary(string $Text):
 	string {
@@ -305,6 +322,7 @@ class Client {
 		return $this->Formatter->Red($Text);
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	GetColourForStatus(mixed $Status):
 	Common\Units\Colour {
@@ -329,6 +347,7 @@ class Client {
 		return $Colour;
 	}
 
+	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
 	GetFormatForStatus(mixed $Status, string $Alt=NULL):
 	array {
@@ -507,6 +526,8 @@ class Client {
 	FormatLn(string $Fmt='', ?string $Preset=NULL, int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
 	static {
 
+		// @todo 2023-09-15 this should be returning, not printing.
+
 		echo $this->Format(
 			Fmt: $Fmt,
 			Colour: $Colour,
@@ -519,6 +540,38 @@ class Client {
 		echo str_repeat(PHP_EOL, $Lines);
 
 		return $this;
+	}
+
+	public function
+	FormatHeading(string $Text, string $Preset=self::FmtPrime):
+	string {
+
+		return $this->Format($Text, $Preset);
+	}
+
+	public function
+	FormatBulletList(iterable $List, string $NamePreset=self::FmtAccent, string $DataPreset=NULL, string $Bull='•', string $BullPreset=NULL):
+	string {
+
+		$Output = '';
+		$Name = NULL;
+		$Data = NULL;
+
+		$BullPreset ??= $NamePreset;
+
+		////////
+
+		foreach($List as $Name => $Data) {
+			$Output .= sprintf(
+				'%s %s: %s%s',
+				$this->Format($Bull, $BullPreset),
+				$this->Format($Name, $NamePreset),
+				$this->Format($Data, $DataPreset),
+				PHP_EOL
+			);
+		}
+
+		return $Output;
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -778,10 +831,18 @@ class Client {
 	}
 
 	static public function
-	Realboot():
+	Realboot(array $Input):
 	int {
 
-		$App = new static;
+		$Argv = Common\Datastore::FromArray($_SERVER['argv']);
+
+		$Argv->MergeRight(array_map(
+			fn($K, $V)=> "--{$K}={$V}",
+			array_keys($Input),
+			array_values($Input)
+		));
+
+		$App = new static($Argv->GetData());
 
 		return $App->Run();
 	}
