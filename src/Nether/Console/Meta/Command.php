@@ -9,7 +9,7 @@ use Nether\Common\Prototype\MethodInfo;
 use Nether\Common\Prototype\MethodInfoInterface;
 use Nether\Console\Util;
 
-#[Attribute(Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
 class Command
 implements MethodInfoInterface {
 

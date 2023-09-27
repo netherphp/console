@@ -175,17 +175,21 @@ class Client {
 	BuildCommandIndex():
 	static {
 
-		$this->Commands = (
-			(new Common\Datastore(static::GetMethodsWithAttribute(Meta\Command::class)))
-			->RemapKeys(
-				fn(string $Key, Common\Prototype\MethodInfo $Method)
-				=> [
-					$Method->Attributes[Meta\Command::class]->Name
-					=> $Method
-				]
-			)
-		);
+		$Methods = static::GetMethodsWithAttribute(Meta\Command::class);
+		$Commands = [];
+		$M = NULL;
+		$A = NULL;
 
+		/** @var Common\Prototype\MethodInfo $M */
+		/** @var Meta\Command $A */
+
+		foreach($Methods as $M)
+		foreach($M->GetAttributes(Meta\Command::class) as $A)
+		$Commands[$A->Name] = $M;
+
+		////////
+
+		$this->Commands = Common\Datastore::FromArray($Commands);
 		$this->Commands->Sort();
 
 		return $this;
@@ -735,94 +739,97 @@ class Client {
 		foreach($this->Commands as $Method) {
 			/** @var MethodInfo $Method */
 
-			$Command = $Method->GetAttribute(Meta\Command::class);
-			$Info = $Method->GetAttribute(Meta\Info::class);
-			$Indent = "  ";
+			$Commands = $Method->GetAttributes(Meta\Command::class);
 
-			$Args = array_merge(
-				$Class->GetAttributes(Meta\Arg::class),
-				$Method->GetAttributes(Meta\Arg::class)
-			);
+			foreach($Commands as $Command) {
+				$Info = $Method->GetAttribute(Meta\Info::class);
+				$Indent = "  ";
 
-			$Options = array_merge(
-				$Class->GetAttributes(Meta\Option::class),
-				$Method->GetAttributes(Meta\Option::class)
-			);
+				$Args = array_merge(
+					$Class->GetAttributes(Meta\Arg::class),
+					$Method->GetAttributes(Meta\Arg::class)
+				);
 
-			$Toggles = array_merge(
-				$Class->GetAttributes(Meta\Toggle::class),
-				$Method->GetAttributes(Meta\Toggle::class)
-			);
+				$Options = array_merge(
+					$Class->GetAttributes(Meta\Option::class),
+					$Method->GetAttributes(Meta\Option::class)
+				);
 
-			$Values = array_merge(
-				$Class->GetAttributes(Meta\Value::class),
-				$Method->GetAttributes(Meta\Value::class)
-			);
+				$Toggles = array_merge(
+					$Class->GetAttributes(Meta\Toggle::class),
+					$Method->GetAttributes(Meta\Toggle::class)
+				);
 
-			if($Picked && $Command->Name !== $Picked)
-			continue;
+				$Values = array_merge(
+					$Class->GetAttributes(Meta\Value::class),
+					$Method->GetAttributes(Meta\Value::class)
+				);
 
-			if(!$Picked && $Command->Hide)
-			continue;
+				if($Picked && $Command->Name !== $Picked)
+				continue;
 
-			////////
+				if(!$Picked && $Command->Hide)
+				continue;
 
-			if($Options)
-			$Options = new Common\Datastore($Options);
-			else
-			$Options = new Common\Datastore;
+				////////
 
-			if($Args)
-			$Args = new Common\Datastore($Args);
+				if($Options)
+				$Options = new Common\Datastore($Options);
+				else
+				$Options = new Common\Datastore;
 
-			////////
+				if($Args)
+				$Args = new Common\Datastore($Args);
 
-			if($Toggles)
-			$Options->MergeRight($Toggles);
+				////////
 
-			if($Values)
-			$Options->MergeRight($Values);
+				if($Toggles)
+				$Options->MergeRight($Toggles);
 
-			$Options->Sort(
-				fn(Meta\Option $A, Meta\Option $B)
-				=> $A->Name <=> $B->Name
-			);
+				if($Values)
+				$Options->MergeRight($Values);
 
-			////////
+				$Options->Sort(
+					fn(Meta\Option $A, Meta\Option $B)
+					=> $A->Name <=> $B->Name
+				);
 
-			printf(
-				'%s%s%s%s',
-				$Indent,
-				$this->Formatter->{$this->ColourPrimary}($Command->Name),
-				($Args ? $Args->Map(fn($Val)=> " <{$Val->Name}>")->Join('') : ''),
-				str_repeat(PHP_EOL, 2)
-			);
+				////////
 
-			if($Info || (!$Info && !$Options->Count()))
-			printf(
-				'%s%s%s',
-				str_repeat($Indent, 2),
-				($Info ? $Info->Text : 'No info provided.'),
-				str_repeat(PHP_EOL, 2)
-			);
-
-			if($Verbose && $Options)
-			foreach($Options as $Option) {
 				printf(
 					'%s%s%s%s',
-					str_repeat($Indent, 2),
-					$this->Formatter->{$this->ColourSecondary}($Option->Name),
-					($Option->TakesValue ? '=<…>' : ''),
-					str_repeat(PHP_EOL, ($Option->Text ? 1 : 2))
-				);
-
-				if($Option->Text)
-				printf(
-					'%s%s%s',
-					str_repeat($Indent, 3),
-					$Option->Text,
+					$Indent,
+					$this->Formatter->{$this->ColourPrimary}($Command->Name),
+					($Args ? $Args->Map(fn($Val)=> " <{$Val->Name}>")->Join('') : ''),
 					str_repeat(PHP_EOL, 2)
 				);
+
+				if($Info || (!$Info && !$Options->Count()))
+				printf(
+					'%s%s%s',
+					str_repeat($Indent, 2),
+					($Info ? $Info->Text : 'No info provided.'),
+					str_repeat(PHP_EOL, 2)
+				);
+
+				if($Verbose && $Options)
+				foreach($Options as $Option) {
+					printf(
+						'%s%s%s%s',
+						str_repeat($Indent, 2),
+						$this->Formatter->{$this->ColourSecondary}($Option->Name),
+						($Option->TakesValue ? '=<…>' : ''),
+						str_repeat(PHP_EOL, ($Option->Text ? 1 : 2))
+					);
+
+					if($Option->Text)
+					printf(
+						'%s%s%s',
+						str_repeat($Indent, 3),
+						$Option->Text,
+						str_repeat(PHP_EOL, 2)
+					);
+				}
 			}
 
 		}
