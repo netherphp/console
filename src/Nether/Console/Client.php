@@ -567,9 +567,9 @@ class Client {
 
 		foreach($List as $Name => $Data) {
 			$Output .= sprintf(
-				'%s %s: %s%s',
+				'%s %s %s%s',
 				$this->Format($Bull, $BullPreset),
-				$this->Format($Name, $NamePreset),
+				$this->Format("{$Name}:", $NamePreset),
 				$this->Format($Data, $DataPreset),
 				PHP_EOL
 			);
@@ -592,13 +592,20 @@ class Client {
 
 		foreach($List as $Name => $Data) {
 			$Output .= sprintf(
-				'%s%s%s%s',
+				'%s%s%s%s%s',
 				$this->Format($Name, $NamePreset),
 				PHP_EOL,
 				$this->Format($Data, $DataPreset),
+				PHP_EOL,
 				PHP_EOL
 			);
 		}
+
+		$Output = sprintf(
+			'%s%s',
+			rtrim($Output),
+			PHP_EOL
+		);
 
 		return $Output;
 	}
@@ -745,7 +752,7 @@ class Client {
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
-	#[Meta\Command('help')]
+	#[Meta\Command('help', TRUE)]
 	#[Meta\Arg('command', 'Only show help for specific command.')]
 	#[Meta\Toggle('--verbose', 'Shows all of the helpful.')]
 	#[Meta\Info('Display this help.')]
@@ -753,15 +760,12 @@ class Client {
 	HandleCommandHelp():
 	int {
 
+		$Class = $this->GetClassInfo();
 		$Picked = $this->GetInput(1);
 		$Verbose = $this->GetOption('verbose') ?? FALSE;
 		$Version = $this->GetOption('version') ?? FALSE;
-		$Class = $this->GetClassInfo();
-		$Method = NULL;
-		$Command = NULL;
-		$Args = NULL;
-		$Options = NULL;
-		$Info = NULL;
+
+		////////
 
 		if($this->AppInfo->AutoCmd)
 		$Picked = $this->AppInfo->AutoCmd;
@@ -769,145 +773,126 @@ class Client {
 		if($Picked !== NULL)
 		$Verbose = TRUE;
 
-		if($Version) {
-			$this->PrintLn($this->AppInfo->Version);
-			return 0;
-		}
+		////////
+
+		$this->PrintLn(sprintf(
+			'%s %s',
+			$this->FormatHeading($this->AppInfo->Name),
+			$this->Format("// {$this->AppInfo->Version}", static::FmtMuted)
+		), 2);
+
+		if($Version)
+		return 0;
 
 		////////
 
-		if(!$Picked) {
-			$this
-			->PrintLn(sprintf(
-				'%s %s',
-				$this->AppInfo->Name, $this->AppInfo->Version
-			))
-			->PrintLn($this->AppInfo->Desc)
-			->PrintLn();
-		}
+		$this->PrintLn(sprintf(
+			'%s %s <command> <args>',
+			$this->Format('USAGE:', static::FmtAccent),
+			$this->Name
+		), 2);
 
-		printf(
-			'%1$s %2$s <command> <args>%3$s%3$s',
-			$this->Formatter->{$this->ColourPrimary}('USAGE:'),
-			$this->Name,
-			PHP_EOL
-		);
+		if(!$Picked)
+		$this->PrintLn($this->FormatBulletList([
+			'help <command>' => 'view help for specific command.',
+			'help --verbose' => 'view all help for all commands.'
+		]));
 
-		if(!$Picked) {
-			printf(
-				'%s - view help for specific command.%s',
-				$this->FormatSecondary('help <command>'),
-				PHP_EOL
-			);
+		////////
 
-			printf(
-				'%s - view all help for all commands.%s%s',
-				$this->FormatSecondary('help --verbose'),
-				PHP_EOL,
-				PHP_EOL
-			);
-		}
+		($this->Commands)
+		->Each(function(Common\Prototype\MethodInfo $Method) use($Class, $Picked, $Verbose) {
 
-		foreach($this->Commands as $Method) {
-			/** @var MethodInfo $Method */
+			$Commands = new Common\Datastore($Method->GetAttributes(Meta\Command::class));
+			$Commands->Each(function(Meta\Command $Command) use($Class, $Method, $Picked, $Verbose) {
 
-			$Commands = $Method->GetAttributes(Meta\Command::class);
+				if($Picked && $Picked !== $Command->Name)
+				return;
 
-			foreach($Commands as $Command) {
-				$Info = $Method->GetAttribute(Meta\Info::class);
-				$Indent = "  ";
+				if($Command->Hide)
+				return;
 
-				$Args = array_merge(
+				////////
+
+				$Title = $this->Format($Command->Name, static::FmtPrime);
+				$Text = 'No info provided.';
+
+				$Args = Common\Datastore::FromStackMerged(
 					$Class->GetAttributes(Meta\Arg::class),
 					$Method->GetAttributes(Meta\Arg::class)
 				);
 
-				$Options = array_merge(
+				$Opts = Common\Datastore::FromStackMerged(
 					$Class->GetAttributes(Meta\Option::class),
-					$Method->GetAttributes(Meta\Option::class)
-				);
-
-				$Toggles = array_merge(
+					$Method->GetAttributes(Meta\Option::class),
 					$Class->GetAttributes(Meta\Toggle::class),
-					$Method->GetAttributes(Meta\Toggle::class)
-				);
-
-				$Values = array_merge(
+					$Method->GetAttributes(Meta\Toggle::class),
 					$Class->GetAttributes(Meta\Value::class),
 					$Method->GetAttributes(Meta\Value::class)
 				);
 
-				if($Picked && $Command->Name !== $Picked)
-				continue;
-
-				if(!$Picked && $Command->Hide)
-				continue;
-
-				////////
-
-				if($Options)
-				$Options = new Common\Datastore($Options);
-				else
-				$Options = new Common\Datastore;
-
-				if($Args)
-				$Args = new Common\Datastore($Args);
-
-				////////
-
-				if($Toggles)
-				$Options->MergeRight($Toggles);
-
-				if($Values)
-				$Options->MergeRight($Values);
-
-				$Options->Sort(
-					fn(Meta\Option $A, Meta\Option $B)
-					=> $A->Name <=> $B->Name
+				$Infos = Common\Datastore::FromStackMerged(
+					$Method->GetAttributes(Meta\Info::class)
 				);
 
 				////////
 
-				printf(
-					'%s%s%s%s',
-					$Indent,
-					$this->Formatter->{$this->ColourPrimary}($Command->Name),
-					($Args ? $Args->Map(fn($Val)=> " <{$Val->Name}>")->Join('') : ''),
-					str_repeat(PHP_EOL, 2)
-				);
+				if($Args->Count())
+				$Title .= sprintf(' %s', (
+					$Args
+					->Map(fn(Meta\Arg $A)=> "<{$A->Name}>")
+					->Join(' ')
+				));
 
-				if($Info || (!$Info && !$Options->Count()))
-				printf(
-					'%s%s%s',
-					str_repeat($Indent, 2),
-					($Info ? $Info->Text : 'No info provided.'),
-					str_repeat(PHP_EOL, 2)
-				);
+				if($Opts->Count())
+				$Title .= sprintf(' %s', (
+					$Opts
+					->Map(function(Meta\Option $Opt){
 
-				if($Verbose && $Options)
-				foreach($Options as $Option) {
-					printf(
-						'%s%s%s%s',
-						str_repeat($Indent, 2),
-						$this->Formatter->{$this->ColourSecondary}($Option->Name),
-						($Option->TakesValue ? '=<…>' : ''),
-						str_repeat(PHP_EOL, ($Option->Text ? 1 : 2))
-					);
+						if($Opt instanceof Meta\Value)
+						return "{$Opt->Name}=…";
 
-					if($Option->Text)
-					printf(
-						'%s%s%s',
-						str_repeat($Indent, 3),
-						$Option->Text,
-						str_repeat(PHP_EOL, 2)
-					);
+						return $Opt->Name;
+					})
+					->Join(' ')
+				));
+
+				if($Infos->Count())
+				$Text = $Infos->Map(fn(Meta\Info $I)=> $I->Text)->Join(' ');
+
+				////////
+
+				$this->PrintLn($Title);
+				$this->PrintLn($this->Format($Text, static::FmtMuted), 2);
+
+				if($Verbose && $Opts->Count()) {
+					$Opts->Each(function(Meta\Option $Opt) {
+						$Name = $Opt->Name;
+						$Text = $this->Format($Opt->Text, static::FmtMuted);
+						$Value = '';
+
+						if($Opt instanceof Meta\Value)
+						$Value = '=…';
+
+						$this->PrintLn("\t{$Name}{$Value}");
+						$this->PrintLn("\t{$Text}");
+						return;
+					});
+
+					$this->PrintLn();
 				}
-			}
 
-		}
+				return;
+			});
+
+			return;
+		});
 
 		return 0;
 	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	static public function
 	Realboot(array $Input):
