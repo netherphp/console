@@ -578,6 +578,31 @@ class Client {
 		return $Output;
 	}
 
+	public function
+	FormatTopicList(iterable $List, string $NamePreset=self::FmtAccent, string $DataPreset=NULL):
+	string {
+
+		$Output = '';
+		$Name = NULL;
+		$Data = NULL;
+
+		$BullPreset ??= $NamePreset;
+
+		////////
+
+		foreach($List as $Name => $Data) {
+			$Output .= sprintf(
+				'%s%s%s%s',
+				$this->Format($Name, $NamePreset),
+				PHP_EOL,
+				$this->Format($Data, $DataPreset),
+				PHP_EOL
+			);
+		}
+
+		return $Output;
+	}
+
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
@@ -632,6 +657,53 @@ class Client {
 
 		return $this->PromptBool($Msg, $Prompt, FALSE, $Input);
 	}
+
+	#[Common\Meta\Date('2023-10-12')]
+	#[Common\Meta\Info('Ask for text input from STDIN in a nice way.')]
+	protected function
+	PromptForValue(string $Name, ?string $Type=NULL, bool $Required=FALSE, ?callable $Filter=NULL, mixed $Default=NULL):
+	mixed {
+
+		$Result = NULL;
+
+		while($Result === NULL) {
+			$Result = Common\Filters\Text::TrimmedNullable($this->Prompt(
+				$this->Format("{$Name}:", static::FmtAccent),
+				$this->Format(
+					sprintf(
+						'%s%s:',
+						$Type,
+						($Default ? " ({$Default})" : "")
+					),
+					static::FmtMuted
+				)
+			));
+
+			if($Result === NULL)
+			$Result = $Default;
+
+			////////
+
+			if(is_callable($Filter))
+			$Result = $Filter($Result, $Name, $Type);
+
+			if($Result !== NULL)
+			break;
+
+			if($Required === FALSE)
+			break;
+
+			////////
+
+			$this->FormatLn("{$Name} is Required.", static::FmtError);
+			$this->FormatLn("(expects: {$Type})", static::FmtMuted, 2);
+		}
+
+		return $Result;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	public function
 	ExecuteCommandLine(string $Command, bool $Silent=FALSE):
