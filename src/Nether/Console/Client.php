@@ -593,10 +593,8 @@ class Client {
 		foreach($List as $Name => $Data) {
 			$Output .= sprintf(
 				'%s%s%s%s%s',
-				$this->Format($Name, $NamePreset),
-				PHP_EOL,
-				$this->Format($Data, $DataPreset),
-				PHP_EOL,
+				$this->Format($Name, $NamePreset), PHP_EOL,
+				$this->Format($Data, $DataPreset), PHP_EOL,
 				PHP_EOL
 			);
 		}
@@ -876,10 +874,10 @@ class Client {
 
 						$this->PrintLn("\t{$Name}{$Value}");
 						$this->PrintLn("\t{$Text}");
+						$this->PrintLn();
 						return;
 					});
 
-					$this->PrintLn();
 				}
 
 				return;
