@@ -27,7 +27,9 @@ class Client {
 	FmtOK         = 'OK',
 	FmtOKAlt      = 'OKAlt',
 	FmtMuted      = 'Muted',
-	FmtMutedAlt   = 'MutedAlt';
+	FmtMutedAlt   = 'MutedAlt',
+	FmtStrong     = 'Strong',
+	FmtStrongAlt  = 'StrongAlt';
 
 	const
 	FmtPresets = [
@@ -41,6 +43,8 @@ class Client {
 		'ErrorAlt'     => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
 		'OK'           => [ 'Bold'=> TRUE, 'Colour'=> '#4EA125' ],
 		'OKAlt'        => [ 'Bold'=> TRUE, 'Colour'=> '#A2D181' ],
+		'Strong'       => [ 'Bold'=> TRUE ],
+		'StrongAlt'    => [ 'Bold'=> TRUE ],
 		'Muted'        => [ 'Colour'=> '#666666' ],
 		'MutedAlt'     => [ 'Colour'=> '#AAAAAA' ]
 	];
