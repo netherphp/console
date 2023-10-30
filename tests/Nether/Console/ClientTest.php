@@ -463,7 +463,7 @@ extends PHPUnit\Framework\TestCase {
 			return;
 		}
 
-		$App = new TestApp([ 'test.lulz', 'test' ]);
+		$App = new TestApp([ 'echo', 'test' ]);
 		SudoFoolery::$GetUID = 0;
 
 		$Result = $App->Sudo();
