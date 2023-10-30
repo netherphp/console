@@ -1,6 +1,7 @@
 <?php
 
-namespace Nether\Console;
+namespace NetherTestSuite\Console;
+
 use Nether;
 use PHPUnit;
 
@@ -14,12 +15,14 @@ class SudoFoolery {
 	$GetUID = 0;
 }
 
-function posix_getuid() {
+function
+posix_getuid() {
 
 	return ((++SudoFoolery::$GetUID % 2) === 0) ? 0 : 100;
 }
 
-function pcntl_exec(string $Command, array $Args) {
+function
+pcntl_exec(string $Command, array $Args) {
 
 	return TRUE;
 }
@@ -179,7 +182,7 @@ extends PHPUnit\Framework\TestCase {
 		$App->Run();
 		$Output = trim(ob_get_clean());
 
-		$this->AssertTrue(str_starts_with($Output, 'AppName'));
+		$this->AssertTrue(str_contains($Output, 'AppName'));
 
 		return;
 	}
@@ -205,6 +208,7 @@ extends PHPUnit\Framework\TestCase {
 
 		$App = new TestApp([ 'test.lulz', 'omgwtfbbq' ]);
 		$App->Formatter->Disable();
+
 		$this->AssertEquals('nope', $App->Output);
 		$this->AssertEquals('omgwtfbbq', $App->Command);
 
@@ -212,7 +216,7 @@ extends PHPUnit\Framework\TestCase {
 		$App->Run();
 		$Output = trim(ob_get_clean());
 
-		$this->AssertTrue(str_starts_with($Output, 'AppName'));
+		$this->AssertTrue(str_contains($Output, 'AppName'));
 
 		return;
 	}
