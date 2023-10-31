@@ -2,9 +2,17 @@
 
 namespace Nether\Console;
 
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
 use Nether\Common;
 
+use Phar;
+use SplFileInfo;
 use Throwable;
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 class Client {
 
@@ -54,6 +62,9 @@ class Client {
 
 	public Meta\Application
 	$AppInfo;
+
+	public string
+	$File;
 
 	public string
 	$Command = 'help';
@@ -106,6 +117,8 @@ class Client {
 
 			$Argv = $_SERVER['argv'];
 		}
+
+		$this->File = realpath($_SERVER['SCRIPT_NAME']);
 
 		$this
 		->ReadAppInfo()
@@ -752,7 +765,7 @@ class Client {
 	}
 
 	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
+	// COMMAND: help ///////////////////////////////////////////////
 
 	#[Meta\Command('help', TRUE)]
 	#[Meta\Arg('command', 'Only show help for specific command.')]
@@ -894,7 +907,99 @@ class Client {
 	}
 
 	////////////////////////////////////////////////////////////////
+	// COMMAND: phar ///////////////////////////////////////////////
+
+	#[Meta\Command('phar', TRUE)]
+	#[Meta\Info('Compile a tort.phar for easy use/distribution.')]
+	public function
+	HandleCommandPhar():
+	int {
+
+		$Phar = Common\Phar\Builder::From(
+			PharOut: $this->GetPharOut(),
+			Bin: $this->GetPharBin(),
+			Files: $this->GetPharFiles(),
+			FileFilters: $this->GetPharFileFilters(),
+			BaseDir: $this->GetPharBaseDir()
+		);
+
+		$Phar->Build();
+
+		return 0;
+	}
+
+	#[Common\Meta\Date('2023-10-31')]
+	#[Common\Meta\Info('Return the project base dir.')]
+	protected function
+	GetPharBaseDir():
+	string {
+
+		// this default implementation assumes that executable scripts
+		// are kept in a subdir like `bin` or `scripts` such that the
+		// project root is two steps up from here.
+
+		return dirname($this->File, 2);
+	}
+
+	#[Common\Meta\Date('2023-10-31')]
+	#[Common\Meta\Info('Return the name of the entry point bin script.')]
+	protected function
+	GetPharBin():
+	string {
+
+		// return a project relative path to the file that should behave
+		// as the cli command entry point.
+
+		return Common\Filesystem\Util::Prechomp(
+			$this->GetPharBaseDir(), $this->File
+		);
+	}
+
+	#[Common\Meta\Date('2023-10-31')]
+	#[Common\Meta\Info('Return the final phar filename.')]
+	protected function
+	GetPharOut():
+	string {
+
+		// typically a whatever.phar in the root of the build.
+		// default implementation tries to name it the same as the default
+		// bin file but with a phar extension right in the build root.
+
+		return Common\Filesystem\Util::ReplaceFileExtension(
+			basename($this->GetPharBin()), 'phar'
+		);
+	}
+
+	#[Common\Meta\Date('2023-10-31')]
+	#[Common\Meta\Info('Return a list of files to bake.')]
+	protected function
+	GetPharFiles():
+	Common\Datastore {
+
+		// this should be overloaded to return an accurate list of files
+		// to be included in the archive.
+
+		$Index = new Common\Datastore([
+			Common\Filesystem\Util::Prechomp($this->GetPharBaseDir(), $this->File),
+			'composer.json',
+			'composer.lock',
+			'vendor'
+		]);
+
+		return $Index;
+	}
+
+	protected function
+	GetPharFileFilters():
+	Common\Datastore {
+
+		$Output = new Common\Datastore;
+
+		return $Output;
+	}
+
 	////////////////////////////////////////////////////////////////
+	// FACTORY API /////////////////////////////////////////////////
 
 	static public function
 	Realboot(array $Input):
