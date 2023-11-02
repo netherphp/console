@@ -165,6 +165,7 @@ class Client {
 		$ClassInfo = static::GetClassInfo();
 		$AttrAppl = $ClassInfo->GetAttribute(Meta\Application::class);
 		$AttrInfo = $ClassInfo->GetAttribute(Meta\Info::class);
+		$Phar = Phar::Running(FALSE);
 
 		// bring in the main application information from the application
 		// attribute.
@@ -173,7 +174,8 @@ class Client {
 		$AttrAppl = new Meta\Application(
 			Name: static::AppName,
 			Version: static::AppVersion,
-			AutoCmd: NULL
+			AutoCmd: NULL,
+			Phar: $Phar
 		);
 
 		$this->AppInfo = $AttrAppl;
@@ -182,6 +184,9 @@ class Client {
 
 		if($AttrInfo)
 		$this->AppInfo->Desc = $AttrInfo->Text;
+
+		if($Phar)
+		$this->AppInfo->Phar = $Phar;
 
 		////////
 
@@ -571,6 +576,73 @@ class Client {
 	}
 
 	public function
+	FormatHeaderBlock(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	string {
+
+		/*
+		██████████████████████████████████
+		████ Example █████████████████████
+		*/
+
+		$Size = static::FetchTerminalSize();
+		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
+		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+
+		$Line = $this->Format(str_repeat($Char, $Size->X), $Preset);
+		$Line .= PHP_EOL;
+
+		$Line .= $this->Format(
+			sprintf('%s%s', $Label, str_repeat($Char, $Fill)),
+			$Preset
+		);
+		$Line .= PHP_EOL;
+
+		return $Line;
+	}
+
+	public function
+	FormatHeaderLine(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	string {
+
+		/*
+		████ Example █████████████████████
+		*/
+
+		$Size = static::FetchTerminalSize();
+		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
+		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+
+		$Line = $this->Format(
+			sprintf('%s%s', $Label, str_repeat($Char, $Fill)),
+			$Preset
+		);
+		$Line .= PHP_EOL;
+
+		return $Line;
+	}
+
+	public function
+	FormatHeaderPoint(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	string {
+
+		/*
+		████ Example
+		*/
+
+		$Size = static::FetchTerminalSize();
+		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
+		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+
+		$Line = $this->Format(
+			$Label,
+			$Preset
+		);
+		$Line .= PHP_EOL;
+
+		return $Line;
+	}
+
+	public function
 	FormatBulletList(iterable $List, string $NamePreset=self::FmtAccent, string $DataPreset=NULL, string $Bull='•', string $BullPreset=NULL):
 	string {
 
@@ -747,10 +819,6 @@ class Client {
 	public function
 	Sudo():
 	bool {
-	/*//
-	return true if a privilege escilaton was performed. return false if we
-	are already good to go.
-	//*/
 
 		$IsAdmin = (posix_getuid() === 0);
 		$SudoPath = trim(`which sudo`);
@@ -791,9 +859,10 @@ class Client {
 		////////
 
 		$this->PrintLn(sprintf(
-			'%s %s',
+			'%s %s%s',
 			$this->FormatHeading($this->AppInfo->Name),
-			$this->Format("// {$this->AppInfo->Version}", static::FmtMuted)
+			$this->Format("// {$this->AppInfo->Version}", static::FmtMuted),
+			$this->Format(($this->AppInfo->Phar ? ' (Phar)' : ''), static::FmtMuted)
 		), 2);
 
 		if($Version)
@@ -804,7 +873,7 @@ class Client {
 		$this->PrintLn(sprintf(
 			'%s %s <command> <args>',
 			$this->Format('USAGE:', static::FmtAccent),
-			$this->Name
+			basename($this->Name)
 		), 2);
 
 		if(!$Picked)
@@ -1016,6 +1085,16 @@ class Client {
 		$App = new static($Argv->GetData());
 
 		return $App->Run();
+	}
+
+	static public function
+	FetchTerminalSize():
+	Common\Units\Vec2 {
+
+		return new Common\Units\Vec2(
+			(int)`tput cols`,
+			(int)`tput lines`
+		);
 	}
 
 }

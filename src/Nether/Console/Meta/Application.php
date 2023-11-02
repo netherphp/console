@@ -24,16 +24,20 @@ implements Common\Prototype\ClassInfoInterface {
 	public ?string
 	$Desc;
 
+	public ?string
+	$Phar;
+
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
 	public function
-	__Construct(string $Name=NULL, string $Version='0.0.0', ?string $AutoCmd=NULL) {
+	__Construct(string $Name=NULL, string $Version='0.0.0', ?string $AutoCmd=NULL, ?string $Phar=NULL) {
 
 		$this->Name = $Name;
 		$this->Version = $Version;
 		$this->AutoCmd = $AutoCmd;
 		$this->Desc = NULL;
+		$this->Phar = $Phar;
 
 		return;
 	}
