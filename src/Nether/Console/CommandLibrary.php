@@ -32,7 +32,8 @@ class CommandLibrary {
 
 		Common\Datastore::FromArray($Tokens)
 		->Each(function(string $New, string $Old) use(&$Input) {
-			$Input = str_replace($Old, $New, $Input);
+
+			$Input = str_replace(Common\Text::TemplateMakeToken($Old), $New, $Input);
 			return;
 		});
 
