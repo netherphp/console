@@ -2,6 +2,8 @@
 
 namespace Nether\Console\Struct;
 
+use Nether\Console;
+
 class CommandLineUtil {
 
 	public string
@@ -60,6 +62,33 @@ class CommandLineUtil {
 	string {
 
 		return join(sprintf('%s%s', PHP_EOL, $Prefix), $this->Output);
+	}
+
+	////////
+
+	public function
+	HasError():
+	bool {
+
+		$Error = $this->Error;
+
+		////////
+
+		// git push having nothing to push is not an error.
+
+		if($Error)
+		$Error = Console\CommandLibrary::DidItReallyFailTho($this);
+
+		////////
+
+		return ($Error !== 0);
+	}
+
+	public function
+	HasOutput():
+	bool {
+
+		return (count($this->Output) > 0);
 	}
 
 }
