@@ -15,30 +15,39 @@ use Exception;
 class CommandLibrary {
 
 	static public function
-	FromNote(string $Input):
+	FromNote(string $Input, iterable $Tokens=[]):
 	?string {
 
 		$Match = NULL;
 
 		if(preg_match('/^@git-shove (.+)$/ms', $Input, $Match))
-		return static::GitShoveReckless($Match[1]);
+		return static::FromString(
+			static::GitShoveReckless($Match[1]),
+			$Tokens
+		);
 
 		return $Input;
 	}
 
 	static public function
-	FromStringWithTokens(string $Input, iterable $Tokens):
+	FromString(string $Input, iterable $Tokens=[]):
 	?string {
 
-		Common\Datastore::FromArray($Tokens)
-		->Each(function(string $New, string $Old) use(&$Input) {
+		$Output = $Input;
 
-			$Input = str_replace(Common\Text::TemplateMakeToken($Old), $New, $Input);
+		Common\Datastore::FromArray($Tokens)
+		->Each(function(string $New, string $Old) use(&$Output) {
+
+			$Output = str_replace(
+				Common\Text::TemplateMakeToken($Old),
+				$New,
+				$Output
+			);
 
 			return;
 		});
 
-		return $Input;
+		return $Output;
 	}
 
 	////////////////////////////////////////////////////////////////
