@@ -10,6 +10,7 @@ use Nether\Common;
 use Phar;
 use SplFileInfo;
 use Throwable;
+use Nether\Common\Units\Colour;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,38 +25,13 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	const
-	FmtDefault    = 'Default',
-	FmtDefaultAlt = 'DefaultAlt',
-	FmtPrime      = 'Primary',
-	FmtPrimeAlt   = 'PrimaryAlt',
-	FmtAccent     = 'Accent',
-	FmtAccentAlt  = 'AccentAlt',
-	FmtError      = 'Error',
-	FmtErrorAlt   = 'ErrorAlt',
-	FmtOK         = 'OK',
-	FmtOKAlt      = 'OKAlt',
-	FmtMuted      = 'Muted',
-	FmtMutedAlt   = 'MutedAlt',
-	FmtStrong     = 'Strong',
-	FmtStrongAlt  = 'StrongAlt';
-
-	const
-	FmtPresets = [
-		'Default'      => [],
-		'DefaultAlt'   => [],
-		'Primary'      => [ 'Bold'=> TRUE, 'Colour'=> '#F6684E' ],
-		'PrimaryAlt'   => [ 'Bold'=> TRUE, 'Colour'=> '#FAA99A' ],
-		'Accent'       => [ 'Bold'=> TRUE, 'Colour'=> '#E3C099' ],
-		'AccentAlt'    => [ 'Bold'=> TRUE, 'Colour'=> '#EFDBC5' ],
-		'Error'        => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
-		'ErrorAlt'     => [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ],
-		'OK'           => [ 'Bold'=> TRUE, 'Colour'=> '#4EA125' ],
-		'OKAlt'        => [ 'Bold'=> TRUE, 'Colour'=> '#A2D181' ],
-		'Strong'       => [ 'Bold'=> TRUE ],
-		'StrongAlt'    => [ 'Bold'=> TRUE ],
-		'Muted'        => [ 'Colour'=> '#666666' ],
-		'MutedAlt'     => [ 'Colour'=> '#AAAAAA' ]
-	];
+	FmtDefault = 'Default',
+	FmtPrime   = 'Primary',
+	FmtAccent  = 'Accent',
+	FmtError   = 'Error',
+	FmtOK      = 'OK',
+	FmtMuted   = 'Muted',
+	FmtStrong  = 'Strong';
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
@@ -83,6 +59,12 @@ class Client {
 
 	public Common\Datastore
 	$ExtraData;
+
+	public Theme
+	$Theme;
+
+	public Common\Units\Vec2
+	$Size;
 
 	////////////////////////////////////////////////////////////////
 	// DEPRECATED //////////////////////////////////////////////////
@@ -127,6 +109,8 @@ class Client {
 
 		$this->Formatter = new TerminalFormatter;
 		$this->ExtraData = new Common\Datastore;
+		$this->Theme = new Theme;
+		$this->Size = static::FetchTerminalSize();
 
 		$this->OnPrepare();
 		$this->OnReady();
@@ -244,6 +228,27 @@ class Client {
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
+
+	#[Common\Meta\Date('2023-11-02')]
+	public function
+	GetAppFile():
+	string {
+
+		return $this->File;
+	}
+
+	#[Common\Meta\Date('2023-11-02')]
+	public function
+	GetAppDir():
+	string {
+
+		$Chop = 2;
+
+		if(Phar::Running() !== FALSE)
+		$Chop = 1;
+
+		return dirname(__FILE__, $Chop);
+	}
 
 	public function
 	GetInput(int $Key):
@@ -514,53 +519,42 @@ class Client {
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
+	#[Common\Meta\Date('2023-11-03')]
 	public function
-	Format(string $Fmt='', ?string $Preset=NULL, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
+	Format(string $Text='', ?string $Type=NULL, string|Colour $C=NULL, bool $Bd=FALSE, bool $It=FALSE, bool $Un=FALSE):
 	Common\Text {
 
-		$Opts = NULL;
+		$Argv = match(TRUE) {
+			($Type !== NULL && $this->Theme->Has($Type))
+			=> $Argv = $this->Theme->Get($Type),
 
-		if($Preset !== NULL) {
-			$Opts = static::FmtPresets[$Preset];
+			default
+			=> [ 'Colour' => $C, 'Bold' => $Bd, 'Italic' => $It, 'Underline' => $Un ]
+		};
 
-			if(isset($Opts['Colour']) && is_string($Opts['Colour']))
-			$Opts['Colour'] = new Common\Units\Colour($Opts['Colour']);
-		}
+		////////
 
-		else {
-			if(is_string($Colour))
-			$Colour = new Common\Units\Colour($Colour);
+		if(isset($Argv['Colour']) && is_string($Argv['Colour']))
+		$Argv['Colour'] = new Colour($Argv['Colour']);
 
-			$Opts = [
-				'Colour'    => $Colour,
-				'Bold'      => $Bold,
-				'Italic'    => $Italic,
-				'Underline' => $Underline
-			];
-		}
+		////////
 
-		$Output = Common\Text::New(
-			$Fmt,
-			Common\Text::ModeTerminal,
-			...$Opts
-		);
-
-		return $Output;
+		return Common\Text::New($Text, Common\Text::ModeTerminal, ...$Argv);
 	}
 
 	public function
-	FormatLn(string $Fmt='', ?string $Preset=NULL, int $Lines=1, string|Common\Units\Colour $Colour=NULL, bool $Bold=FALSE, bool $Italic=FALSE, bool $Underline=FALSE):
+	FormatLn(string $Fmt='', ?string $Type=NULL, int $Lines=1, string|Colour $C=NULL, bool $Bd=FALSE, bool $It=FALSE, bool $Un=FALSE):
 	static {
 
 		// @todo 2023-09-15 this should be returning, not printing.
 
 		echo $this->Format(
-			Fmt: $Fmt,
-			Colour: $Colour,
-			Bold: $Bold,
-			Italic: $Italic,
-			Underline: $Underline,
-			Preset: $Preset
+			Text: $Fmt,
+			Type: $Type,
+			C: $C,
+			Bd: $Bd,
+			It: $It,
+			Un: $Un
 		);
 
 		echo str_repeat(PHP_EOL, $Lines);
@@ -569,26 +563,25 @@ class Client {
 	}
 
 	public function
-	FormatHeading(string $Text, string $Preset=self::FmtPrime):
+	FormatHeading(string $Text, string $Preset=Theme::Prime):
 	string {
 
 		return $this->Format($Text, $Preset);
 	}
 
 	public function
-	FormatHeaderBlock(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	FormatHeaderBlock(string $Text, string $Preset=Theme::Prime, string $Char = '█'):
 	string {
 
 		/*
 		██████████████████████████████████
-		████ Example █████████████████████
+		██ Example ███████████████████████
 		*/
 
-		$Size = static::FetchTerminalSize();
-		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
-		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+		$Label = sprintf('%s %s ', str_repeat($Char, 2), $Text);
+		$Fill = max(0, ($this->Size->X - mb_strlen($Label)));
 
-		$Line = $this->Format(str_repeat($Char, $Size->X), $Preset);
+		$Line = $this->Format(str_repeat($Char, $this->Size->X), $Preset);
 		$Line .= PHP_EOL;
 
 		$Line .= $this->Format(
@@ -601,16 +594,16 @@ class Client {
 	}
 
 	public function
-	FormatHeaderLine(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	FormatHeaderLine(string $Text, string $Preset=Theme::Prime, string $Char = '█'):
 	string {
 
 		/*
-		████ Example █████████████████████
+		██ Example ███████████████████████
 		*/
 
-		$Size = static::FetchTerminalSize();
-		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
-		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+		//$Size = static::FetchTerminalSize();
+		$Label = sprintf('%s %s ', str_repeat($Char, 2), $Text);
+		$Fill = max(0, ($this->Size->X - mb_strlen($Label)));
 
 		$Line = $this->Format(
 			sprintf('%s%s', $Label, str_repeat($Char, $Fill)),
@@ -622,16 +615,15 @@ class Client {
 	}
 
 	public function
-	FormatHeaderPoint(string $Text, string $Preset=self::FmtPrime, string $Char = '█'):
+	FormatHeaderPoint(string $Text, string $Preset=Theme::Prime, string $Char = '█'):
 	string {
 
 		/*
-		████ Example
+		██ Example
 		*/
 
 		$Size = static::FetchTerminalSize();
-		$Label = sprintf('%s %s ', str_repeat($Char, 4), $Text);
-		$Fill = max(0, ($Size->X - mb_strlen($Label)));
+		$Label = sprintf('%s %s ', str_repeat($Char, 2), $Text);
 
 		$Line = $this->Format(
 			$Label,
@@ -643,7 +635,7 @@ class Client {
 	}
 
 	public function
-	FormatBulletList(iterable $List, string $NamePreset=self::FmtAccent, string $DataPreset=NULL, string $Bull='•', string $BullPreset=NULL):
+	FormatBulletList(iterable $List, string $NamePreset=Theme::Accent, string $DataPreset=NULL, string $Bull='•', string $BullPreset=NULL):
 	string {
 
 		$Output = '';
@@ -664,11 +656,11 @@ class Client {
 			);
 		}
 
-		return $Output;
+		return trim($Output);
 	}
 
 	public function
-	FormatTopicList(iterable $List, string $NamePreset=self::FmtAccent, string $DataPreset=NULL):
+	FormatTopicList(iterable $List, string $NamePreset=Theme::Accent, string $DataPreset=NULL):
 	string {
 
 		$Output = '';
@@ -688,13 +680,7 @@ class Client {
 			);
 		}
 
-		$Output = sprintf(
-			'%s%s',
-			rtrim($Output),
-			PHP_EOL
-		);
-
-		return $Output;
+		return trim($Output);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -836,9 +822,9 @@ class Client {
 	// COMMAND: help ///////////////////////////////////////////////
 
 	#[Meta\Command('help', TRUE)]
+	#[Meta\Info('Display this help.')]
 	#[Meta\Arg('command', 'Only show help for specific command.')]
 	#[Meta\Toggle('--verbose', 'Shows all of the helpful.')]
-	#[Meta\Info('Display this help.')]
 	public function
 	HandleCommandHelp():
 	int {
@@ -880,7 +866,7 @@ class Client {
 		$this->PrintLn($this->FormatBulletList([
 			'help <command>' => 'view help for specific command.',
 			'help --verbose' => 'view all help for all commands.'
-		]));
+		]), 2);
 
 		////////
 
