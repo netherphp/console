@@ -26,6 +26,19 @@ class CommandLibrary {
 		return $Input;
 	}
 
+	static public function
+	FromStringWithTokens(string $Input, iterable $Tokens):
+	?string {
+
+		Common\Datastore::FromArray($Tokens)
+		->Each(function(string $New, string $Old) use(&$Input) {
+			$Input = str_replace($Old, $New, $Input);
+			return;
+		});
+
+		return $Input;
+	}
+
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
