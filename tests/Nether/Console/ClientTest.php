@@ -453,17 +453,22 @@ extends PHPUnit\Framework\TestCase {
 		return;
 	}
 
-	/** @test */
+	/**
+	 * @tttttest
+	 * @runInSeparateProcess
+	 */
 	public function
 	TestSudo():
 	void {
+
+		// this attempt was wrong.
 
 		if(PHP_OS_FAMILY === 'Windows') {
 			$this->AssertTrue(TRUE);
 			return;
 		}
 
-		$App = new TestApp([ 'echo', 'test' ]);
+		$App = new TestApp([ 'sleep', '0.01']);
 		SudoFoolery::$GetUID = 0;
 
 		$Result = $App->Sudo();

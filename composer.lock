@@ -227,16 +227,16 @@
         },
         {
             "name": "netherphp/common",
-            "version": "v5.0.26",
+            "version": "v5.0.29",
             "source": {
                 "type": "git",
                 "url": "https://github.com/netherphp/common.git",
-                "reference": "a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515"
+                "reference": "281adb1328d33a32d0e99465f58032f57818f9b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/netherphp/common/zipball/a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515",
-                "reference": "a18d118c9d9fb7549efb5cac8ccaf1d73a6bb515",
+                "url": "https://api.github.com/repos/netherphp/common/zipball/281adb1328d33a32d0e99465f58032f57818f9b7",
+                "reference": "281adb1328d33a32d0e99465f58032f57818f9b7",
                 "shasum": ""
             },
             "require": {
@@ -277,9 +277,9 @@
             ],
             "support": {
                 "issues": "https://github.com/netherphp/common/issues",
-                "source": "https://github.com/netherphp/common/tree/v5.0.26"
+                "source": "https://github.com/netherphp/common/tree/v5.0.29"
             },
-            "time": "2023-08-14T01:21:48+00:00"
+            "time": "2023-11-08T22:00:01+00:00"
         },
         {
             "name": "ozdemirburak/iris",
