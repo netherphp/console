@@ -1083,8 +1083,13 @@ class Client {
 	FetchTerminalSize():
 	Common\Units\Vec2 {
 
-		$W = (int)`tput cols -T dumb`;
-		$H = (int)`tput lines -T dumb`;
+		$W = 80;
+		$H = 24;
+
+		if(PHP_OS_FAMILY !== 'Windows') {
+			$W = (int)`tput cols -T dumb`;
+			$H = (int)`tput lines -T dumb`;
+		}
 
 		return new Common\Units\Vec2($W, $H);
 	}
