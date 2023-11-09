@@ -642,11 +642,17 @@ class Client {
 		$Name = NULL;
 		$Data = NULL;
 
+		$List = Common\Datastore::FromArray($List);
+		$IsNumeric = $List->IsList();
+
 		$BullPreset ??= $NamePreset;
 
 		////////
 
 		foreach($List as $Name => $Data) {
+			if($IsNumeric)
+			$Name = (((int)$Name) + 1);
+
 			$Output .= sprintf(
 				'%s %s %s%s',
 				$this->Format($Bull, $BullPreset),

@@ -468,7 +468,7 @@ extends PHPUnit\Framework\TestCase {
 			return;
 		}
 
-		$App = new TestApp([ 'sleep', '0.01']);
+		$App = new TestApp([ 'sleep', '0']);
 		SudoFoolery::$GetUID = 0;
 
 		$Result = $App->Sudo();

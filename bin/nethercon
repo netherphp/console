@@ -155,8 +155,12 @@ extends Nether\Console\Client {
 		$this->PrintLn($this->FormatTopicList($People));
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderLine('Bullet List'));
+		$this->PrintLn($this->FormatHeaderLine('Bullet List (Keyed List)'));
 		$this->PrintLn($this->FormatBulletList($People));
+
+		$this->PrintLn();
+		$this->PrintLn($this->FormatHeaderLine('Bullet List (Numeric List)'));
+		$this->PrintLn($this->FormatBulletList(array_keys($People)));
 
 		$this->PrintLn();
 
