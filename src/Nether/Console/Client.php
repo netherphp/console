@@ -1083,10 +1083,10 @@ class Client {
 	FetchTerminalSize():
 	Common\Units\Vec2 {
 
-		return new Common\Units\Vec2(
-			(int)`tput cols`,
-			(int)`tput lines`
-		);
+		$W = (int)`tput cols -T dumb`;
+		$H = (int)`tput lines -T dumb`;
+
+		return new Common\Units\Vec2($W, $H);
 	}
 
 }
