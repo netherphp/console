@@ -588,7 +588,6 @@ class Client {
 			sprintf('%s%s', $Label, str_repeat($Char, $Fill)),
 			$Preset
 		);
-		$Line .= PHP_EOL;
 
 		return $Line;
 	}
@@ -609,7 +608,6 @@ class Client {
 			sprintf('%s%s', $Label, str_repeat($Char, $Fill)),
 			$Preset
 		);
-		$Line .= PHP_EOL;
 
 		return $Line;
 	}
@@ -629,7 +627,6 @@ class Client {
 			$Label,
 			$Preset
 		);
-		$Line .= PHP_EOL;
 
 		return $Line;
 	}
@@ -687,6 +684,15 @@ class Client {
 		}
 
 		return trim($Output);
+	}
+
+	public function
+	FormatWrap(string $Input, ?int $Width=NULL):
+	string {
+
+		$Width ??= $this->Size->X;
+
+		return wordwrap($Input, $Width);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -812,7 +818,7 @@ class Client {
 	Sudo():
 	bool {
 
-		$IsAdmin = (posix_getuid() === 0);
+		$IsAdmin = $this->IsUserAdmin();
 		$SudoPath = trim(`which sudo`);
 
 		if($IsAdmin)
@@ -822,6 +828,14 @@ class Client {
 			$SudoPath,
 			$this->Args->Source
 		);
+	}
+
+	#[Common\Meta\Date('2023-11-11')]
+	public function
+	IsUserAdmin():
+	bool {
+
+		return (posix_getuid() === 0);
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -850,12 +864,11 @@ class Client {
 
 		////////
 
-		$this->PrintLn(sprintf(
-			'%s %s%s',
-			$this->FormatHeading($this->AppInfo->Name),
-			$this->Format("// {$this->AppInfo->Version}", static::FmtMuted),
-			$this->Format(($this->AppInfo->Phar ? ' (Phar)' : ''), static::FmtMuted)
-		), 2);
+		$this->PrintLn($this->FormatHeaderLine($this->AppInfo->Name));
+		$this->PrintLn($this->FormatHeaderLine(
+			"Version: {$this->AppInfo->Version}", Theme::Muted
+		));
+		$this->PrintLn();
 
 		if($Version)
 		return 0;
