@@ -16,6 +16,20 @@ use Nether\Console\Meta\Error;
 class App
 extends Nether\Console\Client {
 
+	////////////////////////////////////////////////////////////////
+	// OVERRIDES Console\Client ////////////////////////////////////
+
+	protected function
+	OnReady():
+	void {
+
+		return;
+	}
+
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
 	#[Command('yolo')]
 	#[Info('Obviously the best command in the entire suite.')]
 	#[Arg('num', 'number of iterations')]
@@ -105,7 +119,7 @@ extends Nether\Console\Client {
 		$Title = 'Hello Moto';
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderBlock($Title));
+		$this->PrintLn($this->FormatHeaderBlock($Title), 2);
 		$this->PrintLn(''
 			. 'The above header should have been a massive overwhelming'
 			. 'block of block for use in the event an unmissable page '
@@ -114,7 +128,7 @@ extends Nether\Console\Client {
 		);
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderLine($Title));
+		$this->PrintLn($this->FormatHeaderLine($Title), 2);
 		$this->PrintLn(''
 			. 'This header is still massive but not as thicc as the '
 			. 'previous one. It still is quite demanding of attention '
@@ -122,7 +136,7 @@ extends Nether\Console\Client {
 		);
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderPoint($Title));
+		$this->PrintLn($this->FormatHeaderPoint($Title), 2);
 		$this->PrintLn(''
 			. 'This is barely more than a fancy bullet point but it '
 			. 'still carries with it the default formatting of headers '
@@ -130,6 +144,17 @@ extends Nether\Console\Client {
 		);
 
 		$this->PrintLn();
+		$this->PrintLn($this->FormatH1('H1'));
+		$this->PrintLn('Suitable for an H1 division with an extra line after.', 2);
+
+		$this->PrintLn($this->FormatH2('H2'));
+		$this->PrintLn('Suitable for an H2 division with an extra line after.', 2);
+
+		$this->PrintLn($this->FormatH3('H3'));
+		$this->PrintLn('Suitable for an H3 division with an extra line after.', 2);
+
+		$this->PrintLn($this->FormatH4('H4'));
+		$this->PrintLn('Suitable for an H4 division with an extra line after.', 2);
 
 		return 0;
 	}
@@ -151,15 +176,15 @@ extends Nether\Console\Client {
 		];
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderLine('Topic List'));
+		$this->PrintLn($this->FormatH1('Topic List'));
 		$this->PrintLn($this->FormatTopicList($People));
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderLine('Bullet List (Keyed List)'));
+		$this->PrintLn($this->FormatH1('Bullet List (Keyed List)'));
 		$this->PrintLn($this->FormatBulletList($People));
 
 		$this->PrintLn();
-		$this->PrintLn($this->FormatHeaderLine('Bullet List (Numeric List)'));
+		$this->PrintLn($this->FormatH1('Bullet List (Numeric List)'));
 		$this->PrintLn($this->FormatBulletList(array_keys($People)));
 
 		$this->PrintLn();

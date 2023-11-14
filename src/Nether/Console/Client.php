@@ -109,8 +109,10 @@ class Client {
 
 		$this->Formatter = new TerminalFormatter;
 		$this->ExtraData = new Common\Datastore;
-		$this->Theme = new Theme;
-		$this->Size = static::FetchTerminalSize();
+
+		$this->ApplyDefaultSize();
+		$this->ApplyDefaultTheme();
+		$this->ApplyDefaultSort();
 
 		$this->OnPrepare();
 		$this->OnReady();
@@ -135,6 +137,50 @@ class Client {
 	protected function
 	OnRun():
 	void {
+
+		return;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Load and apply a theme.')]
+	protected function
+	ApplyDefaultTheme():
+	void {
+
+		if($this->IsUserAdmin()) {
+			$this->Theme = new Themes\DefaultAdmin;
+			$this->AppInfo->Name .= ' (Admin)';
+		}
+
+		else {
+			$this->Theme = new Themes\DefaultUser;
+		}
+
+		return;
+	}
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Load an apply a default terminal size.')]
+	protected function
+	ApplyDefaultSize():
+	void {
+
+		$this->Size = static::FetchTerminalSize();
+		$this->Size->ClampX(0, 80);
+
+		return;
+	}
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Load an apply a default terminal size.')]
+	protected function
+	ApplyDefaultSort():
+	void {
+
+		$this->Commands->Sort();
 
 		return;
 	}
@@ -517,7 +563,7 @@ class Client {
 	}
 
 	////////////////////////////////////////////////////////////////
-	////////////////////////////////////////////////////////////////
+	// Manual Formatting Methods ///////////////////////////////////
 
 	#[Common\Meta\Date('2023-11-03')]
 	public function
@@ -696,6 +742,65 @@ class Client {
 	}
 
 	////////////////////////////////////////////////////////////////
+	// Contextually Prepared Formatting Methods ////////////////////
+
+	// These methods are designed intended to be PrintLn'd and they will
+	// include whatever extra lines were determined were needed to make the
+	// elements look good.
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Returns theme-styled content suitable for an H1 division with an extra line break after.')]
+	public function
+	FormatH1(string $Text):
+	string {
+
+		return sprintf(
+			'%s%s',
+			$this->FormatHeaderLine($Text, Theme::Prime),
+			PHP_EOL
+		);
+	}
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Returns theme-styled content suitable for an H2 division with an extra line break after.')]
+	public function
+	FormatH2(string $Text):
+	string {
+
+		return sprintf(
+			'%s%s',
+			$this->FormatHeaderLine($Text, Theme::Accent),
+			PHP_EOL
+		);
+	}
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Returns theme-styled content suitable for an H3 division with an extra line break after.')]
+	public function
+	FormatH3(string $Text):
+	string {
+
+		return sprintf(
+			'%s%s',
+			$this->FormatHeaderPoint($Text, Theme::Accent),
+			PHP_EOL
+		);
+	}
+
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Returns theme-styled content suitable for an H4 division with an extra line break after.')]
+	public function
+	FormatH4(string $Text):
+	string {
+
+		return sprintf(
+			'%s%s',
+			$this->Format($Text, Theme::Accent, Bd: TRUE),
+			PHP_EOL
+		);
+	}
+
+	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
 	public function
@@ -864,11 +969,16 @@ class Client {
 
 		////////
 
-		$this->PrintLn($this->FormatHeaderLine($this->AppInfo->Name));
-		$this->PrintLn($this->FormatHeaderLine(
-			"Version: {$this->AppInfo->Version}", Theme::Muted
-		));
-		$this->PrintLn();
+		$this
+		->PrintLn($this->FormatHeaderLine(
+			$this->AppInfo->Name,
+			Theme::Prime
+		))
+		->PrintLn($this->FormatHeaderLine(
+			"Version: {$this->AppInfo->Version}",
+			Theme::Muted
+		))
+		->PrintLn();
 
 		if($Version)
 		return 0;
@@ -877,7 +987,7 @@ class Client {
 
 		$this->PrintLn(sprintf(
 			'%s %s <command> <args>',
-			$this->Format('USAGE:', static::FmtAccent),
+			$this->Format('USAGE:', Theme::Accent),
 			basename($this->Name)
 		), 2);
 
@@ -952,12 +1062,12 @@ class Client {
 				////////
 
 				$this->PrintLn($Title);
-				$this->PrintLn($this->Format($Text, static::FmtMuted), 2);
+				$this->PrintLn($this->Format($Text, Theme::Muted), 2);
 
 				if($Verbose && $Opts->Count()) {
 					$Opts->Each(function(Meta\Option $Opt) {
 						$Name = $Opt->Name;
-						$Text = $this->Format($Opt->Text, static::FmtMuted);
+						$Text = $this->Format($Opt->Text, Theme::Muted);
 						$Value = '';
 
 						if($Opt instanceof Meta\Value)
@@ -985,9 +1095,19 @@ class Client {
 
 	#[Meta\Command('phar', TRUE)]
 	#[Meta\Info('Compile a tort.phar for easy use/distribution.')]
+	#[Meta\Error(1, 'Phar creation must be enabled in php.ini via phar.readonly=0')]
+	#[Meta\Error(2, 'Phar creation must be enabled by setting AppInfo.Phar to the desired filename.')]
 	public function
 	HandleCommandPhar():
 	int {
+
+		if(ini_get('phar.readonly'))
+		$this->Quit(1);
+
+		if(!$this->AppInfo->Phar)
+		$this->Quit(2);
+
+		////////
 
 		$Phar = Common\Phar\Builder::From(
 			PharOut: $this->GetPharOut(),
@@ -1039,6 +1159,8 @@ class Client {
 		// default implementation tries to name it the same as the default
 		// bin file but with a phar extension right in the build root.
 
+		return $this->AppInfo->Phar;
+
 		return Common\Filesystem\Util::ReplaceFileExtension(
 			basename($this->GetPharBin()), 'phar'
 		);
@@ -1063,6 +1185,8 @@ class Client {
 		return $Index;
 	}
 
+	#[Common\Meta\Date('2023-10-31')]
+	#[Common\Meta\Info('Return a list of filters to trim the final list of files to bake.')]
 	protected function
 	GetPharFileFilters():
 	Common\Datastore {
@@ -1076,7 +1200,7 @@ class Client {
 	// FACTORY API /////////////////////////////////////////////////
 
 	static public function
-	Realboot(array $Input):
+	Realboot(array $Input=[]):
 	int {
 
 		$Argv = Common\Datastore::FromArray($_SERVER['argv']);

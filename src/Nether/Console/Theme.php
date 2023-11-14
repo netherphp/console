@@ -12,6 +12,8 @@ class Theme {
 	Accent  = 'Accent',
 	OK      = 'OK',
 	Error   = 'Error',
+	Warning = 'Warning',
+	Alert   = 'Alert',
 	Strong  = 'Strong',
 	Muted   = 'Muted';
 
@@ -19,7 +21,7 @@ class Theme {
 	Types = [
 		self::Default,
 		self::Prime, self::Accent,
-		self::OK, self::Error,
+		self::OK, self::Error, self::Alert, self::Warning,
 		self::Strong, self::Muted
 	];
 
@@ -27,25 +29,31 @@ class Theme {
 	////////////////////////////////////////////////////////////////
 
 	public array
-	$Default = [ ];
+	$Default;
 
 	public array
-	$Primary = [ 'Bold'=> TRUE, 'Colour'=> '#F6684E' ];
+	$Primary;
 
 	public array
-	$Accent = [ 'Bold'=> TRUE, 'Colour'=> '#E3C099' ];
+	$Accent;
 
 	public array
-	$Error = [ 'Bold'=> TRUE, 'Colour'=> '#E17B7B' ];
+	$OK;
 
 	public array
-	$OK = [ 'Bold'=> TRUE, 'Colour'=> '#4EA125' ];
+	$Error;
 
 	public array
-	$Strong = [ 'Bold'=> TRUE ];
+	$Warning;
 
 	public array
-	$Muted = [ 'Colour'=> '#666666' ];
+	$Alert;
+
+	public array
+	$Strong;
+
+	public array
+	$Muted;
 
 	////////
 
