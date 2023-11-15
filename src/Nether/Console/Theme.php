@@ -29,39 +29,48 @@ class Theme {
 	////////////////////////////////////////////////////////////////
 
 	public array
-	$Default;
+	$Default = [ ];
 
 	public array
-	$Primary;
+	$Strong = [ 'Bold'=> TRUE ];
 
 	public array
-	$Accent;
+	$Primary = [ ];
 
 	public array
-	$OK;
+	$Accent = [ ];
 
 	public array
-	$Error;
+	$OK = [ ];
 
 	public array
-	$Warning;
+	$Error = [ ];
 
 	public array
-	$Alert;
+	$Warning = [ ];
 
 	public array
-	$Strong;
+	$Alert = [ ];
 
 	public array
-	$Muted;
+	$Muted = [ ];
 
 	////////
 
-	public string
-	$CharBullet = '•';
+	#[Common\Meta\Date('2023-11-15')]
+	#[Common\Meta\Info('Thicc filled dot.')]
+	public string|int
+	$CharBullet = 0x25CF; // thicc dot
 
-	public string
-	$CharHeader = '█';
+	#[Common\Meta\Date('2023-11-15')]
+	#[Common\Meta\Info('Empty circle that should pair with CharBullet.')]
+	public string|int
+	$CharCircle = 0x25CB;
+
+	#[Common\Meta\Date('2023-11-15')]
+	#[Common\Meta\Info('Solid AF.')]
+	public string|int
+	$CharBlock = 0x2588;
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
@@ -71,6 +80,9 @@ class Theme {
 
 		return;
 	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	public function
 	Has(string $Key):
@@ -84,6 +96,39 @@ class Theme {
 	mixed {
 
 		return $this->{$Key};
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	public function
+	GetCharBullet():
+	string {
+
+		if(is_int($this->CharBullet))
+		return mb_chr($this->CharBullet);
+
+		return $this->CharBullet;
+	}
+
+	public function
+	GetCharCircle():
+	string {
+
+		if(is_int($this->CharCircle))
+		return mb_chr($this->CharCircle);
+
+		return $this->CharCircle;
+	}
+
+	public function
+	GetCharBlock():
+	string {
+
+		if(is_int($this->CharBlock))
+		return mb_chr($this->CharBlock);
+
+		return $this->CharBlock;
 	}
 
 };

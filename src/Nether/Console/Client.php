@@ -944,7 +944,10 @@ class Client {
 	IsUserAdmin():
 	bool {
 
+		if(PHP_OS_FAMILY !== 'Windows')
 		return (posix_getuid() === 0);
+
+		return FALSE;
 	}
 
 	////////////////////////////////////////////////////////////////

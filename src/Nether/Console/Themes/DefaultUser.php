@@ -8,9 +8,6 @@ class DefaultUser
 extends Console\Theme {
 
 	public array
-	$Default = [ ];
-
-	public array
 	$Primary = [ 'Bold'=> TRUE, 'Colour'=> '#7B9BD5' ];
 
 	public array
@@ -29,17 +26,6 @@ extends Console\Theme {
 	$Alert = [ 'Bold'=> TRUE, 'Colour'=> '#E953DD' ];
 
 	public array
-	$Strong = [ 'Bold'=> TRUE ];
-
-	public array
-	$Muted = [ 'Colour'=> '#666666' ];
-
-	////////
-
-	public string
-	$CharBullet = '•';
-
-	public string
-	$CharHeader = '█';
+	$Muted = [ 'Colour'=> '#676767' ];
 
 };
