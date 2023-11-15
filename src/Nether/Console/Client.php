@@ -8,7 +8,6 @@ namespace Nether\Console;
 use Nether\Common;
 
 use Phar;
-use SplFileInfo;
 use Throwable;
 use Nether\Common\Units\Colour;
 
@@ -101,14 +100,13 @@ class Client {
 		}
 
 		$this->File = realpath($_SERVER['SCRIPT_NAME']);
+		$this->ExtraData = new Common\Datastore;
+		$this->Formatter = new TerminalFormatter; // @deprecated 2023-07-26
 
-		$this
+		($this)
 		->ReadAppInfo()
 		->BuildCommandIndex()
 		->ParseArguments($Argv);
-
-		$this->Formatter = new TerminalFormatter;
-		$this->ExtraData = new Common\Datastore;
 
 		$this->ApplyDefaultSize();
 		$this->ApplyDefaultTheme();
@@ -120,6 +118,10 @@ class Client {
 		return;
 	}
 
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	#[Common\Meta\Info('Runs from __Construct() once the object is confident about itself.')]
 	protected function
 	OnPrepare():
 	void {
@@ -127,6 +129,7 @@ class Client {
 		return;
 	}
 
+	#[Common\Meta\Info('Runs from __Construct() after OnPrepare() as another pass.')]
 	protected function
 	OnReady():
 	void {
@@ -134,6 +137,7 @@ class Client {
 		return;
 	}
 
+	#[Common\Meta\Info('Runs before the real method within the same exception handler.')]
 	protected function
 	OnRun():
 	void {
@@ -145,7 +149,7 @@ class Client {
 	////////////////////////////////////////////////////////////////
 
 	#[Common\Meta\Date('2023-11-14')]
-	#[Common\Meta\Info('Load and apply a theme.')]
+	#[Common\Meta\Info('Load and apply a theme. Override this method to change the theme selection logic.')]
 	protected function
 	ApplyDefaultTheme():
 	void {
@@ -163,7 +167,7 @@ class Client {
 	}
 
 	#[Common\Meta\Date('2023-11-14')]
-	#[Common\Meta\Info('Load an apply a default terminal size.')]
+	#[Common\Meta\Info('Detect and apply a default terminal size. Override this method to change the terminal size detection.')]
 	protected function
 	ApplyDefaultSize():
 	void {
@@ -175,7 +179,7 @@ class Client {
 	}
 
 	#[Common\Meta\Date('2023-11-14')]
-	#[Common\Meta\Info('Load an apply a default terminal size.')]
+	#[Common\Meta\Info('Sort the command list for the help command. Override this method to apply custom sorting.')]
 	protected function
 	ApplyDefaultSort():
 	void {
