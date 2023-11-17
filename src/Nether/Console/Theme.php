@@ -60,12 +60,17 @@ class Theme {
 	#[Common\Meta\Date('2023-11-15')]
 	#[Common\Meta\Info('Thicc filled dot.')]
 	public string|int
-	$CharBullet = 0x25CF; // thicc dot
+	$CharBullet = 0x2022; // thicc dot
 
 	#[Common\Meta\Date('2023-11-15')]
 	#[Common\Meta\Info('Empty circle that should pair with CharBullet.')]
 	public string|int
-	$CharCircle = 0x25CB;
+	$CharCircleFilled = 0x25CB;
+
+	#[Common\Meta\Date('2023-11-15')]
+	#[Common\Meta\Info('Empty circle that should pair with CharBullet.')]
+	public string|int
+	$CharCircleEmpty = 0x25CB;
 
 	#[Common\Meta\Date('2023-11-15')]
 	#[Common\Meta\Info('Solid AF.')]
@@ -112,13 +117,23 @@ class Theme {
 	}
 
 	public function
-	GetCharCircle():
+	GetCharCircleEmpty():
 	string {
 
-		if(is_int($this->CharCircle))
-		return mb_chr($this->CharCircle);
+		if(is_int($this->CharCircleEmpty))
+		return mb_chr($this->CharCircleEmpty);
 
-		return $this->CharCircle;
+		return $this->CharCircleEmpty;
+	}
+
+	public function
+	GetCharCircleFilled():
+	string {
+
+		if(is_int($this->CharCircleFilled))
+		return mb_chr($this->CharCircleFilled);
+
+		return $this->CharCircleFilled;
 	}
 
 	public function
