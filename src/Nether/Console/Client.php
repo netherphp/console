@@ -804,6 +804,159 @@ class Client {
 		);
 	}
 
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintH1(string $Text):
+	static {
+
+		$this->PrintLn($this->FormatH1($Text));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintH2(string $Text):
+	static {
+
+		$this->PrintLn($this->FormatH2($Text));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintH3(string $Text):
+	static {
+
+		$this->PrintLn($this->FormatH3($Text));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintH4(string $Text):
+	static {
+
+		$this->PrintLn($this->FormatH4($Text));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintAppHeader(?string $Title=NULL):
+	static {
+
+		$Label = $this->AppInfo->Name;
+
+		if($Title !== NULL)
+		$Label .= ": {$Title}";
+
+		$this->PrintLn($this->FormatH1($Label));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	public function
+	PrintBulletList(iterable $List):
+	static {
+
+		$this->PrintLn($this->FormatBulletList($List), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintOK(?string $More=NULL, ?string $Yell='OK'):
+	static {
+
+		$Msg = match(TRUE) {
+			($More !== NULL)
+			=> "{$Yell}: {$More}",
+
+			default
+			=> $Yell
+		};
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::OK
+		), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintError(?string $More=NULL, ?string $Yell='ERROR'):
+	static {
+
+		$Msg = match(TRUE) {
+			($More !== NULL)
+			=> "{$Yell}: {$More}",
+
+			default
+			=> $Yell
+		};
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::Error
+		), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintStatus(string $Msg):
+	static {
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::Default
+		), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintStatusMuted(string $Msg):
+	static {
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::Muted
+		), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintStatusAlert(string $Msg):
+	static {
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::Alert
+		), 2);
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2023-11-16')]
+	protected function
+	PrintStatusWarning(string $Msg):
+	static {
+
+		$this->PrintLn($this->FormatHeaderPoint(
+			$Msg, Theme::Warning
+		), 2);
+
+		return $this;
+	}
+
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
 
@@ -978,8 +1131,7 @@ class Client {
 
 		$this
 		->PrintLn($this->FormatHeaderLine(
-			$this->AppInfo->Name,
-			Theme::Prime
+			$this->AppInfo->Name, Theme::Prime
 		))
 		->PrintLn($this->FormatHeaderLine(
 			"Version: {$this->AppInfo->Version}",
