@@ -65,7 +65,7 @@ class Theme {
 	#[Common\Meta\Date('2023-11-15')]
 	#[Common\Meta\Info('Empty circle that should pair with CharBullet.')]
 	public string|int
-	$CharCircleFilled = 0x25CB;
+	$CharCircleFilled = 0x25CF;
 
 	#[Common\Meta\Date('2023-11-15')]
 	#[Common\Meta\Info('Empty circle that should pair with CharBullet.')]
