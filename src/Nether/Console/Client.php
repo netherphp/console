@@ -537,11 +537,17 @@ class Client {
 			->PrintLn()
 			->PrintLn(sprintf(
 				'%s %s',
-				$this->Format("[{$this->AppInfo->Name}:UnhandledException]", static::FmtError),
+				$this->Format("[{$this->AppInfo->Name}:UnhandledException]", Theme::Error),
 				$Message
 			))
+			->PrintLn(sprintf(
+				'%s %s:%s',
+				$this->Format("[{$this->AppInfo->Name}:UnhandledException]", Theme::Muted),
+				$Err->GetFile(),
+				$Err->GetLine()
+			))
 			->PrintLn()
-			->PrintLn($this->Format($Err->GetTraceAsString(), static::FmtMuted));
+			->PrintLn($this->Format($Err->GetTraceAsString(), Theme::Muted));
 
 			return $Code ?? -1;
 		}
