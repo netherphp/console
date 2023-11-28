@@ -184,7 +184,7 @@ class Client {
 	ApplyDefaultSort():
 	void {
 
-		$this->Commands->Sort();
+		$this->Commands->SortKeys();
 
 		return;
 	}
