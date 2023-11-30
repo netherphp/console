@@ -595,6 +595,10 @@ class Client {
 
 		////////
 
+		if($this->GetOption('cli-format-html')) {
+			return Common\Text::New($Text, Common\Text::ModeTagSpan, ...$Argv);
+		}
+
 		return Common\Text::New($Text, Common\Text::ModeTerminal, ...$Argv);
 	}
 
