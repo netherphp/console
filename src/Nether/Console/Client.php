@@ -568,7 +568,15 @@ class Client {
 	PrintLn(?string $Line=NULL, int $Lines=1):
 	static {
 
-		echo ($Line ?? ''), str_repeat(PHP_EOL, $Lines);
+		$EOL = match(TRUE) {
+			($this->GetOption('cli-newline-html'))
+			=> str_repeat(sprintf('%s<br />', PHP_EOL), $Lines),
+
+			default
+			=> str_repeat(PHP_EOL, $Lines)
+		};
+
+		echo ($Line ?? ''), $EOL;
 		return $this;
 	}
 
@@ -859,6 +867,11 @@ class Client {
 	PrintAppHeader(?string $Title=NULL):
 	static {
 
+		if($this->GetOption('cli-no-appheader'))
+		return $this;
+
+		////////
+
 		$Label = $this->AppInfo->Name;
 
 		if($Title !== NULL)
@@ -1139,15 +1152,18 @@ class Client {
 
 		////////
 
-		$this
-		->PrintLn($this->FormatHeaderLine(
-			$this->AppInfo->Name, Theme::Prime
-		))
-		->PrintLn($this->FormatHeaderLine(
-			"Version: {$this->AppInfo->Version}",
-			Theme::Muted
-		))
-		->PrintLn();
+		if(!$this->GetOption('cli-no-appheader')) {
+			$this->PrintLn($this->FormatHeaderLine(
+				$this->AppInfo->Name, Theme::Prime
+			));
+
+			$this->PrintLn($this->FormatHeaderLine(
+				"Version: {$this->AppInfo->Version}",
+				Theme::Muted
+			));
+
+			$this->PrintLn();
+		}
 
 		if($Version)
 		return 0;
@@ -1155,9 +1171,10 @@ class Client {
 		////////
 
 		$this->PrintLn(sprintf(
-			'%s %s <command> <args>',
+			'%s %s%s <command> <args>',
 			$this->Format('USAGE:', Theme::Accent),
-			basename($this->Name)
+			basename($this->Name),
+			($Picked)?(" {$Picked}"):('')
 		), 2);
 
 		if(!$Picked)
