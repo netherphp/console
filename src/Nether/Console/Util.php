@@ -229,4 +229,13 @@ class Util {
 		return str_replace('\\', '/', $Input);
 	}
 
+	static public function
+	PrintLn(string $Msg):
+	void {
+
+		echo $Msg, PHP_EOL;
+
+		return;
+	}
+
 }
