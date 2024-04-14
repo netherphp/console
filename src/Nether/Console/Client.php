@@ -1126,6 +1126,13 @@ class Client {
 		return FALSE;
 	}
 
+	public function
+	IsPharing():
+	bool {
+
+		return Phar::Running(FALSE) !== '';
+	}
+
 	////////////////////////////////////////////////////////////////
 	// COMMAND: help ///////////////////////////////////////////////
 
