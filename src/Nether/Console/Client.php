@@ -809,6 +809,107 @@ class Client {
 		);
 	}
 
+	#[Common\Meta\Date('2024-04-22')]
+	public function
+	FormatTable(array $Head, array $Data, ?array $Fmts=NULL):
+	string {
+
+		$Delim = ' | ';
+		$MaxCol = 16;
+		$TWidth = 80;
+
+		$Output = '';
+		$ColMax = [];
+		$LineMax = 0;
+		$Row = NULL;
+		$Joiner = NULL;
+		$CK = NULL;
+		$CV = NULL;
+		$LastKey = NULL;
+
+		////////
+
+		if(!count($Head))
+		throw new Common\Error\RequiredDataMissing(
+			'Table Headers', 'array of strings'
+		);
+
+		if(count($Data) && count($Data[0]) !== count($Head))
+		throw new Common\Error\FormatInvalid(
+			'header/row column count mismatch'
+		);
+
+		if($Fmts === NULL)
+		$Fmts = array_fill(0, count($Head), 's');
+
+		if(count($Fmts) && (count($Fmts) !== count($Head)))
+		throw new Common\Error\FormatInvalid(
+			'header/formats column count mismatch'
+		);
+
+		////////
+
+		$LastKey = array_reverse(array_keys($Head))[0];
+
+		// find the max width of each column in this dataset.
+
+		foreach($Head as $CK=> $CV)
+		$ColMax[$CK] = strlen($CV);
+
+		foreach($Data as $Row) {
+			foreach($Row as $CK=> $CV) {
+				// @TODO 2024-04-22 handle callable() fmt
+				$CV = sprintf("%{$Fmts[$CK]}", $CV);
+
+				if(strlen($CV) > $ColMax[$CK])
+				$ColMax[$CK] = min(strlen($CV), $MaxCol);
+			}
+		}
+
+		// determine the longest line we will try to print.
+
+		$LineMax = array_sum($ColMax);
+		$LineMax += (strlen($Delim) * count($ColMax)) - 1;
+
+		// allow the final column to flood the terminal width.
+
+		$ColMax[$LastKey] = $TWidth - ($LineMax - $ColMax[$LastKey]);
+
+		////////
+
+		$Joiner = [];
+
+		foreach($Head as $CK=> $CV)
+		$Joiner[] = $this->Format(
+			sprintf("%-{$ColMax[$CK]}s", $CV),
+			Theme::Prime
+		);
+
+		$Output .= join($this->Format(' | ', Theme::Muted), $Joiner);
+		$Output .= PHP_EOL;
+		$Output .= $this->Format(str_repeat('=', $LineMax), Theme::Accent);
+		$Output .= PHP_EOL;
+
+		////////
+
+		foreach($Data as $Row) {
+			$Joiner = [];
+
+			foreach($Row as $CK=> $CV) {
+				// @TODO 2024-04-22 handle callable() fmt
+				$CV = sprintf("%{$Fmts[$CK]}", $CV);
+				$Joiner[] = sprintf("%-{$ColMax[$CK]}s", $CV);
+			}
+
+			$Output .= join($this->Format(' | ', Theme::Muted), $Joiner);
+			$Output .= PHP_EOL;
+		}
+
+		////////
+
+		return $Output;
+	}
+
 	#[Common\Meta\Date('2023-11-14')]
 	#[Common\Meta\Info('Returns theme-styled content suitable for an H4 division with an extra line break after.')]
 	public function
@@ -858,6 +959,16 @@ class Client {
 	static {
 
 		$this->PrintLn($this->FormatH4($Text));
+
+		return $this;
+	}
+
+	#[Common\Meta\Date('2024-04-22')]
+	protected function
+	PrintTable(array $Head, array $Data):
+	static {
+
+		$this->PrintLn($this->FormatTable($Head, $Data));
 
 		return $this;
 	}
