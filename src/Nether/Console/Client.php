@@ -173,7 +173,7 @@ class Client {
 	void {
 
 		$this->Size = static::FetchTerminalSize();
-		$this->Size->ClampX(0, 80);
+		//$this->Size->ClampX(0, 80);
 
 		return;
 	}
@@ -1524,15 +1524,27 @@ class Client {
 	FetchTerminalSize():
 	Common\Units\Vec2 {
 
-		$W = 80;
-		$H = 24;
+		$Vec = match(PHP_OS_FAMILY) {
+			'Linux'
+			=> new Common\Units\Vec2(
+				(int)`tput cols -T dumb`,
+				(int)`tput lines -T dumb`
+			),
 
-		if(PHP_OS_FAMILY !== 'Windows') {
-			$W = (int)`tput cols -T dumb`;
-			$H = (int)`tput lines -T dumb`;
-		}
+			'Darwin'
+			=> new Common\Units\Vec2(
+				(int)`tput cols`,
+				(int)`tput lines`
+			),
 
-		return new Common\Units\Vec2($W, $H);
+			default
+			=> new Common\Units\Vec2(80, 24)
+		};
+
+		//Common\Dump::Var(PHP_OS_FAMILY);
+		//Common\Dump::Var($Vec);
+
+		return $Vec;
 	}
 
 }
