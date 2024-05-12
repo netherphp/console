@@ -815,9 +815,7 @@ class Client {
 	string {
 
 		$Delim = ' | ';
-		$MaxCol = 16;
-		$TWidth = 80;
-
+		$TWidth = $this->Size->X;
 		$Output = '';
 		$ColMax = [];
 		$LineMax = 0;
@@ -827,29 +825,19 @@ class Client {
 		$CV = NULL;
 		$LastKey = NULL;
 
-		////////
+		// make sure the datasets make sense.
 
 		if(!count($Head))
-		throw new Common\Error\RequiredDataMissing(
-			'Table Headers', 'array of strings'
-		);
+		throw new Common\Error\RequiredDataMissing('Table Headers', 'array of strings');
 
 		if(count($Data) && count($Data[0]) !== count($Head))
-		throw new Common\Error\FormatInvalid(
-			'header/row column count mismatch'
-		);
+		throw new Common\Error\FormatInvalid('header/row column count mismatch');
 
 		if($Fmts === NULL)
 		$Fmts = array_fill(0, count($Head), 's');
 
 		if(count($Fmts) && (count($Fmts) !== count($Head)))
-		throw new Common\Error\FormatInvalid(
-			'header/formats column count mismatch'
-		);
-
-		////////
-
-		$LastKey = array_reverse(array_keys($Head))[0];
+		throw new Common\Error\FormatInvalid('header/formats column count mismatch');
 
 		// find the max width of each column in this dataset.
 
@@ -862,17 +850,18 @@ class Client {
 				$CV = sprintf("%{$Fmts[$CK]}", $CV);
 
 				if(strlen($CV) > $ColMax[$CK])
-				$ColMax[$CK] = min(strlen($CV), $MaxCol);
+				$ColMax[$CK] = strlen($CV);
 			}
 		}
 
 		// determine the longest line we will try to print.
 
 		$LineMax = array_sum($ColMax);
-		$LineMax += (strlen($Delim) * count($ColMax)) - 1;
+		$LineMax += (strlen($Delim) * count($ColMax)) - strlen($Delim);
 
 		// allow the final column to flood the terminal width.
 
+		$LastKey = array_reverse(array_keys($Head))[0];
 		$ColMax[$LastKey] = $TWidth - ($LineMax - $ColMax[$LastKey]);
 
 		////////
@@ -881,7 +870,7 @@ class Client {
 
 		foreach($Head as $CK=> $CV)
 		$Joiner[] = $this->Format(
-			sprintf("%-{$ColMax[$CK]}s", $CV),
+			sprintf("%-{$ColMax[$CK]}s", substr($CV, 0, $ColMax[$CK])),
 			Theme::Prime
 		);
 
@@ -898,7 +887,7 @@ class Client {
 			foreach($Row as $CK=> $CV) {
 				// @TODO 2024-04-22 handle callable() fmt
 				$CV = sprintf("%{$Fmts[$CK]}", $CV);
-				$Joiner[] = sprintf("%-{$ColMax[$CK]}s", $CV);
+				$Joiner[] = sprintf("%-{$ColMax[$CK]}s", substr($CV, 0, $ColMax[$CK]));
 			}
 
 			$Output .= join($this->Format(' | ', Theme::Muted), $Joiner);
