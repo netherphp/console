@@ -809,6 +809,19 @@ class Client {
 		);
 	}
 
+	#[Common\Meta\Date('2023-11-14')]
+	#[Common\Meta\Info('Returns theme-styled content suitable for an H4 division with an extra line break after.')]
+	public function
+	FormatH4(string $Text):
+	string {
+
+		return sprintf(
+			'%s%s',
+			$this->Format($Text, Theme::Accent, Bd: TRUE),
+			PHP_EOL
+		);
+	}
+
 	#[Common\Meta\Date('2024-04-22')]
 	public function
 	FormatTable(array $Head, array $Data, ?array $Fmts=NULL):
@@ -897,19 +910,6 @@ class Client {
 		////////
 
 		return $Output;
-	}
-
-	#[Common\Meta\Date('2023-11-14')]
-	#[Common\Meta\Info('Returns theme-styled content suitable for an H4 division with an extra line break after.')]
-	public function
-	FormatH4(string $Text):
-	string {
-
-		return sprintf(
-			'%s%s',
-			$this->Format($Text, Theme::Accent, Bd: TRUE),
-			PHP_EOL
-		);
 	}
 
 	#[Common\Meta\Date('2023-11-16')]
