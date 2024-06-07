@@ -58,10 +58,15 @@ class CommandLineUtil {
 	}
 
 	public function
-	GetOutputString($Prefix=''):
+	GetOutputString($Prefix='', bool $Trim=TRUE):
 	string {
 
-		return join(sprintf('%s%s', PHP_EOL, $Prefix), $this->Output);
+		$Output = join(sprintf('%s%s', PHP_EOL, $Prefix), $this->Output);
+
+		if($Trim)
+		$Output = trim($Output);
+
+		return $Output;
 	}
 
 	////////
