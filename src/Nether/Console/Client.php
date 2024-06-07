@@ -824,7 +824,7 @@ class Client {
 
 	#[Common\Meta\Date('2024-04-22')]
 	public function
-	FormatTable(array $Head, array $Data, ?array $Fmts=NULL):
+	FormatTable(array $Head, array $Data, ?array $Fmts=NULL, ?array $Styles=NULL):
 	string {
 
 		$Delim = ' | ';
@@ -834,6 +834,7 @@ class Client {
 		$LineMax = 0;
 		$Row = NULL;
 		$Joiner = NULL;
+		$CR = NULL;
 		$CK = NULL;
 		$CV = NULL;
 		$LastKey = NULL;
@@ -849,8 +850,14 @@ class Client {
 		if($Fmts === NULL)
 		$Fmts = array_fill(0, count($Head), 's');
 
+		if($Styles === NULL)
+		$Styles = array_fill(0, count($Head), $this->Theme::Default);
+
 		if(count($Fmts) && (count($Fmts) !== count($Head)))
 		throw new Common\Error\FormatInvalid('header/formats column count mismatch');
+
+		if(count($Styles) && (count($Styles) !== count($Data)))
+		throw new Common\Error\FormatInvalid('data/styles row count mismatch');
 
 		// find the max width of each column in this dataset.
 
@@ -894,13 +901,19 @@ class Client {
 
 		////////
 
-		foreach($Data as $Row) {
+		foreach($Data as $CR=> $Row) {
 			$Joiner = [];
 
 			foreach($Row as $CK=> $CV) {
-				// @TODO 2024-04-22 handle callable() fmt
 				$CV = sprintf("%{$Fmts[$CK]}", $CV);
-				$Joiner[] = sprintf("%-{$ColMax[$CK]}s", substr($CV, 0, $ColMax[$CK]));
+
+				$Joiner[] = $this->Format(
+					sprintf(
+						"%-{$ColMax[$CK]}s",
+						substr($CV, 0, $ColMax[$CK])
+					),
+					$Styles[$CR]
+				);
 			}
 
 			$Output .= join($this->Format(' | ', Theme::Muted), $Joiner);
@@ -954,10 +967,12 @@ class Client {
 
 	#[Common\Meta\Date('2024-04-22')]
 	protected function
-	PrintTable(array $Head, array $Data):
+	PrintTable(array $Head, array $Data, ?array $Fmts=NULL, ?array $Styles=NULL):
 	static {
 
-		$this->PrintLn($this->FormatTable($Head, $Data));
+		$this->PrintLn($this->FormatTable(
+			$Head, $Data, $Fmts, $Styles
+		));
 
 		return $this;
 	}
