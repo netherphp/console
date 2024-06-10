@@ -851,7 +851,7 @@ class Client {
 		$Fmts = array_fill(0, count($Head), 's');
 
 		if($Styles === NULL)
-		$Styles = array_fill(0, count($Head), $this->Theme::Default);
+		$Styles = array_fill(0, count($Data), $this->Theme::Default);
 
 		if(count($Fmts) && (count($Fmts) !== count($Head)))
 		throw new Common\Error\FormatInvalid('header/formats column count mismatch');
