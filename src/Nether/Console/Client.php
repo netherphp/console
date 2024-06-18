@@ -405,31 +405,6 @@ class Client {
 
 	#[Common\Meta\Deprecated('2023-09-15')]
 	public function
-	GetColourForStatus(mixed $Status):
-	Common\Units\Colour {
-
-		$Colour = match(TRUE) {
-			$Status === TRUE,
-			$Status === 'OK',
-			=> new Common\Units\Colour('#44CC44'),
-
-			$Status === FALSE,
-			$Status === 'ERROR',
-			=> new Common\Units\Colour('#CC4444'),
-
-			$Status === NULL,
-			$Status === 'UNKNOWN'
-			=> new Common\Units\Colour('#CCCCCC'),
-
-			default
-			=> new Common\Units\Colour('#ffffff')
-		};
-
-		return $Colour;
-	}
-
-	#[Common\Meta\Deprecated('2023-09-15')]
-	public function
 	GetFormatForStatus(mixed $Status, string $Alt=NULL):
 	array {
 
