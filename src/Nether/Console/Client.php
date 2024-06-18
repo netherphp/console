@@ -9,7 +9,7 @@ use Nether\Common;
 
 use Phar;
 use Throwable;
-use Nether\Common\Units\Colour;
+use Nether\Dye\Colour;
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -401,54 +401,6 @@ class Client {
 	string {
 
 		return $this->Formatter->Red($Text);
-	}
-
-	#[Common\Meta\Deprecated('2023-09-15')]
-	public function
-	GetFormatForStatus(mixed $Status, string $Alt=NULL):
-	array {
-
-		$Output = match(TRUE) {
-
-			$Status === TRUE,
-			$Status === 'ok',
-			=> [ 'Colour'=> new Common\Units\Colour('#44CC44') ],
-
-			$Status === FALSE,
-			$Status === 'error',
-			=> [ 'Colour'=> new Common\Units\Colour('#CC4444') ],
-
-			$Status === NULL,
-			$Status === 'unknown'
-			=> [ 'Colour'=> new Common\Units\Colour('#CCCCCC') ],
-
-			////////
-
-			$Status === 'primary'
-			=> [ 'Colour'=> new Common\Units\Colour('#E4D060') ],
-
-			default
-			=> []
-		};
-
-		switch($Alt) {
-			case 'alt1':
-				($Output['Colour'])
-				->Desaturate(44);
-			break;
-			case 'alt2':
-				($Output['Colour'])
-				->Desaturate(44)
-				->Rotate(45);
-			break;
-			case 'alt3':
-				($Output['Colour'])
-				->Desaturate(44)
-				->Rotate(-45);
-			break;
-		}
-
-		return $Output;
 	}
 
 	static public function
