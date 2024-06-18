@@ -403,24 +403,6 @@ class Client {
 		return $this->Formatter->Red($Text);
 	}
 
-	static public function
-	GetStatusEmoji(mixed $Status):
-	string {
-
-		if($Status === TRUE)
-		return '🟢';
-
-		if($Status === FALSE)
-		return '🔴';
-
-		if(is_int($Status))
-		return ['⚫', '⚪', '🟤', '🔴', '🟠', '🟡', '🟢', '🔵', '🟣'][$Status];
-
-		////////
-
-		return '⚫';
-	}
-
 	public function
 	Run():
 	int {
