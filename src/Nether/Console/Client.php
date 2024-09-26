@@ -1311,7 +1311,8 @@ class Client {
 	// COMMAND: phar ///////////////////////////////////////////////
 
 	#[Meta\Command('phar', TRUE)]
-	#[Meta\Info('Compile a tort.phar for easy use/distribution.')]
+	#[Meta\Info('Compile a PHAR for easy use/distribution.')]
+	#[Meta\Option('ver', TRUE, 'Version to append to the PHAR. Use "null" to skip versioning.')]
 	#[Meta\Error(1, 'Phar creation must be enabled in php.ini via phar.readonly=0')]
 	#[Meta\Error(2, 'Phar creation must be enabled by setting AppInfo.Phar to the desired filename.')]
 	public function
@@ -1326,15 +1327,33 @@ class Client {
 
 		////////
 
+		$Outfile = $this->GetPharOut();
+		$Bin = $this->GetPharBin();
+		$Version = $this->GetOption('ver') ?? TRUE;
+		$Files = $this->GetPharFiles();
+		$FileFilters = $this->GetPharFileFilters();
+		$BaseDir = $this->GetPharBaseDir();
+
+		////////
+
+		if($Version === TRUE)
+		$Version = $this->GetPharVersion();
+
+		if($Version === '' || $Version === 'null')
+		$Version = '';
+
+		////////
+
 		$Phar = Common\Phar\Builder::From(
-			PharOut: $this->GetPharOut(),
-			Bin: $this->GetPharBin(),
-			Files: $this->GetPharFiles(),
-			FileFilters: $this->GetPharFileFilters(),
-			BaseDir: $this->GetPharBaseDir()
+			PharOut: $Outfile,
+			Bin: $Bin,
+			Version: $Version,
+			Files: $Files,
+			FileFilters: $FileFilters,
+			BaseDir: $BaseDir
 		);
 
-		$Phar->Build();
+		$Phar->Build($Version);
 
 		return 0;
 	}
@@ -1377,10 +1396,19 @@ class Client {
 		// bin file but with a phar extension right in the build root.
 
 		return $this->AppInfo->Phar;
+	}
 
-		return Common\Filesystem\Util::ReplaceFileExtension(
-			basename($this->GetPharBin()), 'phar'
-		);
+	#[Common\Meta\Date('2024-09-26')]
+	#[Common\Meta\Info('Return the final phar filename.')]
+	protected function
+	GetPharVersion():
+	string {
+
+		// typically a whatever.phar in the root of the build.
+		// default implementation tries to name it the same as the default
+		// bin file but with a phar extension right in the build root.
+
+		return $this->AppInfo->Version;
 	}
 
 	#[Common\Meta\Date('2023-10-31')]
