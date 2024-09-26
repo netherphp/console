@@ -2,6 +2,7 @@
 
 namespace Nether\Console\Struct;
 
+use Nether\Common;
 use Nether\Console;
 
 class CommandLineUtil {
@@ -94,6 +95,20 @@ class CommandLineUtil {
 	bool {
 
 		return (count($this->Output) > 0);
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	#[Common\Meta\Date('2024-09-25')]
+	static public function
+	Exec(string $Cmd):
+	static {
+
+		$Output = new static($Cmd);
+		$Output->Run();
+
+		return $Output;
 	}
 
 }
