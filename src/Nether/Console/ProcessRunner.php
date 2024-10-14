@@ -3,28 +3,34 @@
 
 namespace Nether\Console;
 
+use Nether\Common;
+
 ################################################################################
 ################################################################################
 
 class ProcessRunner {
 
-	public mixed
-	$Proc;
-
 	public string
 	$Line;
+
+	public bool
+	$Verbose;
+
+	public mixed
+	$Proc;
 
 	public array
 	$Pipe = [];
 
-	public bool
-	$Verbose;
+	public Common\Datastore
+	$Env;
 
 	public function
 	__Construct($Line, bool $Verbose=FALSE) {
 
 		$this->Line = $Line;
 		$this->Verbose = $Verbose;
+		$this->Env = new Common\Datastore;
 
 		return;
 	}
@@ -36,7 +42,9 @@ class ProcessRunner {
 		$this->Proc = proc_open(
 			$this->Line,
 			[ ['pipe', 'r'], ['pipe', 'w'], ['pipe', 'w'] ],
-			$this->Pipe
+			$this->Pipe,
+			NULL,
+			$this->Env->Export()
 		);
 
 		return $this;
