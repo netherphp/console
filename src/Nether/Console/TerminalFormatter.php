@@ -194,4 +194,11 @@ class TerminalFormatter {
 		return sprintf("\e[%sm", join(';', $Codes));
 	}
 
+	public function
+	Link(string $URL, string $Label='LINK➜'):
+	string {
+
+		return sprintf("\033]8;;%s\033\\%s\033]8;;\033\\", $URL, $Label);
+	}
+
 }

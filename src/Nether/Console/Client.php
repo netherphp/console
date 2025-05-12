@@ -627,6 +627,9 @@ class Client {
 			if($IsNumeric)
 			$Name = (((int)$Name) + 1);
 
+			if(!$Data)
+			$Data = '';
+
 			$Output .= sprintf(
 				'%s %s %s%s',
 				$this->Format($Bull, $BullPreset),
@@ -1072,8 +1075,9 @@ class Client {
 				$this->Format("{$Name}:", static::FmtAccent),
 				$this->Format(
 					sprintf(
-						'%s%s:',
+						'%s%s%s:',
 						$Type,
+						($Required ? " [Required]" : ""),
 						($Default ? " ({$Default})" : "")
 					),
 					static::FmtMuted
@@ -1098,6 +1102,8 @@ class Client {
 
 			$this->FormatLn("{$Name} is Required.", static::FmtError);
 			$this->FormatLn("(expects: {$Type})", static::FmtMuted, 2);
+
+			continue;
 		}
 
 		return $Result;
