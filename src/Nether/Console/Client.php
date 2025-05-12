@@ -1035,33 +1035,6 @@ class Client {
 		return ($Result === $Condition);
 	}
 
-	public function
-	PromptBool(?string $Msg=NULL, ?string $Prompt=NULL, bool $Condition=TRUE, mixed $Input=STDIN):
-	bool {
-
-		$Result = Common\Filters\Numbers::BoolType($this->Prompt(
-			$Msg,
-			$Prompt,
-			$Input
-		));
-
-		return ($Result === $Condition);
-	}
-
-	public function
-	PromptTrue(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
-	bool {
-
-		return $this->PromptBool($Msg, $Prompt, TRUE, $Input);
-	}
-
-	public function
-	PromptFalse(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
-	bool {
-
-		return $this->PromptBool($Msg, $Prompt, FALSE, $Input);
-	}
-
 	#[Common\Meta\Date('2023-10-12')]
 	#[Common\Meta\Info('Ask for text input from STDIN in a nice way.')]
 	protected function
@@ -1107,6 +1080,23 @@ class Client {
 		}
 
 		return $Result;
+	}
+
+	#[Common\Meta\Date('2025-05-12')]
+	#[Common\Meta\Info('Ask for text input from STDIN expecting a value that seems like a yes or a no.')]
+	protected function
+	PromptForBool(string $Name, ?string $Type='bool', bool $Required=FALSE, ?callable $Filter=NULL, mixed $Default=NULL):
+	mixed {
+
+		$Truths = [ '1', 'Y', 'YES', 'TRUE' ];
+
+		$Value = $this->PromptForValue($Name, $Type, $Required, $Filter, $Default);
+		$Value = strtoupper(trim($Value ?? ''));
+
+		if(in_array($Value, $Truths))
+		return TRUE;
+
+		return FALSE;
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -1492,6 +1482,41 @@ class Client {
 		//Common\Dump::Var($Vec);
 
 		return $Vec;
+	}
+
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+
+	#[Common\Meta\Deprecated('2025-05-12', 'Use PromptForBool instead.')]
+	public function
+	PromptBool(?string $Msg=NULL, ?string $Prompt=NULL, bool $Condition=TRUE, mixed $Input=STDIN):
+	bool {
+
+		$Result = Common\Filters\Numbers::BoolType($this->Prompt(
+			$Msg,
+			$Prompt,
+			$Input
+		));
+
+		return ($Result === $Condition);
+	}
+
+	#[Common\Meta\Deprecated('2025-05-12', 'Use PromptForBool instead.')]
+	public function
+	PromptTrue(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
+	bool {
+
+		return $this->PromptBool($Msg, $Prompt, TRUE, $Input);
+	}
+
+	#[Common\Meta\Deprecated('2025-05-12', 'Use PromptForBool instead.')]
+	public function
+	PromptFalse(?string $Msg=NULL, ?string $Prompt=NULL, mixed $Input=STDIN):
+	bool {
+
+		return $this->PromptBool($Msg, $Prompt, FALSE, $Input);
 	}
 
 }
