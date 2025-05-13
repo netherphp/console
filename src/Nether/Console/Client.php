@@ -175,6 +175,9 @@ class Client {
 		$this->Size = static::FetchTerminalSize();
 		//$this->Size->ClampX(0, 80);
 
+		if($this->GetOption('cli-width'))
+		$this->Size->X = $this->GetOption('cli-width');
+
 		return;
 	}
 
@@ -1198,7 +1201,7 @@ class Client {
 		////////
 
 		$this->PrintLn(sprintf(
-			'%s %s%s <command> <args>',
+			'%s %s%s [command] [args]',
 			$this->Format('USAGE:', Theme::Accent),
 			basename($this->Name),
 			($Picked)?(" {$Picked}"):('')
@@ -1206,7 +1209,7 @@ class Client {
 
 		if(!$Picked)
 		$this->PrintLn($this->FormatBulletList([
-			'help <command>' => 'view help for specific command.',
+			'help [command]' => 'view help for specific command.',
 			'help --verbose' => 'view all help for all commands.'
 		]), 2);
 
@@ -1252,7 +1255,7 @@ class Client {
 				if($Args->Count())
 				$Title .= sprintf(' %s', (
 					$Args
-					->Map(fn(Meta\Arg $A)=> "<{$A->Name}>")
+					->Map(fn(Meta\Arg $A)=> "[{$A->Name}]")
 					->Join(' ')
 				));
 
