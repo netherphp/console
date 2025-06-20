@@ -630,8 +630,8 @@ class Client {
 			if($IsNumeric)
 			$Name = (((int)$Name) + 1);
 
-			if(!$Data)
-			$Data = '';
+			//if(!$Data)
+			//$Data = '';
 
 			$Output .= sprintf(
 				'%s %s %s%s',
