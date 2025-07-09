@@ -21,6 +21,10 @@ extends Common\Prototype {
 
 	#[Common\Meta\PropertyObjectify]
 	public Common\Datastore
+	$Chars;
+
+	#[Common\Meta\PropertyObjectify]
+	public Common\Datastore
 	$Headers;
 
 	#[Common\Meta\PropertyObjectify]
@@ -52,6 +56,15 @@ extends Common\Prototype {
 		$this->Headers->MergeRight($Argv);
 
 		$this->ShowAllColumns();
+
+		return $this;
+	}
+
+	public function
+	SetData(array $Rows):
+	static {
+
+		$this->Rows->SetData($Rows);
 
 		return $this;
 	}
@@ -147,6 +160,18 @@ extends Common\Prototype {
 	}
 
 	public function
+	PrintFooter():
+	static {
+
+		$BChar = '=';
+		$TW = $this->FetchTerminalWidth();
+
+		echo str_repeat($BChar, $TW), PHP_EOL;
+
+		return $this;
+	}
+
+	public function
 	PrintRows():
 	static {
 
@@ -170,10 +195,13 @@ extends Common\Prototype {
 				continue;
 
 				$Format = sprintf('| %%- %ds ', max($Min, $this->Widths[$Key]));
+				//s$Format = '| %s ';
 				$Line .= sprintf($Format, $Value);
 			}
 
-			echo substr($Line, 0, $TW), PHP_EOL;
+			$Diff = mb_strlen($Line) - mb_strlen($this->StripTerminalCodes($Line));
+
+			echo mb_substr($Line, 0, ($TW+$Diff)), PHP_EOL;
 		}
 
 		return $this;
@@ -196,23 +224,34 @@ extends Common\Prototype {
 
 		// start with the headers.
 
-		foreach($this->Headers as $Label)
-		$this->Widths->Push(strlen($Label));
+		foreach($this->Headers as $Label) {
+			$this->Widths->Push(mb_strlen($this->StripTerminalCodes($Label)));
+			$this->Chars->Push(mb_strlen($Label));
+		}
 
 		// analyse the data.
 
 		foreach($this->Rows as $Row)
 		foreach($Row as $Field => $Label) {
 			$Label ??= '';
-			$Len = strlen($Label);
+			$Len = mb_strlen($this->StripTerminalCodes($Label));
 
-			if($Len > $this->Widths[$Field])
-			$this->Widths[$Field] = $Len;
+			if($Len > $this->Widths[$Field]) {
+				$this->Widths[$Field] = $Len;
+				$this->Chars->Push(mb_strlen($Label));
+			}
 
 			continue;
 		}
 
 		return $this;
+	}
+
+	public function
+	StripTerminalCodes(string $Input):
+	string {
+
+		return preg_replace('#\e\[[0-9;]*m(?:\e\[K)?#', '', $Input);
 	}
 
 	////////////////////////////////////////////////////////////////

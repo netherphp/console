@@ -746,6 +746,7 @@ class Client {
 		$TWidth = $this->Size->X;
 		$Output = '';
 		$ColMax = [];
+		$ColWid = [];
 		$LineMax = 0;
 		$Row = NULL;
 		$Joiner = NULL;
@@ -776,16 +777,21 @@ class Client {
 
 		// find the max width of each column in this dataset.
 
-		foreach($Head as $CK=> $CV)
-		$ColMax[$CK] = strlen($CV);
+		foreach($Head as $CK=> $CV) {
+			$ColMax[$CK] = mb_strlen($CV);
+			$ColWid[$CK] = mb_strlen($CV);
+		}
 
 		foreach($Data as $Row) {
 			foreach($Row as $CK=> $CV) {
 				// @TODO 2024-04-22 handle callable() fmt
 				$CV = sprintf("%{$Fmts[$CK]}", $CV);
+				$CVLen = mb_strlen(preg_replace('#\e\[[0-9;]*m(?:\e\[K)?#', '', $CV));
 
-				if(strlen($CV) > $ColMax[$CK])
-				$ColMax[$CK] = strlen($CV);
+				if($CVLen > $ColMax[$CK]) {
+					$ColMax[$CK] = $CVLen;
+					$ColWid[$CK] = mb_strlen($CV);
+				}
 			}
 		}
 
@@ -825,7 +831,7 @@ class Client {
 				$Joiner[] = $this->Format(
 					sprintf(
 						"%-{$ColMax[$CK]}s",
-						substr($CV, 0, $ColMax[$CK])
+						mb_substr($CV, 0, $ColWid[$CK])
 					),
 					$Styles[$CR]
 				);
