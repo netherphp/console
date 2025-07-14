@@ -5,6 +5,7 @@ namespace Nether\Console\Elements;
 
 use Nether\Common;
 use Nether\Console;
+use Nether\Dye;
 
 ################################################################################
 ################################################################################
@@ -34,6 +35,21 @@ extends Common\Prototype {
 	#[Common\Meta\PropertyObjectify]
 	public Common\Datastore
 	$Show;
+
+	public string
+	$BorderCharH = '=';
+
+	public string
+	$BorderCharV = '|';
+
+	public ?Dye\Colour
+	$BorderColour = NULL;
+
+	public ?Dye\Colour
+	$HeaderColour = NULL;
+
+	public ?Dye\Colour
+	$TextColour = NULL;
 
 	////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////
@@ -126,14 +142,29 @@ extends Common\Prototype {
 	PrintHeaders():
 	static {
 
-		$Min = 1;
-		$BChar = '=';
+		// a lot of the weird math in here is to put up with terminal
+		// escape codes being zero width to us but not to string counting
+		// things.
+
 		$TW = $this->FetchTerminalWidth();
+		$BH = $this->BorderCharH;
+		$BV = $this->BorderCharV;
+		$PC = ' ';
 
 		$Key = NULL;
 		$Name = NULL;
-		$Format = NULL;
+		$PLen = NULL;
+
 		$Line = '';
+		$LLen = 0;
+		$Sane = '';
+		$SLen = 0;
+		$Diff = NULL;
+
+		$LineBorder = NULL;
+		$LineChop = NULL;
+		$LinePad = NULL;
+		$LineEnd = NULL;
 
 		////////
 
@@ -146,13 +177,34 @@ extends Common\Prototype {
 			if(!$this->Show[$Key])
 			continue;
 
-			$Format = sprintf('| %%- %ds ', max($Min, $this->Widths[$Key]));
-			$Line .= sprintf($Format, $Name);
+			$PLen = max(0, ($this->Widths[$Key] - (mb_strlen($Name))));
+
+			$Line .= sprintf(
+				'%s %s%s ',
+				$this->Client->Format($BV, C: $this->BorderColour),
+				$Name,
+				str_repeat($PC, $PLen)
+			);
 		}
 
-		echo str_repeat($BChar, $TW), PHP_EOL;
-		echo substr($Line, 0, $TW), PHP_EOL;
-		echo str_repeat($BChar, $TW), PHP_EOL;
+		////////
+
+		$Line = rtrim($Line);
+		$LLen = mb_strlen($Line);
+		$Sane = $this->StripTerminalCodes($Line);
+		$SLen = mb_strlen($Sane);
+		$Diff = $LLen - $SLen;
+
+		$LineBorder = $this->Client->Format(str_repeat($BH, $TW), C: $this->BorderColour);
+		$LineChop = mb_substr($Line, 0, (($TW-2) + $Diff));
+		$LinePad = str_repeat($PC, max(0, ($TW - $SLen - 2)));
+		$LineEnd = $this->Client->Format(sprintf(' %s', $BV), C: $this->BorderColour);
+
+		////////
+
+		echo $LineBorder, PHP_EOL;
+		echo $LineChop, $LinePad, $LineEnd, PHP_EOL;
+		echo $LineBorder, PHP_EOL;
 
 		////////
 
@@ -184,6 +236,7 @@ extends Common\Prototype {
 		$Value = NULL;
 		$Format = NULL;
 		$Line = NULL;
+		$Len = NULL;
 
 		foreach($this->Rows as $Loop => $Row) {
 			/** @var array $Row */
@@ -194,14 +247,26 @@ extends Common\Prototype {
 				if(!$this->Show[$Key])
 				continue;
 
-				$Format = sprintf('| %%- %ds ', max($Min, $this->Widths[$Key]));
-				//s$Format = '| %s ';
+				$Len = mb_strlen($this->StripTerminalCodes($Value));
+
+				$Format = sprintf(
+					'| %s%s ',
+					$Value,
+					str_repeat(' ', max(0, ($this->Widths[$Key] - $Len)) )
+				);
+
 				$Line .= sprintf($Format, $Value);
 			}
 
-			$Diff = mb_strlen($Line) - mb_strlen($this->StripTerminalCodes($Line));
+			$Stripped = $this->StripTerminalCodes($Line);
+			$SLen = mb_strlen($Stripped);
 
-			echo mb_substr($Line, 0, ($TW+$Diff)), PHP_EOL;
+			$Len = mb_strlen($Line);
+			$Diff = max(0, ($Len - $SLen));
+			$End = max(0, ($TW - $SLen - 2));
+
+			echo mb_substr($Line, 0, ($TW+$Diff) -2);
+			echo str_repeat(' ', $End), ' |', PHP_EOL;
 		}
 
 		return $this;
@@ -221,12 +286,13 @@ extends Common\Prototype {
 		////////
 
 		$this->Widths->Clear();
+		$this->Chars->Clear();
 
 		// start with the headers.
 
 		foreach($this->Headers as $Label) {
 			$this->Widths->Push(mb_strlen($this->StripTerminalCodes($Label)));
-			$this->Chars->Push(mb_strlen($Label));
+			$this->Chars->Push(strlen($this->StripTerminalCodes($Label)));
 		}
 
 		// analyse the data.
@@ -235,10 +301,11 @@ extends Common\Prototype {
 		foreach($Row as $Field => $Label) {
 			$Label ??= '';
 			$Len = mb_strlen($this->StripTerminalCodes($Label));
+			$Chr = strlen($this->StripTerminalCodes($Label));
 
 			if($Len > $this->Widths[$Field]) {
 				$this->Widths[$Field] = $Len;
-				$this->Chars->Push(mb_strlen($Label));
+				$this->Chars[$Field] = $Chr;
 			}
 
 			continue;
@@ -258,11 +325,14 @@ extends Common\Prototype {
 	////////////////////////////////////////////////////////////////
 
 	static public function
-	New(Console\Client $Client):
+	New(Console\Client $Client, ?Dye\Colour $BorderColour=NULL, ?Dye\Colour $HeaderColour=NULL, ?Dye\Colour $TextColour=NULL):
 	static {
 
 		$Output = new static([
-			'Client' => $Client
+			'Client'       => $Client,
+			'BorderColour' => $BorderColour,
+			'HeaderColour' => $HeaderColour,
+			'TextColour'   => $TextColour
 		]);
 
 		return $Output;
