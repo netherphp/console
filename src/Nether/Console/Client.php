@@ -510,7 +510,7 @@ class Client {
 
 		////////
 
-		if(isset($Argv['Colour']) && is_string($Argv['Colour']))
+		if(isset($Argv['Colour']) && is_string($Argv['Colour']) && $Argv['Colour'])
 		$Argv['Colour'] = new Colour($Argv['Colour']);
 
 		////////
@@ -688,12 +688,12 @@ class Client {
 	#[Common\Meta\Date('2023-11-14')]
 	#[Common\Meta\Info('Returns theme-styled content suitable for an H1 division with an extra line break after.')]
 	public function
-	FormatH1(string $Text):
+	FormatH1(string $Text, string $Preset=Theme::Prime):
 	string {
 
 		return sprintf(
 			'%s%s',
-			$this->FormatHeaderLine($Text, Theme::Prime),
+			$this->FormatHeaderLine($Text, $Preset),
 			PHP_EOL
 		);
 	}
@@ -701,12 +701,12 @@ class Client {
 	#[Common\Meta\Date('2023-11-14')]
 	#[Common\Meta\Info('Returns theme-styled content suitable for an H2 division with an extra line break after.')]
 	public function
-	FormatH2(string $Text):
+	FormatH2(string $Text, string $Preset=Theme::Accent):
 	string {
 
 		return sprintf(
 			'%s%s',
-			$this->FormatHeaderLine($Text, Theme::Accent),
+			$this->FormatHeaderLine($Text, $Preset),
 			PHP_EOL
 		);
 	}
@@ -848,20 +848,20 @@ class Client {
 
 	#[Common\Meta\Date('2023-11-16')]
 	protected function
-	PrintH1(string $Text):
+	PrintH1(string $Text, string $Preset=Theme::Prime):
 	static {
 
-		$this->PrintLn($this->FormatH1($Text));
+		$this->PrintLn($this->FormatH1($Text, $Preset));
 
 		return $this;
 	}
 
 	#[Common\Meta\Date('2023-11-16')]
 	protected function
-	PrintH2(string $Text):
+	PrintH2(string $Text, string $Preset=Theme::Accent):
 	static {
 
-		$this->PrintLn($this->FormatH2($Text));
+		$this->PrintLn($this->FormatH2($Text, $Preset));
 
 		return $this;
 	}

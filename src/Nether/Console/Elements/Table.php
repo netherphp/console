@@ -37,10 +37,10 @@ extends Common\Prototype {
 	$Show;
 
 	public string
-	$BorderCharH = '=';
+	$BorderCharH = '═';
 
 	public string
-	$BorderCharV = '|';
+	$BorderCharV = '║';
 
 	public ?Dye\Colour
 	$BorderColour = NULL;
@@ -215,10 +215,10 @@ extends Common\Prototype {
 	PrintFooter():
 	static {
 
-		$BChar = '=';
+		$BChar = $this->BorderCharH;
 		$TW = $this->FetchTerminalWidth();
 
-		echo str_repeat($BChar, $TW), PHP_EOL;
+		echo $this->Client->Format(str_repeat($BChar, $TW), C: $this->BorderColour), PHP_EOL;
 
 		return $this;
 	}
@@ -229,6 +229,7 @@ extends Common\Prototype {
 
 		$Min = 1;
 		$TW = $this->FetchTerminalWidth();
+		$BC = $this->BorderCharV;
 
 		$Loop = NULL;
 		$Row = NULL;
@@ -250,7 +251,8 @@ extends Common\Prototype {
 				$Len = mb_strlen($this->StripTerminalCodes($Value));
 
 				$Format = sprintf(
-					'| %s%s ',
+					'%s %s%s ',
+					$this->Client->Format($BC, C: $this->BorderColour),
 					$Value,
 					str_repeat(' ', max(0, ($this->Widths[$Key] - $Len)) )
 				);
@@ -266,7 +268,7 @@ extends Common\Prototype {
 			$End = max(0, ($TW - $SLen - 2));
 
 			echo mb_substr($Line, 0, ($TW+$Diff) -2);
-			echo str_repeat(' ', $End), ' |', PHP_EOL;
+			echo str_repeat(' ', $End), $this->Client->Format(" {$BC}", C: $this->BorderColour), PHP_EOL;
 		}
 
 		return $this;
