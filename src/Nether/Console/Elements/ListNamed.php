@@ -43,7 +43,7 @@ extends ListBullet {
 			$this->Client->PrintLn($Line);
 		}
 
-		$this->Client->PrintLn('', $Newlines);
+		$this->Client->PrintLn('', ($Newlines-1));
 
 		return;
 	}
