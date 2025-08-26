@@ -69,7 +69,13 @@ extends Common\Prototype {
 	////////////////////////////////////////////////////////////////
 
 	static public function
-	New(Console\Client $Client, ?string $Text=NULL, ?Dye\Colour $BorderColour=NULL, ?Dye\Colour $TextColour=NULL):
+	New(
+		Console\Client $Client,
+		?string $Text=NULL,
+		?Dye\Colour $BorderColour=NULL,
+		?Dye\Colour $TextColour=NULL,
+		int $Print=0
+	):
 	static {
 
 		$Output = new static([
@@ -78,6 +84,9 @@ extends Common\Prototype {
 			'BorderColour' => $BorderColour,
 			'TextColour'   => $TextColour
 		]);
+
+		if($Print > 0)
+		$Output->Print($Print);
 
 		return $Output;
 	}
