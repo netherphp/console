@@ -77,10 +77,10 @@ extends Common\Prototype {
 	}
 
 	public function
-	SetData(array $Rows):
+	SetData(iterable $Rows):
 	static {
 
-		$this->Rows->SetData($Rows);
+		$this->Rows->Import($Rows);
 
 		return $this;
 	}
@@ -212,13 +212,13 @@ extends Common\Prototype {
 	}
 
 	public function
-	PrintFooter():
+	PrintFooter(int $Newlines=1):
 	static {
 
 		$BChar = $this->BorderCharH;
 		$TW = $this->FetchTerminalWidth();
 
-		echo $this->Client->Format(str_repeat($BChar, $TW), C: $this->BorderColour), PHP_EOL;
+		echo $this->Client->Format(str_repeat($BChar, $TW), C: $this->BorderColour), str_repeat(PHP_EOL, $Newlines);
 
 		return $this;
 	}
@@ -270,6 +270,17 @@ extends Common\Prototype {
 			echo mb_substr($Line, 0, ($TW+$Diff) -2);
 			echo str_repeat(' ', $End), $this->Client->Format(" {$BC}", C: $this->BorderColour), PHP_EOL;
 		}
+
+		return $this;
+	}
+
+	public function
+	Print(int $Newlines=1):
+	static {
+
+		$this->PrintHeaders();
+		$this->PrintRows();
+		$this->PrintFooter($Newlines);
 
 		return $this;
 	}
@@ -327,7 +338,15 @@ extends Common\Prototype {
 	////////////////////////////////////////////////////////////////
 
 	static public function
-	New(Console\Client $Client, ?Dye\Colour $BorderColour=NULL, ?Dye\Colour $HeaderColour=NULL, ?Dye\Colour $TextColour=NULL):
+	New(
+		Console\Client $Client,
+		?iterable $Headers=NULL,
+		?iterable $Rows=NULL,
+		?Dye\Colour $BorderColour=NULL,
+		?Dye\Colour $HeaderColour=NULL,
+		?Dye\Colour $TextColour=NULL,
+		int $Print = 0
+	):
 	static {
 
 		$Output = new static([
@@ -336,6 +355,19 @@ extends Common\Prototype {
 			'HeaderColour' => $HeaderColour,
 			'TextColour'   => $TextColour
 		]);
+
+		if($Headers)
+		$Output->SetHeaders(...$Headers);
+
+		if($Rows)
+		$Output->SetData($Rows);
+
+		////////
+
+		if($Print > 0)
+		$Output->Print($Print);
+
+		////////
 
 		return $Output;
 	}

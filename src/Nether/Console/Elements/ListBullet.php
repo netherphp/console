@@ -81,7 +81,8 @@ extends Common\Prototype {
 		string         $DelimChar = ':',
 		string         $IndentChar = "\t",
 		int            $IndentCount = 0,
-		?Dye\Colour    $TextColour = NULL
+		?Dye\Colour    $TextColour = NULL,
+		int            $Print = 0
 	):
 	static {
 
@@ -95,6 +96,9 @@ extends Common\Prototype {
 			'IndentCount'  => $IndentCount,
 			'TextColour'   => $TextColour
 		]);
+
+		if($Print > 0)
+		$Output->Print($Print);
 
 		return $Output;
 	}
