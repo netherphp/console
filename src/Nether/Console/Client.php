@@ -1453,7 +1453,7 @@ class Client {
 	Realboot(array $Input=[]):
 	int {
 
-		$Argv = Common\Datastore::FromArray($_SERVER['argv']);
+		$Argv = Common\Datastore::FromArray((array)$_SERVER['argv']);
 
 		$Argv->MergeRight(array_map(
 			fn($K, $V)=> "--{$K}={$V}",
