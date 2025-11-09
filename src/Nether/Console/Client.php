@@ -1334,7 +1334,7 @@ class Client {
 
 		$Outfile = $this->GetPharOut();
 		$Bin = $this->GetPharBin();
-		$Version = $this->GetOption('ver') ?? TRUE;
+		$Version = $this->GetOption('ver') ?? FALSE;
 		$Files = $this->GetPharFiles();
 		$FileFilters = $this->GetPharFileFilters();
 		$BaseDir = $this->GetPharBaseDir();
