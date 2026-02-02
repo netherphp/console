@@ -41,10 +41,28 @@ extends Common\Prototype {
 	$Styles;
 
 	public string
-	$BorderCharH = '═';
+	$BorderCharNW = '┏';
 
 	public string
-	$BorderCharV = '║';
+	$BorderCharNE = '┓';
+
+	public string
+	$BorderCharSW = '┗';
+
+	public string
+	$BorderCharSE = '┛';
+
+	public string
+	$BorderCharW = '┃';
+
+	public string
+	$BorderCharE = '┃';
+
+	public string
+	$BorderCharH = '━';
+
+	public string
+	$BorderCharV = '┃';
 
 	public ?Dye\Colour
 	$BorderColour = NULL;
@@ -162,6 +180,12 @@ extends Common\Prototype {
 		$TW = $this->FetchTerminalWidth();
 		$BH = $this->BorderCharH;
 		$BV = $this->BorderCharV;
+		$BNE = $this->BorderCharNE;
+		$BNW = $this->BorderCharNW;
+		$BSE = $this->BorderCharSE;
+		$BSW = $this->BorderCharSW;
+		$BW = $this->BorderCharW;
+		$BE = $this->BorderCharE;
 		$PC = ' ';
 
 		$Key = NULL;
@@ -208,16 +232,17 @@ extends Common\Prototype {
 		$SLen = mb_strlen($Sane);
 		$Diff = $LLen - $SLen;
 
-		$LineBorder = $this->Client->Format(str_repeat($BH, $TW), C: $this->BorderColour);
+		$LineTop = $this->Client->Format($BNW.str_repeat($BH, $TW-2).$BNE, C: $this->BorderColour);
+		$LineBtm = $this->Client->Format($BW.str_repeat($BH, $TW-2).$BE, C: $this->BorderColour);
 		$LineChop = mb_substr($Line, 0, (($TW-2) + $Diff));
 		$LinePad = str_repeat($PC, max(0, ($TW - $SLen - 2)));
 		$LineEnd = $this->Client->Format(sprintf(' %s', $BV), C: $this->BorderColour);
 
 		////////
 
-		echo $LineBorder, PHP_EOL;
+		echo $LineTop, PHP_EOL;
 		echo $LineChop, $LinePad, $LineEnd, PHP_EOL;
-		echo $LineBorder, PHP_EOL;
+		echo $LineBtm, PHP_EOL;
 
 		////////
 
@@ -229,9 +254,11 @@ extends Common\Prototype {
 	static {
 
 		$BChar = $this->BorderCharH;
+		$BSE = $this->BorderCharSE;
+		$BSW = $this->BorderCharSW;
 		$TW = $this->FetchTerminalWidth();
 
-		echo $this->Client->Format(str_repeat($BChar, $TW), C: $this->BorderColour), str_repeat(PHP_EOL, $Newlines);
+		echo $this->Client->Format($BSW.str_repeat($BChar, $TW-2).$BSE, C: $this->BorderColour), str_repeat(PHP_EOL, $Newlines);
 
 		return $this;
 	}
