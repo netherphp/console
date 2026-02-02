@@ -36,6 +36,10 @@ extends Common\Prototype {
 	public Common\Datastore
 	$Show;
 
+	#[Common\Meta\PropertyObjectify]
+	public Common\Datastore
+	$Styles;
+
 	public string
 	$BorderCharH = '═';
 
@@ -81,6 +85,15 @@ extends Common\Prototype {
 	static {
 
 		$this->Rows->Import($Rows);
+
+		return $this;
+	}
+
+	public function
+	SetStyles(iterable $Styles):
+	static {
+
+		$this->Styles->Import($Styles);
 
 		return $this;
 	}
@@ -253,7 +266,7 @@ extends Common\Prototype {
 				$Format = sprintf(
 					'%s %s%s ',
 					$this->Client->Format($BC, C: $this->BorderColour),
-					$Value,
+					$this->Client->Format($Value, C: $this->Styles->Get($Loop)),
 					str_repeat(' ', max(0, ($this->Widths[$Key] - $Len)) )
 				);
 
@@ -342,6 +355,7 @@ extends Common\Prototype {
 		Console\Client $Client,
 		?iterable $Headers=NULL,
 		?iterable $Rows=NULL,
+		?iterable $Styles=NULL,
 		?Dye\Colour $BorderColour=NULL,
 		?Dye\Colour $HeaderColour=NULL,
 		?Dye\Colour $TextColour=NULL,
@@ -361,6 +375,9 @@ extends Common\Prototype {
 
 		if($Rows)
 		$Output->SetData($Rows);
+
+		if($Styles)
+		$Output->SetStyles($Styles);
 
 		////////
 
