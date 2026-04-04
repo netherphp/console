@@ -51,7 +51,8 @@ extends Common\Prototype {
 	Print(int $Newlines=0):
 	void {
 
-		echo $this->Get();
+		$this->Client->PrintLn($this->Text, $Newlines);
+
 		return;
 	}
 
@@ -59,13 +60,16 @@ extends Common\Prototype {
 	////////////////////////////////////////////////////////////////
 
 	static public function
-	New(Console\Client $Client, string $Text='', ?Dye\Colour $Colour=NULL):
+	New(Console\Client $Client, string $Text='', ?Dye\Colour $Colour=NULL, int $Print=0):
 	static {
 
 		$Output = new static([
 			'Client' => $Client,
 			'Text'   => $Text
 		]);
+
+		if($Print > 0)
+		$Output->Print($Print);
 
 		return $Output;
 	}
